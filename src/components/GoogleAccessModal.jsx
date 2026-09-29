@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ArrowRight, Info } from 'lucide-react';
+import { api } from '../lib/api';
+import { useModalAccessibility } from '../lib/useModalAccessibility';
 
 // Google 'G' official multi-color SVG icon
 export function GoogleIcon({ size = 20 }) {
@@ -23,11 +25,50 @@ const ROLE_BADGES = {
 };
 
 export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser }) {
+  const modalRef = useRef(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const handleClose = useCallback(() => {
+    setSelectedUser(null);
+    setPassword('');
+    setError('');
+    onClose();
+  }, [onClose]);
+  useModalAccessibility(modalRef, isOpen, handleClose);
+
+  const handleLogin = async event => {
+    event.preventDefault();
+    if (!selectedUser || submitting) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const user = await api('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ userId: selectedUser.id, password })
+      });
+      onSelectUser(user);
+      handleClose();
+      setPassword('');
+      setSelectedUser(null);
+    } catch (loginError) {
+      setError(loginError.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose} style={{ animation: 'fadeIn 0.2s ease' }}>
+    <div className="modal-backdrop" onClick={handleClose} style={{ animation: 'fadeIn 0.2s ease' }}>
       <div 
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="demo-login-title"
+        tabIndex={-1}
         className="google-modal-card" 
         onClick={e => e.stopPropagation()}
         style={{
@@ -44,11 +85,11 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
           <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: '#f8fafc', border: '1px solid #e2e8f0', marginBottom: 12 }}>
             <GoogleIcon size={24} />
           </div>
-          <h2 style={{ margin: '0 0 6px', fontSize: '20px', color: '#1f2937', fontWeight: '700' }}>
+          <h2 id="demo-login-title" style={{ margin: '0 0 6px', fontSize: '20px', color: '#1f2937', fontWeight: '700' }}>
             Acceso simulado con Google / Gmail
           </h2>
           <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
-            Elegí una cuenta ficticia guardada en <code>db.json</code> para entrar como un perfil del prototipo:
+            Elegí una cuenta de demostración e ingresá su contraseña:
           </p>
         </div>
 
@@ -56,7 +97,7 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
         <div style={{ background: '#f8fafc', padding: '12px 24px', borderBottom: '1px solid #edf2f5', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
           <Info size={15} style={{ flexShrink: 0 }} />
           <p style={{ margin: 0, fontSize: '12px', color: '#475569', lineHeight: '1.45' }}>
-            <strong>Aviso de demostración (RF-02):</strong> Este acceso asocia correos ficticios de <code>db.json</code>. Google/Gmail y flujos con n8n son simulados con fines de presentación académica y no realizan autenticación real.
+            <strong>Aviso de demostración (RF-02):</strong> Este acceso asocia correos ficticios de <code>db.json</code>. Google/Gmail y flujos con n8n son simulados con fines académicos. En modo local, las cuentas comparten la contraseña de demostración indicada en el README.
           </p>
         </div>
 
@@ -69,9 +110,12 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
             return (
               <button
                 key={u.id}
+                type="button"
+                aria-pressed={selectedUser?.id === u.id}
                 onClick={() => {
-                  onSelectUser(u);
-                  onClose();
+                  setSelectedUser(u);
+                  setPassword('');
+                  setError('');
                 }}
                 className="google-account-row"
                 style={{
@@ -133,12 +177,33 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
           })}
         </div>
 
+        {selectedUser && (
+          <form onSubmit={handleLogin} style={{ padding: '4px 24px 18px', display: 'grid', gap: '10px' }}>
+            <label htmlFor="demo-password" style={{ fontSize: '12px', fontWeight: 700 }}>
+              Contraseña para {selectedUser.name}
+            </label>
+            <input
+              id="demo-password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={event => setPassword(event.target.value)}
+              style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1' }}
+            />
+            {error && <p role="alert" style={{ color: '#b91c1c', margin: 0, fontSize: '12px' }}>{error}</p>}
+            <button className="btn primary" type="submit" disabled={submitting}>
+              {submitting ? 'Verificando…' : 'Iniciar sesión'}<ArrowRight className="i i-r" size={14} />
+            </button>
+          </form>
+        )}
+
         {/* Modal footer */}
         <div style={{ padding: '16px 24px', background: '#fcfdfd', borderTop: '1px solid #edf2f5', display: 'flex', justifyContent: 'flex-end' }}>
           <button 
             type="button" 
             className="btn secondary" 
-            onClick={onClose}
+            onClick={handleClose}
             style={{ padding: '10px 18px', fontSize: '12.5px' }}
           >
             Cancelar

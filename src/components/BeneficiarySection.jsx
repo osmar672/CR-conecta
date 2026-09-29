@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
-import { API_URL } from '../constants/config';
+import { useState } from 'react';
 import { AlertTriangle, ArrowRight, Check, ClipboardList, Mail, MapPin, Pencil, Phone, Star } from 'lucide-react';
-import { CATEGORY_LIMITS, CATEGORY_OPTIONS, checkRequestLimits, getCategoryUnit } from '../constants/limits';
+import { CATEGORY_OPTIONS, checkRequestLimits, getCategoryUnit } from '../constants/limits';
+import { api } from '../lib/api';
+
+function localDateInputValue() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60 * 1000).toISOString().slice(0, 10);
+}
 
 export function BeneficiarySection({ session, onOpenEditProfile, requests = [], onRefreshRequests }) {
   const [category, setCategory] = useState('Alimentos sellados');
@@ -9,12 +14,12 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
   const [amount, setAmount] = useState(1);
   const [unit, setUnit] = useState('paquetes');
   const [zone, setZone] = useState(session?.zone || 'Barranca');
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(localDateInputValue);
   const [submitting, setSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
 
   // Filter requests belonging to this beneficiary
-  const myRequests = requests.filter(r => r.beneficiaryId === session?.id || r.beneficiaryId === 'u2');
+  const myRequests = requests.filter(r => r.beneficiaryId === session?.id);
 
   // Unit auto-adaptation by category
   const handleCategoryChange = (newCat) => {
@@ -25,18 +30,19 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
   // RF-10 Real-time limit verification
   const limitCheck = checkRequestLimits(category, amount, myRequests);
   const isLimitExceeded = limitCheck.exceeded;
-  const categoryConfig = CATEGORY_LIMITS[category];
+  const today = localDateInputValue();
 
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     setSubmitting(true);
     setNotification(null);
 
     const cleanDescription = description.trim();
     const parsedAmount = Number(amount);
 
-    if (!cleanDescription) {
-      setNotification({ type: 'error', text: 'Ingresá una descripción clara del apoyo solicitado.' });
+    if (!cleanDescription || cleanDescription.length > 500) {
+      setNotification({ type: 'error', text: 'Escribí una descripción clara de hasta 500 caracteres.' });
       setSubmitting(false);
       return;
     }
@@ -46,10 +52,13 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
       setSubmitting(false);
       return;
     }
+    if (!date || date > today) {
+      setNotification({ type: 'error', text: 'Elegí una fecha válida que no sea posterior a hoy.' });
+      setSubmitting(false);
+      return;
+    }
 
-    const newRequestId = `CC-${Date.now().toString().slice(-6)}`;
     const newRequest = {
-      id: newRequestId,
       category,
       description: cleanDescription,
       amount: parsedAmount,
@@ -60,7 +69,6 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
       priority: 'Media',     // Default priority pending admin evaluation (RF-09)
       goal: parsedAmount,
       received: 0,
-      beneficiaryId: session?.id || 'u2',
       limitExceeded: isLimitExceeded, // RF-10: Comparación y alerta de exceso
       requiresException: isLimitExceeded,
       limitDetails: isLimitExceeded ? limitCheck.reason : null,
@@ -69,27 +77,24 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
     };
 
     try {
-      const res = await fetch(`${API_URL}/requests`, {
+      const createdRequest = await api('/requests', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRequest)
       });
 
-      if (!res.ok) throw new Error('Error al registrar la solicitud');
-
       setNotification({
         type: 'success',
-        text: `Solicitud #${newRequestId} registrada exitosamente con estado inicial "En revisión". ${isLimitExceeded ? 'Supera el límite estándar; pasará a revisión de excepción administrativa.' : ''}`
+        text: `Solicitud #${createdRequest.id} registrada exitosamente con estado inicial "En revisión". ${isLimitExceeded ? 'Supera el límite estándar; pasará a revisión de excepción administrativa.' : ''}`
       });
 
       // Reset form
       setDescription('');
       setAmount(1);
       if (onRefreshRequests) onRefreshRequests();
-    } catch (err) {
+    } catch (error) {
       setNotification({
         type: 'error',
-        text: 'No se pudo guardar la solicitud en JSON Server. Verificá que el servidor esté activo.'
+        text: error.message || 'No se pudo guardar la solicitud. Verificá que la API esté activa.'
       });
     } finally {
       setSubmitting(false);
@@ -98,12 +103,11 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
 
   const handleConfirmDelivery = async (req) => {
     try {
-      await fetch(`${API_URL}/requests/${req.id}`, {
+      await api(`/requests/${req.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           deliveryConfirmed: true,
-          deliveryConfirmationDate: new Date().toISOString().slice(0, 10)
+          deliveryConfirmationDate: localDateInputValue()
         })
       });
       setNotification({
@@ -111,8 +115,8 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
         text: `¡Entrega de la solicitud #${req.id} confirmada con éxito por la persona beneficiaria!`
       });
       if (onRefreshRequests) onRefreshRequests();
-    } catch {
-      setNotification({ type: 'error', text: 'Error al confirmar la entrega' });
+    } catch (error) {
+      setNotification({ type: 'error', text: error.message || 'Error al confirmar la entrega' });
     }
   };
 
@@ -120,12 +124,12 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
     <div className="beneficiary-dashboard" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       
       {/* RF-05 Beneficiary Profile Card */}
-      <div 
+      <div
         style={{
           background: '#ffffff',
           borderRadius: '18px',
           border: '1px solid #dce7eb',
-          padding: '24px 28px',
+          padding: '22px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -178,13 +182,16 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
       </div>
 
       {notification && (
-        <div 
+        <div
+          className={notification.type === 'error' ? 'help-form-error' : ''}
+          role={notification.type === 'error' ? 'alert' : 'status'}
+          aria-live={notification.type === 'error' ? 'assertive' : 'polite'}
           style={{
             padding: '14px 18px',
             borderRadius: '12px',
-            background: notification.type === 'success' ? '#eef7f2' : '#fef2f2',
-            border: notification.type === 'success' ? '1px solid #b7e1cd' : '1px solid #fecaca',
-            color: notification.type === 'success' ? '#0f5132' : '#b91c1c',
+            background: notification.type === 'success' ? '#eef7f2' : undefined,
+            border: notification.type === 'success' ? '1px solid #b7e1cd' : undefined,
+            color: notification.type === 'success' ? '#0f5132' : undefined,
             fontSize: '13px',
             fontWeight: '600'
           }}
@@ -197,36 +204,31 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
       <div className="beneficiary-grid">
         
         {/* Formulate Request Box */}
-        <div 
+        <section className="beneficiary-panel"
           style={{
             background: '#ffffff',
             borderRadius: '18px',
             border: '1px solid #dce7eb',
-            padding: '24px 28px',
+            padding: '22px',
             boxShadow: '0 8px 25px rgba(6,36,74,0.03)'
           }}
         >
-          <div style={{ marginBottom: '18px' }}>
-            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#2b789e', fontWeight: '800' }}>
-              NUEVA SOLICITUD (RF-07)
-            </span>
-            <h3 style={{ margin: '4px 0 0', fontSize: '20px', color: '#09274c' }}>
-              Formular solicitud de ayuda
-            </h3>
-            <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#687d91' }}>
-              Ingresá el requerimiento. La solicitud quedará inicialmente en estado <b>En revisión</b>.
-            </p>
+          <div className="help-form-intro">
+            <span className="help-form-step">NUEVA SOLICITUD</span>
+            <h2>
+              Contanos qué necesitás
+            </h2>
+            <p>Compartí solo información general; no incluyas datos sensibles. Revisaremos tu solicitud.</p>
           </div>
 
-          <form onSubmit={handleSubmitRequest} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
-                Categoría de apoyo *
-              </label>
+          <form className="help-form" onSubmit={handleSubmitRequest} aria-busy={submitting}>
+            <div className="help-form-field">
+              <label htmlFor="beneficiary-request-category">Categoría de apoyo <span aria-hidden="true">*</span></label>
               <select
+                id="beneficiary-request-category"
+                required
                 value={category}
                 onChange={e => handleCategoryChange(e.target.value)}
-                style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px' }}
               >
                 {CATEGORY_OPTIONS.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -234,75 +236,70 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
               </select>
             </div>
 
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
-                Descripción de la necesidad *
-              </label>
-              <input
-                type="text"
+            <div className="help-form-field">
+              <label htmlFor="beneficiary-request-description">¿Qué apoyo necesitás? <span aria-hidden="true">*</span></label>
+              <textarea
+                id="beneficiary-request-description"
                 required
+                maxLength={500}
+                rows={3}
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="Ej. Alimentos sellados para núcleo familiar de 5 personas"
-                style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                placeholder="Describí brevemente qué ayudaría a tu hogar o comunidad."
+                aria-describedby="beneficiary-request-description-count"
               />
+              <small id="beneficiary-request-description-count" className="help-form-hint help-form-counter">{description.length}/500 caracteres</small>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
-                  Cantidad solicitada *
-                </label>
+            <div className="help-form-grid">
+              <div className="help-form-field">
+                <label htmlFor="beneficiary-request-amount">Cantidad solicitada <span aria-hidden="true">*</span></label>
                 <input
+                  id="beneficiary-request-amount"
                   type="number"
                   min="1"
-                  max="100"
+                  max="100000"
+                  step="1"
                   required
                   value={amount}
                   onChange={e => setAmount(Number(e.target.value))}
-                  style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
-                  Unidad de medida *
-                </label>
+              <div className="help-form-field">
+                <label htmlFor="beneficiary-request-unit">Unidad de medida</label>
                 <input
+                  id="beneficiary-request-unit"
                   type="text"
-                  required
                   value={unit}
-                  onChange={e => setUnit(e.target.value)}
-                  style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  readOnly
                 />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
-                  Zona general *
-                </label>
+            <div className="help-form-grid">
+              <div className="help-form-field">
+                <label htmlFor="beneficiary-request-zone">Zona general <span aria-hidden="true">*</span></label>
                 <input
+                  id="beneficiary-request-zone"
                   type="text"
                   required
+                  maxLength={100}
                   value={zone}
                   onChange={e => setZone(e.target.value)}
                   placeholder="Ej. Barranca, El Roble"
-                  style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
-                  Fecha de solicitud *
-                </label>
+              <div className="help-form-field">
+                <label htmlFor="beneficiary-request-date">Fecha de solicitud <span aria-hidden="true">*</span></label>
                 <input
+                  id="beneficiary-request-date"
                   type="date"
                   required
+                  max={today}
                   value={date}
                   onChange={e => setDate(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
                 />
               </div>
             </div>
@@ -318,11 +315,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                   </div>
                 </div>
               </div>
-            ) : (
-              <div style={{ fontSize: '12px', color: '#166534', background: '#f0fdf4', padding: '9px 12px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-                <Check className="i i-l" size={14} />Cantidad dentro del límite ordinario permitido ({categoryConfig?.maxPerRequest} {categoryConfig?.unit}).
-              </div>
-            )}
+            ) : null}
 
             <button
               type="submit"
@@ -330,36 +323,34 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
               className="btn primary"
               style={{ padding: '12px 24px', fontSize: '13.5px', background: '#06244a', marginTop: '6px' }}
             >
-              {submitting ? 'Registrando solicitud...' : <>Enviar solicitud (En revisión)<ArrowRight className="i i-r" size={14} /></>}
+              {submitting ? 'Registrando solicitud...' : <>Enviar solicitud<ArrowRight className="i i-r" size={14} /></>}
             </button>
           </form>
-        </div>
+        </section>
 
         {/* Mis Solicitudes y Ayudas Consultadas (RF-05) */}
-        <div 
+        <section className="beneficiary-panel"
           style={{
             background: '#ffffff',
             borderRadius: '18px',
             border: '1px solid #dce7eb',
-            padding: '24px 28px',
+            padding: '22px',
             boxShadow: '0 8px 25px rgba(6,36,74,0.03)',
             display: 'flex',
             flexDirection: 'column'
           }}
         >
           <div style={{ marginBottom: '16px' }}>
-            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#2b789e', fontWeight: '800' }}>
-              CONSULTA DE AYUDAS (RF-05)
-            </span>
+            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#2b789e', fontWeight: '800' }}>SEGUIMIENTO</span>
             <h3 style={{ margin: '4px 0 0', fontSize: '20px', color: '#09274c' }}>
-              Mis solicitudes registradas
+              Mis solicitudes
             </h3>
             <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#687d91' }}>
-              Consultá el estado actual, prioridad y progreso de cada apoyo.
+              Consultá el estado de cada apoyo.
             </p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: '550px' }}>
+          <div className="beneficiary-request-list">
             {myRequests.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 16px', color: '#889baa' }}>
                 <ClipboardList size={32} />
@@ -370,27 +361,26 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                 const progress = Math.min(100, Math.round(((r.received || 0) / (r.goal || r.amount || 1)) * 100));
                 const isApproved = r.status === 'Aprobada';
                 const isDenied = r.status === 'Denegada';
-                const isPending = r.status === 'En revisión';
-
                 return (
-                  <div
+                  <article
                     key={r.id}
+                    className="beneficiary-request-card"
                     style={{
                       border: '1px solid #e2e8f0',
                       borderRadius: '14px',
-                      padding: '16px',
+                      padding: '13px',
                       background: '#fafcff',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '10px'
+                      gap: '8px'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="beneficiary-request-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontWeight: '800', color: '#06244a', fontSize: '13px' }}>
                         #{r.id} · <span style={{ color: '#5b7185', fontWeight: '600' }}>{r.category}</span>
                       </span>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <span 
+                      <div className="beneficiary-request-badges" style={{ display: 'flex', gap: '6px' }}>
+                        <span
                           style={{
                             padding: '3px 8px',
                             borderRadius: '12px',
@@ -402,7 +392,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                         >
                           {r.status}
                         </span>
-                        <span 
+                        {r.priority === 'Alta' && <span 
                           style={{
                             padding: '3px 8px',
                             borderRadius: '12px',
@@ -413,48 +403,49 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                           }}
                         >
                           {r.priority}
-                        </span>
+                        </span>}
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '13.5px', fontWeight: '600', color: '#1e293b' }}>
+                    <div className="beneficiary-request-description" style={{ fontSize: '13.5px', fontWeight: '600', color: '#1e293b' }}>
                       {r.description}
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b' }}>
+                    <div className="beneficiary-request-meta" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b' }}>
                       <span>Zona: {r.zone}</span>
                       <span>Cantidad: {r.amount} {r.unit}</span>
                     </div>
 
-                    {/* Progress bar */}
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
-                        <span>Progreso de donaciones</span>
-                        <span>{r.received || 0} / {r.goal || r.amount} {r.unit} ({progress}%)</span>
+                    <details className="beneficiary-request-details">
+                      <summary>Ver avance y detalles</summary>
+                      <p className="beneficiary-request-full-description">{r.description}</p>
+                      <div className="beneficiary-request-progress">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
+                          <span>Progreso de donaciones</span>
+                          <span>{r.received || 0} / {r.goal || r.amount} {r.unit} ({progress}%)</span>
+                        </div>
+                        <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${progress}%`, background: '#257f9f', borderRadius: '6px' }} />
+                        </div>
                       </div>
-                      <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${progress}%`, background: '#257f9f', borderRadius: '6px' }} />
-                      </div>
-                    </div>
 
-                    {/* Admin decision reason if evaluated (RF-08) */}
-                    {r.decisionReason && (
-                      <div style={{ background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: '#334155' }}>
-                        <strong>Dictamen administrativo:</strong> {r.decisionReason} ({r.decisionDate})
-                        {r.exceptionGranted && (
-                          <div style={{ color: '#b45309', fontWeight: '600', marginTop: '2px' }}>
-                            <Star className="i i-l" size={14} />Aprobada con excepción administrativa: {r.exceptionReason}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      {r.decisionReason && (
+                        <div style={{ background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: '#334155', marginTop: '10px' }}>
+                          <strong>Dictamen administrativo:</strong> {r.decisionReason} ({r.decisionDate})
+                          {r.exceptionGranted && (
+                            <div style={{ color: '#b45309', fontWeight: '600', marginTop: '2px' }}>
+                              <Star className="i i-l" size={14} />Aprobada con excepción administrativa: {r.exceptionReason}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </details>
 
-                    {/* Delivery confirmation action */}
                     {isApproved && (r.received > 0 || r.deliveryConfirmed) && (
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                      <div className="beneficiary-request-delivery">
                         {r.deliveryConfirmed ? (
                           <span style={{ fontSize: '12px', color: '#166534', fontWeight: '700', background: '#dcfce7', padding: '4px 10px', borderRadius: '8px' }}>
-                            <Check className="i i-l" size={14} />Entrega confirmada por beneficiario ({r.deliveryConfirmationDate || 'Registrada'})
+                            <Check className="i i-l" size={14} />Entrega confirmada ({r.deliveryConfirmationDate || 'Registrada'})
                           </span>
                         ) : (
                           <button
@@ -467,12 +458,12 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                         )}
                       </div>
                     )}
-                  </div>
+                  </article>
                 );
               })
             )}
           </div>
-        </div>
+        </section>
 
       </div>
     </div>

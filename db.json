@@ -955,5 +955,77 @@
       "color": "Azul marino",
       "description": "Short deportivo para nino, ideal para actividades fisicas."
     }
+  ],
+  "activity": [
+    {
+      "id": "2f18f9a7-d086-4348-9193-b20e07b602ab",
+      "timestamp": "2026-09-29T20:51:02.038Z",
+      "actor": "María Administradora",
+      "actorRole": "Administrador",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u1",
+      "detail": ""
+    },
+    {
+      "id": "61919166-ce31-4dc3-a4cd-250943301510",
+      "timestamp": "2026-09-29T20:28:23.603Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "7f03f626-0e45-4859-a8cc-99f4b2c629dd",
+      "timestamp": "2026-09-29T20:24:54.562Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "e2a3076d-1f6b-4f95-989e-e0ecc5fb3b1c",
+      "timestamp": "2026-09-29T20:23:43.580Z",
+      "actor": "Carlos Donante",
+      "actorRole": "Donante individual",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u3",
+      "detail": ""
+    },
+    {
+      "id": "5eb09670-4aa0-4f87-9832-0cefef7c273c",
+      "timestamp": "2026-09-29T20:23:23.628Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "223e22c3-f36b-4aea-8198-2893a0c817fc",
+      "timestamp": "2026-09-29T20:13:16.741Z",
+      "actor": "María Administradora",
+      "actorRole": "Administrador",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u1",
+      "detail": ""
+    },
+    {
+      "id": "f878c366-b4fa-4d00-9475-421213a45e47",
+      "timestamp": "2026-09-29T20:07:11.280Z",
+      "actor": "María Administradora",
+      "actorRole": "Administrador",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u1",
+      "detail": ""
+    }
   ]
 }

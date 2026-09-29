@@ -1,37 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { AlertTriangle, ArrowRight, Ban, Check, CheckCircle2, MapPin, X } from 'lucide-react';
 import { CATEGORY_LIMITS, checkRequestLimits } from '../constants/limits';
+import { useModalAccessibility } from '../lib/useModalAccessibility';
+
+function evaluationReason(decision, exceeded) {
+  if (decision === 'Aprobada') {
+    return exceeded
+      ? 'Aprobada bajo excepción administrativa por vulnerabilidad comprobada.'
+      : 'Cumple con los criterios de necesidad y validación de la comunidad.';
+  }
+  return 'No se ajusta a los criterios de atención prioritaria del programa.';
+}
 
 export function RequestEvaluationModal({ isOpen, onClose, request, allRequests = [], adminSession, onSave }) {
+  const modalRef = useRef(null);
   const todayStr = new Date().toISOString().slice(0, 10);
   const limitCheck = request
     ? checkRequestLimits(request.category, request.amount, allRequests.filter(r => r.id !== request.id && r.beneficiaryId === request.beneficiaryId))
     : { exceeded: false, reason: '' };
   const isExceeded = request ? (request.limitExceeded || limitCheck.exceeded) : false;
 
-  const [decision, setDecision] = useState(request?.status === 'Aprobada' ? 'Aprobada' : request?.status === 'Denegada' ? 'Denegada' : 'Aprobada');
-  const [priority, setPriority] = useState(request.priority || 'Media');
-  const [reason, setReason] = useState(request.decisionReason || '');
-  const [decisionDate, setDecisionDate] = useState(request.decisionDate || todayStr);
+  const initialDecision = request?.status === 'Aprobada' ? 'Aprobada' : request?.status === 'Denegada' ? 'Denegada' : 'Aprobada';
+  const [decision, setDecision] = useState(initialDecision);
+  const [priority, setPriority] = useState(request?.priority || 'Media');
+  const [reason, setReason] = useState(request?.decisionReason || evaluationReason(initialDecision, isExceeded));
+  const [decisionDate, setDecisionDate] = useState(request?.decisionDate || todayStr);
   
   // RF-10: Exception fields
-  const [grantException, setGrantException] = useState(Boolean(request.exceptionGranted));
-  const [exceptionReason, setExceptionReason] = useState(request.exceptionReason || '');
-  const [authorizedBy, setAuthorizedBy] = useState(request.exceptionAuthorizedBy || adminSession?.name || 'Administración CR Conecta');
+  const [grantException, setGrantException] = useState(Boolean(request?.exceptionGranted));
+  const [exceptionReason, setExceptionReason] = useState(request?.exceptionReason || '');
+  const [authorizedBy, setAuthorizedBy] = useState(request?.exceptionAuthorizedBy || adminSession?.name || 'Administración CR Conecta');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  useModalAccessibility(modalRef, isOpen && Boolean(request), onClose);
+
+  const changeDecision = value => {
+    setReason(current => current === evaluationReason(decision, isExceeded) ? evaluationReason(value, isExceeded) : current);
+    setDecision(value);
+  };
 
   if (!isOpen || !request) return null;
-
-  useEffect(() => {
-    if (!reason) {
-      if (decision === 'Aprobada') {
-        setReason(isExceeded ? 'Aprobada bajo excepción administrativa por vulnerabilidad comprobada.' : 'Cumple con los criterios de necesidad y validación de la comunidad.');
-      } else {
-        setReason('No se ajusta a los criterios de atención prioritaria del programa.');
-      }
-    }
-  }, [decision, isExceeded]);
 
   const categoryConfig = CATEGORY_LIMITS[request.category];
 
@@ -74,7 +82,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
       await onSave(request.id, payload);
       onClose();
     } catch (err) {
-      setErrorMsg('Ocurrió un error al guardar la evaluación en db.json.');
+      setErrorMsg(err.message || 'No se pudo guardar la evaluación.');
     } finally {
       setSubmitting(false);
     }
@@ -82,7 +90,12 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div 
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="request-evaluation-title"
+        tabIndex={-1}
         className="evaluation-modal" 
         onClick={e => e.stopPropagation()}
         style={{
@@ -103,7 +116,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
             <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#8ec5db', fontWeight: '800' }}>
               EVALUACIÓN ADMINISTRATIVA (RF-08, RF-09, RF-10)
             </span>
-            <h3 style={{ margin: '3px 0 0', fontSize: '20px', color: '#ffffff' }}>
+            <h3 id="request-evaluation-title" style={{ margin: '3px 0 0', fontSize: '20px', color: '#ffffff' }}>
               Evaluar Solicitud #{request.id}
             </h3>
           </div>
@@ -173,7 +186,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
                   type="button"
-                  onClick={() => setDecision('Aprobada')}
+                  onClick={() => changeDecision('Aprobada')}
                   style={{
                     flex: 1,
                     padding: '11px',
@@ -190,7 +203,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                 </button>
                 <button
                   type="button"
-                  onClick={() => setDecision('Denegada')}
+                  onClick={() => changeDecision('Denegada')}
                   style={{
                     flex: 1,
                     padding: '11px',
@@ -384,7 +397,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                 opacity: isApprovalBlocked ? 0.7 : 1
               }}
             >
-              {submitting ? 'Guardando en db.json...' : <>{`Guardar resolución (${decision})`}<ArrowRight className="i i-r" size={14} /></>}
+              {submitting ? 'Guardando…' : <>{`Guardar resolución (${decision})`}<ArrowRight className="i i-r" size={14} /></>}
             </button>
           </div>
         </form>

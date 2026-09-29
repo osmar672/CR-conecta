@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Check, ClipboardList, QrCode, Scale, ShieldCheck, Truck } from 'lucide-react';
 
 export function HowItWorksSection() {

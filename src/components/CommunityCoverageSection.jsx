@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Building2, Clock, MapPin } from 'lucide-react';
 
 export function CommunityCoverageSection({ facilities = [] }) {
@@ -9,37 +9,25 @@ export function CommunityCoverageSection({ facilities = [] }) {
       name: 'Puntarenas Centro',
       key: 'Puntarenas',
       tag: 'Centro de Acopio Principal',
-      description: 'Nodo logístico principal con bodega de almacenamiento y punto de coordinación para traslados hacia los distritos periféricos.',
-      facilityName: 'Centro de apoyo Puntarenas',
-      hours: 'Lunes a Viernes: 8:00 – 16:00',
-      address: 'Frente al litoral central, Puntarenas'
+      description: 'Nodo logístico principal con bodega de almacenamiento y punto de coordinación para traslados hacia los distritos periféricos.'
     },
     {
       name: 'Barranca',
       key: 'Barranca',
       tag: 'Zona de Atención Prioritaria',
-      description: 'Concentra la mayor atención de paquetes de alimentos y apoyo a familias en condición de vulnerabilidad socioeconómica.',
-      facilityName: 'Punto de Enlace Vecinal Barranca',
-      hours: 'Lunes a Sábado: 8:30 – 16:30',
-      address: 'Costado sur de la plaza comunitaria'
+      description: 'Concentra la mayor atención de paquetes de alimentos y apoyo a familias en condición de vulnerabilidad socioeconómica.'
     },
     {
       name: 'El Roble',
       key: 'El Roble',
       tag: 'Punto Comunitario Activo',
-      description: 'Centro de distribución especializado en vestimenta familiar, calzado y coordinación de actividades con personas voluntarias.',
-      facilityName: 'Punto comunitario El Roble',
-      hours: 'Lunes a Sábado: 9:00 – 17:00',
-      address: 'Avenida principal, El Roble'
+      description: 'Centro de distribución especializado en vestimenta familiar, calzado y coordinación de actividades con personas voluntarias.'
     },
     {
       name: 'Chacarita',
       key: 'Chacarita',
       tag: 'Red Vecinal de Base',
-      description: 'Punto articulador de donaciones de mobiliario esencial, mesas, camas y electrodomésticos en coordinación con la Alianza Comunitaria.',
-      facilityName: 'Centro Vecinal Alianza Chacarita',
-      hours: 'Lunes a Viernes: 8:00 – 15:00',
-      address: 'Centro comunitario Chacarita'
+      description: 'Punto articulador de donaciones de mobiliario esencial, mesas, camas y electrodomésticos en coordinación con la Alianza Comunitaria.'
     }
   ];
 
@@ -80,23 +68,26 @@ export function CommunityCoverageSection({ facilities = [] }) {
         </div>
 
         <div className="coverage-cards-grid">
-          {filteredZones.map((zone, idx) => (
-            <div key={zone.key} className="coverage-card card-gpu-optimized" style={{ animationDelay: `${idx * 70}ms` }}>
+          {filteredZones.map((zone, idx) => {
+            const facility = facilities.find(item => item.zone === zone.key);
+            return (
+              <div key={zone.key} className="coverage-card card-gpu-optimized" style={{ animationDelay: `${idx * 70}ms` }}>
               <div className="coverage-card-top">
                 <span className="coverage-tag">{zone.tag}</span>
-                <span className="coverage-badge-live">● Enlace activo</span>
+                <span className="coverage-badge-live">{facility ? 'Enlace registrado · Demo' : 'Zona referencial'}</span>
               </div>
 
               <h3>{zone.name}</h3>
               <p className="coverage-desc">{zone.description}</p>
 
               <div className="coverage-facility-box">
-                <div className="facility-title"><Building2 className="i i-l" size={14} />{zone.facilityName}</div>
-                <div className="facility-detail"><MapPin className="i i-l" size={13} />{zone.address}</div>
-                <div className="facility-detail"><Clock className="i i-l" size={13} />{zone.hours}</div>
+                <div className="facility-title"><Building2 className="i i-l" size={14} />{facility?.name || 'Sin centro registrado'}</div>
+                <div className="facility-detail"><MapPin className="i i-l" size={13} />{facility?.address || 'Dirección no disponible'}</div>
+                <div className="facility-detail"><Clock className="i i-l" size={13} />{facility?.hours || 'Horario no disponible'}</div>
               </div>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
 
       </div>

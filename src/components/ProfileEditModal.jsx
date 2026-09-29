@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { API_URL } from '../constants/config';
+import { useRef, useState } from 'react';
 import { ArrowRight, Info } from 'lucide-react';
+import { api } from '../lib/api';
+import { useModalAccessibility } from '../lib/useModalAccessibility';
 
 export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
+  const modalRef = useRef(null);
   const [form, setForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '+506 8888-0000',
@@ -11,6 +13,7 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  useModalAccessibility(modalRef, isOpen && Boolean(user), onClose);
 
   if (!isOpen || !user) return null;
 
@@ -20,9 +23,8 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/users/${user.id}`, {
+      const updatedUser = await api(`/users/${user.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name,
           phone: form.phone,
@@ -31,15 +33,10 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('No se pudo actualizar el perfil en el servidor');
-      }
-
-      const updatedUser = await response.json();
       onSaved(updatedUser);
       onClose();
     } catch (err) {
-      setError(err.message || 'Error al guardar los cambios en db.json');
+      setError(err.message || 'Error al guardar los cambios en la API local.');
     } finally {
       setLoading(false);
     }
@@ -47,7 +44,12 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div 
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-edit-title"
+        tabIndex={-1}
         className="profile-modal-card" 
         onClick={e => e.stopPropagation()}
         style={{
@@ -64,7 +66,7 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
             <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#8ec5db', fontWeight: '800' }}>
               ACTUALIZACIÓN DE PERFIL (RF-04)
             </span>
-            <h3 style={{ margin: '3px 0 0', fontSize: '19px', color: '#ffffff' }}>
+            <h3 id="profile-edit-title" style={{ margin: '3px 0 0', fontSize: '19px', color: '#ffffff' }}>
               Editar datos de {user.name}
             </h3>
           </div>
@@ -133,7 +135,7 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
           </div>
 
           <div style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', fontSize: '12px', color: '#64748b', border: '1px solid #e2e8f0' }}>
-            <Info className="i i-l" size={14} />Los cambios se persisten de inmediato en <code>db.json</code> mediante la API local de JSON Server.
+            <Info className="i i-l" size={14} />Los cambios se persisten de inmediato en el servidor local.
           </div>
 
           {error && (
@@ -147,7 +149,7 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
               Cancelar
             </button>
             <button type="submit" className="btn primary" disabled={loading} style={{ padding: '9px 22px', fontSize: '12.5px', background: '#06244a' }}>
-              {loading ? 'Guardando...' : <>Guardar en db.json<ArrowRight className="i i-r" size={14} /></>}
+              {loading ? 'Guardando...' : <>Guardar cambios<ArrowRight className="i i-r" size={14} /></>}
             </button>
           </div>
         </form>

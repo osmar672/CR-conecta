@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "json-server --watch db.json --port 3001",
+    "server": "node server/index.js",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test",
+    "lint": "eslint src server scripts eslint.config.js",
+    "auth:set-password": "node scripts/set-password.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^6.1.1",
+    "dotenv": "^18.0.4",
     "lucide-react": "^1.48.0",
     "qrcode": "^1.5.4",
     "react": "^19.3.0",
@@ -19,6 +23,9 @@
     "vite": "^8.3.1"
   },
   "devDependencies": {
-    "json-server": "1.0.0-beta.15"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0"
   }
 }

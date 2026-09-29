@@ -107,10 +107,14 @@ export function getCategoryUnit(category, fallback = 'unidades') {
  */
 export function checkRequestLimits(category, amount, previousRequests = []) {
   const config = CATEGORY_LIMITS[category];
-  const numAmount = Number(amount) || 0;
+  const numAmount = Number(amount);
 
   if (!config) {
-    return { exceeded: false, reason: '', maxAllowed: 999 };
+    return { exceeded: true, reason: 'La categoría de la solicitud no es válida.', maxAllowed: 0 };
+  }
+
+  if (!Number.isFinite(numAmount) || numAmount <= 0) {
+    return { exceeded: true, reason: 'La cantidad debe ser un número positivo y válido.', maxAllowed: config.maxPerRequest };
   }
 
   // 1. Verificación de cantidad por solicitud
@@ -123,9 +127,14 @@ export function checkRequestLimits(category, amount, previousRequests = []) {
   }
 
   // 2. Verificación de historial de ayudas recientes
-  const activeSameCategory = previousRequests.filter(r =>
-    r.category === category && (r.status === 'Aprobada' || r.status === 'En revisión')
-  );
+  const recentCutoff = Date.now() - 60 * 24 * 60 * 60 * 1000;
+  const activeSameCategory = previousRequests.filter(r => {
+    const requestTime = Date.parse(r.date);
+    return r.category === category
+      && (r.status === 'Aprobada' || r.status === 'En revisión')
+      && Number.isFinite(requestTime)
+      && requestTime >= recentCutoff;
+  });
   const totalAccumulated = activeSameCategory.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
 
   const historicalThreshold = config.maxPerRequest * 2;

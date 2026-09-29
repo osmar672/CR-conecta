@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function Logo({ showTagline = true, size = 48 }) {
   return (
     <div className="brand-container" style={{ display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none' }}>

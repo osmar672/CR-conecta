@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ArrowRight, ClipboardList, Handshake, House, Package, Shirt, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -226,7 +226,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
       alt: 'Insumos de salud y primeros auxilios'
     },
     higiene: {
-      src: 'https://images.unsplash.com/photo-1600857062241-98e421ad8411?auto=format&fit=crop&w=900&q=80',
+      src: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=900&q=80',
       alt: 'Productos de higiene y cuidado personal'
     },
     tecnologia: {
@@ -311,7 +311,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
         {/* TAB 1: 4 CATEGORIES OF ASSISTANCE WE OFFER */}
         {activeTab === 'categories' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginTop: '30px' }} className="aid-categories-grid">
-            {aidCategories.map((cat, idx) => (
+            {aidCategories.map(cat => (
               <article
                 key={cat.id}
                 className="aid-category-card card-gpu-optimized"

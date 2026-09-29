@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ArrowRight, Check, Handshake, MapPin } from 'lucide-react';
 
 // Modern, lightweight vector emblems for sponsors and allies

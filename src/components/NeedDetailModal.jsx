@@ -1,15 +1,15 @@
-import React from 'react';
+import { useRef } from 'react';
 import { ArrowRight, Lock, MapPin, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useModalAccessibility } from '../lib/useModalAccessibility';
 
-export function NeedDetailModal({ isOpen, onClose, need, session }) {
+export function NeedDetailModal({ isOpen, onClose, need }) {
+  const modalRef = useRef(null);
+  useModalAccessibility(modalRef, isOpen && Boolean(need), onClose);
   const navigate = useNavigate();
   if (!isOpen || !need) return null;
 
   const progress = Math.min(100, Math.round(((need.received || 0) / (need.goal || need.amount || 1)) * 100));
-  const isDonor = session?.role === 'Donante individual' || session?.role === 'Empresa donante';
-  const isVolunteer = session?.role === 'Voluntario';
-
   const handleDonate = () => {
     onClose();
     navigate(`/donar?requestId=${need.id}`);
@@ -17,7 +17,12 @@ export function NeedDetailModal({ isOpen, onClose, need, session }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div 
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="need-detail-title"
+        tabIndex={-1}
         className="need-detail-card" 
         onClick={e => e.stopPropagation()}
         style={{
@@ -35,7 +40,7 @@ export function NeedDetailModal({ isOpen, onClose, need, session }) {
             <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#8ec5db', fontWeight: '800', textTransform: 'uppercase' }}>
               Ficha limitada de necesidad aprobada
             </span>
-            <h3 style={{ margin: '4px 0 0', fontSize: '20px', color: '#ffffff' }}>
+            <h3 id="need-detail-title" style={{ margin: '4px 0 0', fontSize: '20px', color: '#ffffff' }}>
               Solicitud #{need.id}
             </h3>
           </div>

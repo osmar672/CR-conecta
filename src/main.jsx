@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { TriangleAlert, AlertTriangle, ArrowRight, ArrowRightLeft, ArrowUpRight, Check, CheckCircle2, FileText, House, Info, Lock, MapPin, MessageSquare, Package, PenLine, Pencil, QrCode, Shirt, Star } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { TriangleAlert, AlertTriangle, ArrowRight, ArrowRightLeft, ArrowUpRight, BarChart3, Check, CheckCircle2, CircleCheck, Clock3, FileText, HeartHandshake, Info, Lock, MapPin, MessageSquare, Package, PackageCheck, PenLine, Pencil, QrCode, Route as RouteIcon, Star, UsersRound } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import QRCode from 'qrcode';
@@ -7,7 +7,9 @@ import './styles/global.css';
 
 import { Logo } from './components/Logo';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { API_URL } from './constants/config';
+import { api } from './lib/api';
+import { useData } from './lib/useData';
+import { useModalAccessibility } from './lib/useModalAccessibility';
 import { GoogleAccessModal, GoogleIcon } from './components/GoogleAccessModal';
 import { NeedDetailModal } from './components/NeedDetailModal';
 import { RequestEvaluationModal } from './components/RequestEvaluationModal';
@@ -19,8 +21,6 @@ import { CommunityCoverageSection } from './components/CommunityCoverageSection'
 import { AidServicesSection } from './components/AidServicesSection';
 import { CATEGORY_LIMITS, CATEGORY_OPTIONS, checkRequestLimits, getCategoryUnit } from './constants/limits';
 
-const API = API_URL;
-const roles = ['Administrador', 'Beneficiario', 'Donante individual', 'Empresa donante', 'Voluntario', 'Aliado comunitario'];
 const roleIcons = {
   'Administrador': '/logo-mark.png',
   'Beneficiario': '/logo-mark.png',
@@ -48,35 +48,16 @@ function RoleAvatar({ src, alt, size = 42 }) {
   );
 }
 
-async function api(path, options = {}) {
-  const r = await fetch(`${API}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options
-  });
-  if (!r.ok) throw new Error('No se pudo completar la operación con JSON Server');
-  return r.status === 204 ? null : r.json();
-}
-
-function useData(path, refreshTrigger = 0) {
-  const [data, setData] = useState([]);
-  const [state, setState] = useState('loading');
-  const load = () => {
-    setState('loading');
-    api(path)
-      .then(x => { setData(Array.isArray(x) ? x : (x ?? [])); setState('ready'); })
-      .catch(() => setState('error'));
-  };
-  useEffect(load, [path, refreshTrigger]);
-  return { data, state, retry: load };
-}
-
-function Confirm({ title, text, onConfirm, onCancel }) {
+function Confirm({ title, text, error, onConfirm, onCancel }) {
+  const modalRef = useRef(null);
+  useModalAccessibility(modalRef, true, onCancel);
   return (
     <div className="modal-backdrop">
-      <div className="modal">
+      <div className="modal" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="confirm-title" tabIndex={-1}>
         <div className="modal-mark">!</div>
-        <h3>{title}</h3>
+        <h3 id="confirm-title">{title}</h3>
         <p>{text}</p>
+        {error && <p role="alert" style={{ color: '#b91c1c' }}>{error}</p>}
         <div className="modal-actions">
           <button className="btn secondary" onClick={onCancel}>Cancelar</button>
           <button className="btn primary" onClick={onConfirm}>Continuar</button>
@@ -87,19 +68,40 @@ function Confirm({ title, text, onConfirm, onCancel }) {
 }
 
 function Shell() {
-  const [session, setSession] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('cr_session') || 'null');
-    } catch {
-      return null;
-    }
-  });
+  const [session, setSession] = useState(null);
+  const [sessionReady, setSessionReady] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
   const [selectedNeed, setSelectedNeed] = useState(null);
-  const { data: users = [], state: usersState, retry: retryUsers } = useData('/users');
+  const { data: users = [], state: usersState, retry: retryUsers } = useData('/auth/demo-users');
   const navigate = useNavigate();
   const location = useLocation();
+
+  const closeGoogleModal = useCallback(() => setGoogleModalOpen(false), []);
+  const login = useCallback((user) => {
+    setSession(user);
+    setSessionReady(true);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    api('/auth/session')
+      .then(user => {
+        if (mounted) setSession(user);
+      })
+      .catch(error => {
+        if (error.status !== 401) console.error('No se pudo restaurar la sesión:', error);
+      })
+      .finally(() => {
+        if (mounted) setSessionReady(true);
+      });
+    const handleUnauthorized = () => setSession(null);
+    window.addEventListener('cr:unauthorized', handleUnauthorized);
+    return () => {
+      mounted = false;
+      window.removeEventListener('cr:unauthorized', handleUnauthorized);
+    };
+  }, []);
 
   // Título de pestaña según la pantalla
   useEffect(() => {
@@ -112,20 +114,19 @@ function Shell() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  const login = (u) => {
-    localStorage.setItem('cr_session', JSON.stringify(u));
-    setSession(u);
-  };
-
   const logout = () => {
     setConfirm({
       title: 'Cerrar sesión',
       text: '¿Querés cerrar la sesión activa de demostración?',
-      action: () => {
-        localStorage.removeItem('cr_session');
-        setSession(null);
-        setConfirm(null);
-        navigate('/');
+      action: async () => {
+        try {
+          await api('/auth/logout', { method: 'POST' });
+          setSession(null);
+          setConfirm(null);
+          navigate('/');
+        } catch (error) {
+          setConfirm(current => current ? { ...current, error: error.message || 'No se pudo cerrar la sesión.' } : current);
+        }
       }
     });
   };
@@ -140,7 +141,7 @@ function Shell() {
       {usersState === 'error' && (
         <div className="api-banner" role="alert">
           <TriangleAlert className="i i-l" size={15} />
-          No se pudo conectar con JSON Server ({API}). Ejecutá <code>npm run server</code> en otra terminal.
+          No se pudo conectar con la API local. Ejecutá <code>npm run server</code> en otra terminal.
           <button type="button" onClick={retryUsers}>Reintentar</button>
         </div>
       )}
@@ -186,18 +187,18 @@ function Shell() {
       </header>
 
       {/* Main Content Area */}
-      <main>
+      <main aria-busy={!sessionReady}>
         <ErrorBoundary key={location.pathname}>
         <Routes>
-          <Route path="/" element={<Home onOpenNeedModal={setSelectedNeed} onOpenGoogleAuth={() => setGoogleModalOpen(true)} />} />
-          <Route path="/necesidades" element={<Needs session={session} onOpenNeedModal={setSelectedNeed} />} />
+          <Route path="/" element={<Home onOpenNeedModal={setSelectedNeed} />} />
+          <Route path="/necesidades" element={<Needs onOpenNeedModal={setSelectedNeed} />} />
           <Route path="/panel" element={<Panel session={session} onLogin={login} onOpenGoogleAuth={() => setGoogleModalOpen(true)} />} />
-          <Route path="/acceso" element={<Access onLogin={login} onOpenGoogleAuth={() => setGoogleModalOpen(true)} />} />
+          <Route path="/acceso" element={<Access onOpenGoogleAuth={() => setGoogleModalOpen(true)} />} />
           <Route path="/perfil" element={<Profile session={session} onUpdateSession={login} onLogout={logout} onOpenGoogleAuth={() => setGoogleModalOpen(true)} />} />
           <Route path="/donar" element={<Donate session={session} />} />
           <Route path="/solicitar" element={<RequestForm session={session} />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="*" element={<Home onOpenNeedModal={setSelectedNeed} onOpenGoogleAuth={() => setGoogleModalOpen(true)} />} />
+          <Route path="*" element={<Home onOpenNeedModal={setSelectedNeed} />} />
         </Routes>
         </ErrorBoundary>
       </main>
@@ -215,7 +216,7 @@ function Shell() {
       {/* Google/Gmail Visual Auth Modal (RF-01, RF-02) */}
       <GoogleAccessModal
         isOpen={googleModalOpen}
-        onClose={() => setGoogleModalOpen(false)}
+      onClose={closeGoogleModal}
         users={users || []}
         onSelectUser={(u) => {
           login(u);
@@ -228,7 +229,6 @@ function Shell() {
         isOpen={Boolean(selectedNeed)}
         onClose={() => setSelectedNeed(null)}
         need={selectedNeed}
-        session={session}
       />
 
       {/* Logout confirmation modal */}
@@ -236,6 +236,7 @@ function Shell() {
         <Confirm
           title={confirm.title}
           text={confirm.text}
+          error={confirm.error}
           onConfirm={confirm.action}
           onCancel={() => setConfirm(null)}
         />
@@ -247,12 +248,11 @@ function Shell() {
 // -------------------------------------------------------------
 // HOME PAGE COMPONENT (MATCHING MOCKUP WITH EXTREME PRECISION)
 // -------------------------------------------------------------
-function Home({ onOpenNeedModal, onOpenGoogleAuth }) {
+function Home({ onOpenNeedModal }) {
   const { data: reqs = [] } = useData('/requests');
   const { data: transfers = [] } = useData('/transfers');
   const { data: allies = [] } = useData('/allies');
   const { data: facilities = [] } = useData('/facilities');
-  const navigate = useNavigate();
   const [selectedMapZone, setSelectedMapZone] = useState('Puntarenas Centro');
 
   const mapZones = [
@@ -269,7 +269,7 @@ function Home({ onOpenNeedModal, onOpenGoogleAuth }) {
   // Pick sample requests or fallback to mockup items
   const displayNeeds = useMemo(() => {
     if (reqs && reqs.length > 0) {
-      return reqs.filter(r => r.status === 'Aprobada' || r.id === 'CC-204' || r.id === 'CC-205' || r.id === 'CC-206').slice(0, 3);
+      return reqs.filter(r => r.status === 'Aprobada').slice(0, 3);
     }
     return [
       { id: 'CC-204', category: 'Alimentos sellados', description: 'Paquete de alimentos sellados', amount: 18, unit: 'paquetes', zone: 'Barranca', priority: 'Alta', goal: 18, received: 8 },
@@ -375,12 +375,12 @@ function Home({ onOpenNeedModal, onOpenGoogleAuth }) {
         </div>
         <div className="metrics">
           <div className="metric">
-            <strong>{reqs?.length || '04'}</strong>
-            <span>Solicitudes registradas</span>
+            <strong>{reqs?.length ?? 0}</strong>
+            <span>Solicitudes visibles</span>
           </div>
           <div className="metric">
-            <strong>{transfers?.length || '02'}</strong>
-            <span>Traslados en curso</span>
+            <strong>{transfers?.length ?? 0}</strong>
+            <span>Traslados visibles</span>
           </div>
           <div className="metric">
             <strong>08</strong>
@@ -393,47 +393,139 @@ function Home({ onOpenNeedModal, onOpenGoogleAuth }) {
 }
 
 // -------------------------------------------------------------
-// NEED CARD MATCHING MOCKUP DESIGN
+// Public need card with category-specific imagery
 // -------------------------------------------------------------
 function MockupNeedCard({ r, index, onSelect }) {
-  // Pre-configured mock values for visual harmony matching mockup
   const mockPercentages = [45, 70, 25];
   const progress = r.received && r.goal 
     ? Math.min(100, Math.round((r.received / r.goal) * 100))
     : (mockPercentages[index % 3] || 50);
 
-  const icons = ['/logo-mark.png', '/logo.jpg', '/logo-mark.png'];
+  const requestText = `${r.description || ''} ${r.category || ''}`
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const needVisuals = [
+    {
+      match: ['utiles escolares', 'mochila escolar', 'cuadernos', 'mochila'],
+      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=900&q=80',
+      alt: 'Libros y materiales escolares para apoyar a estudiantes'
+    },
+    {
+      match: ['uniformes escolares', 'uniforme escolar', 'uniforme'],
+      image: 'https://images.unsplash.com/photo-1591219233007-4ac041f8c2be?auto=format&fit=crop&w=900&q=80',
+      alt: 'Estudiantes con uniforme escolar caminando hacia clases'
+    },
+    {
+      match: ['zapatos escolares', 'calzado escolar'],
+      image: 'https://images.unsplash.com/photo-1653868250317-144a0c4f5884?auto=format&fit=crop&w=900&q=80',
+      alt: 'Par de zapatos negros de vestir, similares al calzado escolar solicitado'
+    },
+    {
+      match: ['ropa de abrigo', 'chaqueta', 'sueter'],
+      image: 'https://images.unsplash.com/photo-1611911813383-67769b37a149?auto=format&fit=crop&w=900&q=80',
+      alt: 'Suéter tejido abrigado para donar'
+    },
+    {
+      match: ['alimento', 'comida', 'víveres'],
+      image: 'https://images.unsplash.com/photo-1608686207856-001b95cf60ca?auto=format&fit=crop&w=900&q=80',
+      alt: 'Bolsas de donación con alimentos empacados y productos de despensa'
+    },
+    {
+      match: ['ropa interior', 'bebe', 'infantil'],
+      image: 'https://images.unsplash.com/photo-1768693602418-260d828b878d?auto=format&fit=crop&w=900&q=80',
+      alt: 'Ropa de bebé preparada para entregar a una familia'
+    },
+    {
+      match: ['vestimenta', 'ropa'],
+      image: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=900&q=80',
+      alt: 'Ropa organizada para donación'
+    },
+    {
+      match: ['calzado', 'zapatos'],
+      image: 'https://images.unsplash.com/photo-1653868250317-144a0c4f5884?auto=format&fit=crop&w=900&q=80',
+      alt: 'Par de zapatos negros de vestir para donar'
+    },
+    {
+      match: ['mobiliario', 'mueble', 'hogar'],
+      image: 'https://images.unsplash.com/photo-1713365829670-d8df1e593248?auto=format&fit=crop&w=900&q=80',
+      alt: 'Mesa de comedor con sillas para equipar un hogar'
+    },
+    {
+      match: ['electrodoméstico', 'electrodomestico', 'cocina'],
+      image: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?auto=format&fit=crop&w=900&q=80',
+      alt: 'Electrodomésticos para el hogar'
+    },
+    {
+      match: ['salud', 'medicamento'],
+      image: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&w=900&q=80',
+      alt: 'Insumos de salud y primeros auxilios'
+    },
+    {
+      match: ['higiene', 'cuidado personal'],
+      image: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=900&q=80',
+      alt: 'Productos de higiene y cuidado personal'
+    },
+    {
+      match: ['tecnología', 'tecnologia', 'conectividad', 'digital'],
+      image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=80',
+      alt: 'Computadora portátil para acceso digital'
+    },
+    {
+      match: ['transporte', 'movilidad'],
+      image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=900&q=80',
+      alt: 'Vehículo para traslados comunitarios'
+    },
+    {
+      match: ['legal', 'documentación', 'documentacion'],
+      image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=900&q=80',
+      alt: 'Documentos para asistencia legal'
+    },
+    {
+      match: ['adultos mayores', 'adulto mayor', 'acompañamiento'],
+      image: 'https://images.unsplash.com/photo-1777904257177-f520bc1b10c3?auto=format&fit=crop&w=900&q=80',
+      alt: 'Acompañamiento y cuidado comunitario'
+    },
+    {
+      match: ['emergencia', 'contingencia'],
+      image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=900&q=80',
+      alt: 'Paquetes de ayuda para emergencias'
+    },
+    {
+      match: [],
+      image: 'https://images.unsplash.com/photo-1599059813005-11265ba4b4ce?auto=format&fit=crop&w=900&q=80',
+      alt: 'Voluntariado organizando productos de apoyo comunitario'
+    }
+  ];
+  const visual = needVisuals.find(item => item.match.some(term => requestText.includes(term.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))))
+    || needVisuals[needVisuals.length - 1];
 
   return (
-    <article className={`need-card c${index % 3}`}>
-      {/* Top Graphic Header */}
+    <article className={`need-card needs-list-card c${index % 3}`} style={{ animationDelay: `${index * 75}ms` }}>
       <div className="need-top">
-        <div className="icon-square">
-          <img
-            src={icons[index % 3]}
-            alt={r.category || 'Necesidad'}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }}
-          />
-        </div>
+        <img className="need-photo" src={visual.image} alt={visual.alt} loading="lazy" />
+        <span className="need-zone"><MapPin size={13} />{r.zone}</span>
+        <span className="need-photo-label">CR CONECTA · APOYO COMUNITARIO</span>
       </div>
 
-      {/* Body Content */}
       <div className="need-body">
-        <span className={`priority ${(r.priority || 'media').toLowerCase()}`}>
-          PRIORIDAD {(r.priority || 'MEDIA').toUpperCase()}
-        </span>
+        <div className="need-card-meta">
+          <span className="need-category-label">{r.category}</span>
+          <span className={`priority ${(r.priority || 'media').toLowerCase()}`}>
+            PRIORIDAD {(r.priority || 'MEDIA').toUpperCase()}
+          </span>
+        </div>
 
         <h3>{r.description}</h3>
-        <p>{r.zone} · Progreso de ejemplo {progress}%</p>
+        <p className="need-progress-copy">Apoyo comunitario · {progress}% reunido</p>
 
         <div className="progress">
           <span style={{ width: `${progress}%` }} />
         </div>
 
         <div className="need-foot">
-          <span>{r.category}</span>
           <button type="button" onClick={onSelect}>
-            Ver ficha pública (RF-06)<ArrowRight className="i i-r" size={14} />
+            Conocer esta necesidad<ArrowRight className="i i-r" size={14} />
           </button>
         </div>
       </div>
@@ -444,10 +536,9 @@ function MockupNeedCard({ r, index, onSelect }) {
 // -------------------------------------------------------------
 // NEEDS PAGE (PUBLIC LIST WITH FILTERS & RF-06 ACCESS)
 // -------------------------------------------------------------
-function Needs({ session, onOpenNeedModal }) {
+function Needs({ onOpenNeedModal }) {
   const { data: reqs = [], state, retry } = useData('/requests');
   const [filter, setFilter] = useState('Todas');
-  const navigate = useNavigate();
 
   const approvedList = useMemo(() => {
     return (reqs || []).filter(r => {
@@ -458,19 +549,26 @@ function Needs({ session, onOpenNeedModal }) {
   }, [reqs, filter]);
 
   return (
-    <div className="page">
-      <div className="page-head">
-        <span className="eyebrow">OPORTUNIDADES PARA AYUDAR</span>
-        <h1>Necesidades cerca de vos</h1>
-        <p>
-          Solicitudes aprobadas por la administración con datos generales para proteger la identidad de las personas beneficiarias (RF-06).
-        </p>
+    <div className="page needs-page">
+      <div className="needs-page-hero">
+        <div className="page-head">
+          <span className="eyebrow">OPORTUNIDADES PARA AYUDAR</span>
+          <h1>Tu ayuda puede cambiar un día.</h1>
+          <p>
+            Conocé las necesidades aprobadas en tu comunidad y elegí cómo colaborar. La identidad y ubicación exacta de las familias se mantienen protegidas.
+          </p>
+        </div>
+        <div className="needs-hero-note">
+          <span className="needs-hero-icon"><HeartHandshake size={22} /></span>
+          <strong>Apoyo cercano,<br />impacto real.</strong>
+          <span>Cada aporte suma a una red comunitaria más fuerte.</span>
+        </div>
       </div>
 
       <div className="filter-row">
         <div className="pills">
           <Link className="btn primary" to="/solicitar" style={{ padding: '8px 18px', fontSize: '12px' }}>
-            + Solicitar ayuda (RF-07)
+            Solicitar ayuda
           </Link>
           {['Todas', 'Alta', 'Media', 'Baja'].map(x => (
             <button
@@ -482,8 +580,8 @@ function Needs({ session, onOpenNeedModal }) {
             </button>
           ))}
         </div>
-        <span className="simulated">
-          Datos ficticios · Vista pública protegida (RF-06)
+        <span className="needs-count-note">
+          {approvedList.length} {approvedList.length === 1 ? 'necesidad aprobada' : 'necesidades aprobadas'} · Privacidad protegida
         </span>
       </div>
 
@@ -492,7 +590,7 @@ function Needs({ session, onOpenNeedModal }) {
       ) : state === 'error' ? (
         <div className="state">
           <div className="state-icon">!</div>
-          <h3>Error de conexión con JSON Server</h3>
+          <h3>Error de conexión con la API</h3>
           <p>Verificá que el servidor local en el puerto 3001 esté activo.</p>
           <button className="btn secondary" onClick={retry}>Reintentar</button>
         </div>
@@ -521,14 +619,8 @@ function Needs({ session, onOpenNeedModal }) {
 // -------------------------------------------------------------
 // ACCESS PAGE (RF-01, RF-02 GOOGLE & ROLE SELECTION)
 // -------------------------------------------------------------
-function Access({ onLogin, onOpenGoogleAuth }) {
-  const { data: users = [], state } = useData('/users');
-  const navigate = useNavigate();
-
-  const handleSelect = (u) => {
-    onLogin(u);
-    navigate('/panel');
-  };
+function Access({ onOpenGoogleAuth }) {
+  const { data: users = [], state } = useData('/auth/demo-users');
 
   return (
     <div className="page">
@@ -621,7 +713,7 @@ function Access({ onLogin, onOpenGoogleAuth }) {
             <button
               key={u.id}
               className="account-card"
-              onClick={() => handleSelect(u)}
+              onClick={onOpenGoogleAuth}
             >
               <div className="avatar">
                 <RoleAvatar src={roleIcons[u.role] || '/logo-mark.png'} alt={u.role} size={40} />
@@ -643,6 +735,323 @@ function Access({ onLogin, onOpenGoogleAuth }) {
 // -------------------------------------------------------------
 // PANEL DE GESTIÓN (RF-03, RF-08, RF-09, RF-10)
 // -------------------------------------------------------------
+function DashboardBarChart({ title, subtitle, items, variant = 'bars', emptyLabel = 'Aún no hay datos para mostrar.' }) {
+  const maximum = Math.max(1, ...items.map(item => item.value));
+  const total = items.reduce((sum, item) => sum + item.value, 0);
+  const colors = [
+    'linear-gradient(135deg, #05b8a5, #26d7c4)',
+    'linear-gradient(135deg, #ff7043, #ffad42)',
+    'linear-gradient(135deg, #7256e8, #ad78ff)',
+    'linear-gradient(135deg, #1788e8, #45bdff)',
+    'linear-gradient(135deg, #e84e91, #ff7fb1)',
+    'linear-gradient(135deg, #8bbd22, #c5e94d)'
+  ];
+
+  return (
+    <section className="dashboard-card dashboard-chart-card">
+      <div className="dashboard-chart-heading">
+        <span className="dashboard-chart-icon"><BarChart3 size={18} /></span>
+        <div><h3>{title}</h3><p>{subtitle}</p></div>
+        {items.length > 0 && <span className="dashboard-chart-total"><strong>{total}</strong><small>registros</small></span>}
+      </div>
+      {items.length ? (
+        <div className={`dashboard-bars ${variant === 'columns' ? 'dashboard-bars-columns' : ''}`}>
+          {items.map((item, index) => (
+            <div className="dashboard-bar-row" key={item.label} style={{ '--bar-delay': `${index * 90}ms` }}>
+              {variant === 'columns' ? (
+                <>
+                  <div className="dashboard-column-value">{item.value}</div>
+                  <div className="dashboard-column-track">
+                    <span style={{
+                      '--bar-height': `${Math.max(item.value > 0 ? 10 : 0, (item.value / maximum) * 100)}%`,
+                      '--bar-color': colors[index % colors.length],
+                      '--bar-delay': `${index * 90}ms`
+                    }} />
+                  </div>
+                  <div className="dashboard-column-label">
+                    <strong>{item.label}</strong>
+                    <small>{total ? `${Math.round((item.value / total) * 100)}%` : '0%'}</small>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="dashboard-bar-label">
+                    <span><i style={{ background: colors[index % colors.length] }} />{item.label}</span>
+                    <strong>{item.value}<small>{total ? `${Math.round((item.value / total) * 100)}%` : '0%'}</small></strong>
+                  </div>
+                  <div className="dashboard-bar-track">
+                    <span style={{
+                      '--bar-width': `${Math.max(item.value > 0 ? 7 : 0, (item.value / maximum) * 100)}%`,
+                      '--bar-color': colors[index % colors.length],
+                      '--bar-delay': `${index * 90}ms`
+                    }} />
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : <p className="dashboard-empty-note">{emptyLabel}</p>}
+    </section>
+  );
+}
+
+function DashboardMetric({ icon: Icon, label, value, detail, tone = 'blue' }) {
+  return (
+    <div className={`dashboard-metric-card tone-${tone}`}>
+      <span className="dashboard-metric-icon"><Icon size={19} /></span>
+      <span className="dashboard-metric-label">{label}</span>
+      <strong>{value}</strong>
+      <small>{detail}</small>
+    </div>
+  );
+}
+
+function dashboardCounts(items, getLabel, limit = 5) {
+  const counts = items.reduce((result, item) => {
+    const label = getLabel(item) || 'Sin clasificar';
+    result.set(label, (result.get(label) || 0) + 1);
+    return result;
+  }, new Map());
+  return [...counts.entries()]
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, limit);
+}
+
+function AdminOverview({ reqs, dons, inv, trans, campaigns, jobs, refreshCount, onRefresh }) {
+  const { data: users = [], state: usersState } = useData('/users', refreshCount);
+  const { data: activity = [], state: activityState } = useData('/activity', refreshCount);
+  const pendingRequests = reqs.filter(request => request.status === 'En revisión');
+  const stockAlerts = inv.filter(item => Number(item.available) <= Number(item.minimum));
+  const inRouteTransfers = trans.filter(transfer => transfer.status === 'En ruta');
+  const donationUnits = dons.reduce((sum, donation) => sum + (Number(donation.quantity) || 0), 0);
+  const inventoryByStatus = [
+    { label: 'Bajo mínimo', value: stockAlerts.length },
+    { label: 'En nivel', value: Math.max(0, inv.length - stockAlerts.length) }
+  ];
+  const loadError = usersState === 'error' || activityState === 'error';
+
+  return (
+    <div className="role-dashboard">
+      <div className="admin-dashboard-toolbar">
+        <div>
+          <strong>Vista general de CR Conecta</strong>
+          <p>Indicadores de operación y acciones registradas en el sistema.</p>
+        </div>
+        <button type="button" className="btn secondary" onClick={onRefresh}>Actualizar datos</button>
+      </div>
+      {loadError && (
+        <div className="api-banner" role="alert">
+          No se pudieron cargar los usuarios o la actividad reciente.
+          <button type="button" onClick={onRefresh}>Reintentar</button>
+        </div>
+      )}
+      <div className="dashboard-kpis">
+        <DashboardMetric icon={UsersRound} label="Cuentas" value={users.length} detail="Perfiles registrados" tone="blue" />
+        <DashboardMetric icon={Clock3} label="Por evaluar" value={pendingRequests.length} detail={`${reqs.length} solicitudes en total`} tone="amber" />
+        <DashboardMetric icon={HeartHandshake} label="Donaciones" value={dons.length} detail={`${donationUnits} unidades aportadas`} tone="green" />
+        <DashboardMetric icon={Package} label="Alertas de inventario" value={stockAlerts.length} detail={`${inv.length} productos registrados`} tone="red" />
+        <DashboardMetric icon={RouteIcon} label="Traslados en ruta" value={inRouteTransfers.length} detail={`${trans.length} traslados registrados`} tone="blue" />
+        <DashboardMetric icon={BarChart3} label="Campañas activas" value={campaigns.filter(campaign => campaign.status === 'Activa').length} detail={`${campaigns.length} campañas · ${jobs.length} oportunidades`} tone="green" />
+      </div>
+      <div className="dashboard-chart-grid">
+        <DashboardBarChart title="Solicitudes por estado" subtitle="Seguimiento de todos los casos" items={dashboardCounts(reqs, request => request.status)} />
+        <DashboardBarChart title="Solicitudes por comunidad" subtitle="Zonas con necesidades registradas" items={dashboardCounts(reqs, request => request.zone)} variant="columns" />
+        <DashboardBarChart title="Donaciones por categoría" subtitle="Tipos de aporte registrados" items={dashboardCounts(dons, donation => donation.category)} variant="columns" />
+        <DashboardBarChart title="Donaciones por estado" subtitle="Avance de los aportes" items={dashboardCounts(dons, donation => donation.status)} />
+        <DashboardBarChart title="Estado del inventario" subtitle="Productos bajo mínimo o en nivel" items={inventoryByStatus} variant="columns" />
+        <DashboardBarChart title="Traslados por estado" subtitle="Distribución de entregas logísticas" items={dashboardCounts(trans, transfer => transfer.status)} variant="columns" />
+        <DashboardBarChart title="Cuentas por tipo" subtitle="Perfiles registrados por rol" items={dashboardCounts(users, user => user.role)} />
+        <DashboardBarChart title="Campañas por estado" subtitle="Campañas de empresas y aliados" items={dashboardCounts(campaigns, campaign => campaign.status)} />
+      </div>
+      <section className="dashboard-card dashboard-chart-card">
+        <div className="dashboard-chart-heading">
+          <span className="dashboard-chart-icon"><Clock3 size={18} /></span>
+          <div><h3>Actividad reciente</h3><p>Últimas acciones registradas por el sistema</p></div>
+        </div>
+        {activity.length ? (
+          <div className="dashboard-activity-list">
+            {activity.slice(0, 10).map(event => {
+              const occurredAt = new Date(event.timestamp);
+              const formattedDate = Number.isNaN(occurredAt.getTime())
+                ? 'Fecha no disponible'
+                : occurredAt.toLocaleString('es-CR', { dateStyle: 'short', timeStyle: 'short' });
+              const subject = event.entity === 'sesión'
+                ? ''
+                : ` ${event.entity?.toLowerCase()}${event.entityId ? ` #${event.entityId}` : ''}`;
+              return (
+                <div className="dashboard-activity-row" key={event.id}>
+                  <span className="dashboard-activity-dot done" />
+                  <div>
+                    <strong>{event.actor} {event.action}{subject}</strong>
+                    <small>{event.actorRole} · {formattedDate}{event.detail ? ` · ${event.detail}` : ''}</small>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : <p className="dashboard-empty-note">Todavía no hay acciones registradas. Las nuevas acciones aparecerán aquí.</p>}
+      </section>
+    </div>
+  );
+}
+
+function RoleDashboard({ role, session, reqs, dons, inv, trans, campaigns }) {
+  const myDonations = dons.filter(donation => donation.donorId === session.id);
+  const myDonationUnits = myDonations.reduce((sum, donation) => sum + (Number(donation.quantity) || 0), 0);
+  const deliveredDonations = myDonations.filter(donation => donation.status === 'Entregada');
+  const myCampaigns = campaigns.filter(campaign => campaign.companyId === session.id);
+  const myTransfers = trans.filter(transfer => transfer.responsible === session.name);
+  const normalizedZone = session.zone?.trim().toLowerCase();
+  const localRequests = normalizedZone
+    ? reqs.filter(request => request.zone?.trim().toLowerCase() === normalizedZone)
+    : [];
+  const localRequestIds = new Set(localRequests.map(request => request.id));
+  const localDonations = normalizedZone
+    ? dons.filter(donation =>
+      localRequestIds.has(donation.requestId)
+      || donation.destination?.toLowerCase().includes(normalizedZone)
+    )
+    : [];
+  const stockAlerts = inv.filter(item => item.available <= item.minimum);
+  const pendingRequests = reqs.filter(request => request.status === 'En revisión');
+  const approvedRequests = reqs.filter(request => request.status === 'Aprobada');
+  const inRouteTransfers = trans.filter(transfer => transfer.status === 'En ruta');
+
+  if (role === 'Administrador') {
+    const requestStatus = dashboardCounts(reqs, request => request.status);
+    const donationCategories = dashboardCounts(dons, donation => donation.category);
+    return (
+      <div className="role-dashboard">
+        <div className="dashboard-kpis">
+          <DashboardMetric icon={Clock3} label="Por evaluar" value={pendingRequests.length} detail="Solicitudes en revisión" tone="amber" />
+          <DashboardMetric icon={CircleCheck} label="Aprobadas" value={approvedRequests.length} detail="Casos activos" tone="green" />
+          <DashboardMetric icon={Package} label="Alertas de stock" value={stockAlerts.length} detail="Productos bajo mínimo" tone="red" />
+          <DashboardMetric icon={RouteIcon} label="En ruta" value={inRouteTransfers.length} detail="Traslados activos" tone="blue" />
+        </div>
+        <div className="dashboard-chart-grid">
+          <DashboardBarChart title="Estado de solicitudes" subtitle="Casos registrados en el sistema" items={requestStatus} />
+          <DashboardBarChart title="Donaciones por categoría" subtitle="Distribución de los aportes registrados" items={donationCategories} />
+        </div>
+        <section className="dashboard-card dashboard-insight">
+          <span className="dashboard-insight-icon"><PackageCheck size={20} /></span>
+          <div><strong>Seguimiento operativo</strong><p>{pendingRequests.length ? `${pendingRequests.length} solicitudes esperan evaluación. Revisá el listado para continuar con su validación.` : 'No hay solicitudes pendientes de evaluación en este momento.'}</p></div>
+          <span className="dashboard-insight-tag">{reqs.length} casos en total</span>
+        </section>
+      </div>
+    );
+  }
+
+  if (role === 'Donante individual') {
+    const categories = dashboardCounts(myDonations, donation => donation.category);
+    const recentDonations = [...myDonations].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 4);
+    return (
+      <div className="role-dashboard">
+        <div className="dashboard-kpis">
+          <DashboardMetric icon={HeartHandshake} label="Mis aportes" value={myDonations.length} detail="Donaciones registradas" tone="blue" />
+          <DashboardMetric icon={Package} label="Unidades aportadas" value={myDonationUnits} detail="Productos y paquetes" tone="green" />
+          <DashboardMetric icon={CircleCheck} label="Entregadas" value={deliveredDonations.length} detail="Aportes completados" tone="green" />
+          <DashboardMetric icon={RouteIcon} label="En seguimiento" value={myDonations.filter(donation => donation.status !== 'Entregada').length} detail="En inventario o traslado" tone="amber" />
+        </div>
+        <div className="dashboard-chart-grid">
+          <DashboardBarChart title="Mis aportes por categoría" subtitle="Tipos de ayuda que has compartido" items={categories} />
+          <section className="dashboard-card dashboard-chart-card">
+            <div className="dashboard-chart-heading"><span className="dashboard-chart-icon"><Clock3 size={18} /></span><div><h3>Actividad reciente</h3><p>Últimas donaciones registradas</p></div></div>
+            {recentDonations.length ? <div className="dashboard-activity-list">
+              {recentDonations.map(donation => <div className="dashboard-activity-row" key={donation.id}>
+                <span className="dashboard-activity-dot" />
+                <div><strong>{donation.product}</strong><small>{donation.category} · {donation.date}</small></div>
+                <span className="dashboard-activity-status">{donation.status}</span>
+              </div>)}
+            </div> : <p className="dashboard-empty-note">Todavía no registrás donaciones. Podés explorar las necesidades de tu comunidad.</p>}
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  if (role === 'Empresa donante') {
+    const donatedUnits = myDonations.reduce((sum, donation) => sum + (Number(donation.quantity) || 0), 0);
+    const categories = dashboardCounts(myDonations, donation => donation.category);
+    return (
+      <div className="role-dashboard">
+        <div className="dashboard-kpis">
+          <DashboardMetric icon={BarChart3} label="Campañas activas" value={myCampaigns.filter(campaign => campaign.status === 'Activa').length} detail={`${myCampaigns.length} campañas propias`} tone="blue" />
+          <DashboardMetric icon={Package} label="Unidades aportadas" value={donatedUnits} detail="A través de donaciones" tone="green" />
+          <DashboardMetric icon={CircleCheck} label="Aportes entregados" value={myDonations.filter(donation => donation.status === 'Entregada').length} detail="Donaciones completadas" tone="green" />
+          <DashboardMetric icon={UsersRound} label="Oportunidades" value={myCampaigns.reduce((sum, campaign) => sum + (Number(campaign.goal) || 0), 0)} detail="Meta total de campaña" tone="amber" />
+        </div>
+        <div className="dashboard-chart-grid">
+          <DashboardBarChart title="Aportes por categoría" subtitle="Resumen de donaciones de la empresa" items={categories} />
+          <section className="dashboard-card dashboard-chart-card">
+            <div className="dashboard-chart-heading"><span className="dashboard-chart-icon"><BarChart3 size={18} /></span><div><h3>Avance de campañas</h3><p>Progreso frente a la meta</p></div></div>
+            {myCampaigns.length ? <div className="dashboard-campaign-list">
+              {myCampaigns.slice(0, 4).map(campaign => {
+                const goal = Number(campaign.goal) || 0;
+                const progress = goal ? Math.min(100, Math.round(((Number(campaign.progress) || 0) / goal) * 100)) : 0;
+                return <div className="dashboard-campaign-row" key={campaign.id}>
+                  <div className="dashboard-bar-label"><span>{campaign.name}</span><strong>{progress}%</strong></div>
+                  <div className="dashboard-bar-track"><span style={{ width: `${progress}%` }} /></div>
+                </div>;
+              })}
+            </div> : <p className="dashboard-empty-note">Aún no hay campañas vinculadas a esta cuenta.</p>}
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  if (role === 'Voluntario') {
+    const transferStatuses = dashboardCounts(myTransfers, transfer => transfer.status);
+    return (
+      <div className="role-dashboard">
+        <div className="dashboard-kpis">
+          <DashboardMetric icon={RouteIcon} label="Mis traslados" value={myTransfers.length} detail="Asignados a tu perfil" tone="blue" />
+          <DashboardMetric icon={Clock3} label="En ruta" value={myTransfers.filter(transfer => transfer.status === 'En ruta').length} detail="Pendientes de entrega" tone="amber" />
+          <DashboardMetric icon={CircleCheck} label="Completados" value={myTransfers.filter(transfer => transfer.status === 'Entregado').length} detail="Entregas confirmadas" tone="green" />
+          <DashboardMetric icon={MapPin} label="Mi zona" value={session.zone || 'Sin zona'} detail="Área de colaboración" tone="blue" />
+        </div>
+        <div className="dashboard-chart-grid">
+          <DashboardBarChart title="Estado de mis traslados" subtitle="Seguimiento de rutas asignadas" items={transferStatuses} />
+          <section className="dashboard-card dashboard-chart-card">
+            <div className="dashboard-chart-heading"><span className="dashboard-chart-icon"><RouteIcon size={18} /></span><div><h3>Próximas entregas</h3><p>Rutas asignadas a tu perfil</p></div></div>
+            {myTransfers.length ? <div className="dashboard-activity-list">
+              {myTransfers.map(transfer => <div className="dashboard-activity-row" key={transfer.id}>
+                <span className={`dashboard-activity-dot ${transfer.status === 'Entregado' ? 'done' : ''}`} />
+                <div><strong>{transfer.origin} → {transfer.destination}</strong><small>{transfer.scheduledDate} · {transfer.donationId}</small></div>
+                <span className="dashboard-activity-status">{transfer.status}</span>
+              </div>)}
+            </div> : <p className="dashboard-empty-note">No hay traslados asignados a tu nombre por ahora.</p>}
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  const localCategories = dashboardCounts(localRequests, request => request.category);
+  return (
+    <div className="role-dashboard">
+      <div className="dashboard-kpis">
+        <DashboardMetric icon={MapPin} label="Zona de apoyo" value={session.zone || 'Comunidad'} detail="Centro comunitario asignado" tone="blue" />
+        <DashboardMetric icon={HeartHandshake} label="Casos locales" value={localRequests.length} detail="Solicitudes de tu zona" tone="amber" />
+        <DashboardMetric icon={Package} label="Aportes locales" value={localDonations.length} detail="Donaciones vinculadas" tone="green" />
+        <DashboardMetric icon={CircleCheck} label="Casos aprobados" value={localRequests.filter(request => request.status === 'Aprobada').length} detail="En tu comunidad" tone="green" />
+      </div>
+      <div className="dashboard-chart-grid">
+        <DashboardBarChart title="Necesidades de la zona" subtitle={`Solicitudes registradas en ${session.zone || 'tu comunidad'}`} items={localCategories} />
+        <section className="dashboard-card dashboard-chart-card">
+          <div className="dashboard-chart-heading"><span className="dashboard-chart-icon"><UsersRound size={18} /></span><div><h3>Tu comunidad conectada</h3><p>Resumen de colaboración local</p></div></div>
+          <div className="dashboard-community-summary">
+            <strong>{localRequests.length}</strong><span>solicitudes vinculadas a tu zona</span>
+            <p>Coordiná con las personas donantes y el voluntariado para acercar los aportes a quienes más los necesitan.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
 function Panel({ session, onLogin, onOpenGoogleAuth }) {
   if (!session) {
     return (
@@ -662,20 +1071,23 @@ function Panel({ session, onLogin, onOpenGoogleAuth }) {
     );
   }
 
-  return <PanelInner session={session} />;
+  return <PanelInner session={session} onUpdateSession={onLogin} />;
 }
 
-function PanelInner({ session }) {
+function PanelInner({ session, onUpdateSession }) {
   const [refreshCount, setRefreshCount] = useState(0);
+  const [actionNotice, setActionNotice] = useState('');
   const triggerRefresh = () => setRefreshCount(c => c + 1);
 
-  const { data: reqs = [] } = useData('/requests', refreshCount);
-  const { data: dons = [] } = useData('/donations', refreshCount);
-  const { data: inv = [] } = useData('/inventory', refreshCount);
-  const { data: trans = [] } = useData('/transfers', refreshCount);
-  const { data: allies = [] } = useData('/allies', refreshCount);
-  const { data: campaigns = [] } = useData('/campaigns', refreshCount);
-  const { data: jobs = [] } = useData('/jobs', refreshCount);
+  const { data: reqs = [], state: requestsState } = useData('/requests', refreshCount);
+  const { data: dons = [], state: donationsState } = useData('/donations', refreshCount);
+  const { data: inv = [], state: inventoryState } = useData('/inventory', refreshCount);
+  const { data: trans = [], state: transfersState } = useData('/transfers', refreshCount);
+  const { data: allies = [], state: alliesState } = useData('/allies', refreshCount);
+  const { data: campaigns = [], state: campaignsState } = useData('/campaigns', refreshCount);
+  const { data: jobs = [], state: jobsState } = useData('/jobs', refreshCount);
+  const hasLoadError = [requestsState, donationsState, inventoryState, transfersState, alliesState, campaignsState, jobsState]
+    .includes('error');
 
   const role = session.role;
   const isAdmin = role === 'Administrador';
@@ -683,7 +1095,14 @@ function PanelInner({ session }) {
   const isDonor = role === 'Donante individual';
   const isCompany = role === 'Empresa donante';
   const isVolunteer = role === 'Voluntario';
-  const isAlly = role === 'Aliado comunitario';
+  const roleDescriptions = {
+    Administrador: 'Resumen de solicitudes, inventario y traslados para coordinar la operación comunitaria.',
+    Beneficiario: 'Consultá tus solicitudes y el avance de los apoyos asignados a tu hogar.',
+    'Donante individual': 'Seguí tus aportes, revisá su estado y descubrí cómo están ayudando a tu comunidad.',
+    'Empresa donante': 'Medí el avance de tus campañas y el impacto de los aportes de tu organización.',
+    Voluntario: 'Consultá tus rutas asignadas y el estado de las entregas comunitarias.',
+    'Aliado comunitario': `Información de apoyo y necesidades vinculadas con ${session.zone || 'tu comunidad'}.`
+  };
 
   const [tab, setTab] = useState(isBeneficiary ? 'beneficiario' : 'resumen');
   const [evaluatingRequest, setEvaluatingRequest] = useState(null);
@@ -717,7 +1136,7 @@ function PanelInner({ session }) {
           <span className="eyebrow">PANEL DE GESTIÓN · {role.toUpperCase()} (RF-03)</span>
           <h1>Hola, {session.name.split(' ')[0]}.</h1>
           <p>
-            Vistas y acciones configuradas acordes con el rol de demostración. Los cambios impactan directamente en <code>db.json</code>.
+            {roleDescriptions[role] || 'Resumen personalizado de tu actividad en CR Conecta.'}
           </p>
         </div>
 
@@ -730,6 +1149,14 @@ function PanelInner({ session }) {
           Editar perfil (RF-04)<Pencil className="i i-r" size={14} />
         </button>
       </div>
+
+      {hasLoadError && (
+        <div className="api-banner" role="alert">
+          No se pudieron cargar algunos datos del panel.
+          <button type="button" onClick={triggerRefresh}>Reintentar</button>
+        </div>
+      )}
+      {actionNotice && <div role="status" className="api-banner">{actionNotice}</div>}
 
       {/* Navigation Tabs */}
       <div className="panel-tabs">
@@ -754,54 +1181,28 @@ function PanelInner({ session }) {
         />
       )}
 
-      {/* GENERAL DASHBOARD METRICS */}
+      {/* Role-specific summary and analytics */}
       {tab === 'resumen' && !isBeneficiary && (
-        <div className="dashboard">
-          <div className="metric">
-            <strong>{reqs?.length ?? 0}</strong>
-            <span>Total solicitudes</span>
-          </div>
-          <div className="metric">
-            <strong>{dons?.length ?? 0}</strong>
-            <span>Donaciones registradas</span>
-          </div>
-          <div className="metric">
-            <strong>{inv?.length ?? 0}</strong>
-            <span>Artículos en inventario</span>
-          </div>
-          <div className="metric">
-            <strong>{trans?.length ?? 0}</strong>
-            <span>Traslados en ruta</span>
-          </div>
-
-          <div className="dashboard-card wide">
-            <h3>Flujo operativo de demostración (CR Conecta)</h3>
-            <div className="flow-steps">
-              {['1. Solicitud (RF-07)', '2. Evaluación & Límites (RF-08/10)', '3. Donación directa', '4. Traslado simulado', '5. Entrega comunitaria'].map((t, i, arr) => (
-                <span className="flow-step" key={t}>
-                  <span className="flow-pill">{t}</span>
-                  {i < arr.length - 1 && <ArrowRight className="i flow-arrow" size={14} />}
-                </span>
-              ))}
-            </div>
-            <p style={{ marginTop: '14px', fontSize: '12px', color: '#687e91' }}>
-              Todas las operaciones se ejecutan en memoria y se persisten en <code>db.json</code> usando JSON Server.
-            </p>
-          </div>
-
-          <div className="dashboard-card wide">
-            <h3>Alertas de inventario y stock mínimo</h3>
-            {(inv || []).filter(x => x.available <= x.minimum).map(x => (
-              <div key={x.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #edf2f5', fontSize: '12px' }}>
-                <b>{x.product}</b>
-                <span style={{ color: '#b91c1c', fontWeight: '700' }}>{x.available} disp. (mín {x.minimum})</span>
-              </div>
-            ))}
-            {(inv || []).every(x => x.available > x.minimum) && (
-              <p style={{ fontSize: '12px', color: '#15803d' }}><Check className="i i-l" size={14} />Niveles óptimos en todos los centros.</p>
-            )}
-          </div>
-        </div>
+        isAdmin
+          ? <AdminOverview
+              reqs={reqs}
+              dons={dons}
+              inv={inv}
+              trans={trans}
+              campaigns={campaigns}
+              jobs={jobs}
+              refreshCount={refreshCount}
+              onRefresh={triggerRefresh}
+            />
+          : <RoleDashboard
+              role={role}
+              session={session}
+              reqs={reqs}
+              dons={dons}
+              inv={inv}
+              trans={trans}
+              campaigns={campaigns}
+            />
       )}
 
       {/* ADMIN EVALUATION OF REQUESTS (RF-08, RF-09, RF-10) */}
@@ -809,7 +1210,7 @@ function PanelInner({ session }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Header filter controls */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '16px 20px', borderRadius: '14px', border: '1px solid #dce8ec', flexWrap: 'wrap', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="request-filter-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>Filtrar por estado:</span>
               <select 
                 value={filterStatus} 
@@ -953,7 +1354,7 @@ function PanelInner({ session }) {
 
       {/* DONATIONS TABLE */}
       {(tab === 'donaciones' || tab === 'mis donaciones') && (
-        <DonationsView data={dons} session={session} />
+        <DonationsView data={dons} />
       )}
 
       {/* INVENTORY */}
@@ -983,10 +1384,10 @@ function PanelInner({ session }) {
 
       {/* TRANSFERS */}
       {(tab === 'traslados' || tab === 'traslados asignados') && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px' }}>
+        <div className="transfer-grid">
           {trans.map(t => (
             <div key={t.id} className="dashboard-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="transfer-card-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <strong style={{ color: '#06244a' }}>Traslado #{t.id}</strong>
                 <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' }}>
                   {t.status}
@@ -996,7 +1397,7 @@ function PanelInner({ session }) {
               <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
                 Donación {t.donationId} · Responsable: {t.responsible}
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '16px 0', fontSize: '12px' }}>
+              <div className="transfer-points" style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '16px 0', fontSize: '12px' }}>
                 {(t.points || []).map((p, idx) => (
                   <React.Fragment key={p}>
                     <span style={{ background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px', fontWeight: '600' }}>{p}</span>
@@ -1010,9 +1411,14 @@ function PanelInner({ session }) {
                   className="btn primary" 
                   style={{marginTop:'12px', padding:'8px 12px', fontSize:'11px'}}
                   onClick={async () => {
-                    await api(`/transfers/${t.id}`, { method: 'PATCH', body: JSON.stringify({status: 'Entregado'}) });
-                    triggerRefresh();
-                    alert('Firma y fotografía simulada recolectada exitosamente (RF-27).');
+                    setActionNotice('');
+                    try {
+                      await api(`/transfers/${t.id}`, { method: 'PATCH', body: JSON.stringify({status: 'Entregado'}) });
+                      triggerRefresh();
+                      setActionNotice('Entrega actualizada. La firma y fotografía siguen siendo simuladas (RF-27).');
+                    } catch (error) {
+                      setActionNotice(error.message || 'No se pudo actualizar el traslado.');
+                    }
                   }}
                 >
                   Completar entrega (Firma)<PenLine className="i i-r" size={14} />
@@ -1123,7 +1529,7 @@ function PanelInner({ session }) {
           onClose={() => setEditingProfile(false)}
           user={session}
           onSaved={(updated) => {
-            localStorage.setItem('cr_session', JSON.stringify(updated));
+            onUpdateSession(updated);
             triggerRefresh();
           }}
         />
@@ -1135,8 +1541,10 @@ function PanelInner({ session }) {
 // -------------------------------------------------------------
 // DONATIONS VIEW WITH QR GENERATION
 // -------------------------------------------------------------
-function DonationsView({ data = [], session }) {
+function DonationsView({ data = [] }) {
   const [qrModal, setQrModal] = useState(null);
+  const qrModalRef = useRef(null);
+  useModalAccessibility(qrModalRef, Boolean(qrModal), () => setQrModal(null));
 
   const generateQR = async (d) => {
     const url = await QRCode.toDataURL(`http://localhost:5174/donacion/${d.id}`);
@@ -1198,9 +1606,9 @@ function DonationsView({ data = [], session }) {
 
       {qrModal && (
         <div className="modal-backdrop" onClick={() => setQrModal(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
+          <div className="modal" ref={qrModalRef} role="dialog" aria-modal="true" aria-labelledby="qr-title" tabIndex={-1} onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
             <span className="eyebrow">CONSULTA LOCAL SIMULADA</span>
-            <h3 style={{ margin: '8px 0 4px' }}>Comprobante #{qrModal.donation.id}</h3>
+            <h3 id="qr-title" style={{ margin: '8px 0 4px' }}>Comprobante #{qrModal.donation.id}</h3>
             <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#64748b' }}>
               Código QR de demostración para verificar el aporte en centros comunitarios.
             </p>
@@ -1304,34 +1712,62 @@ function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }) {
 // -------------------------------------------------------------
 // STANDALONE REQUEST REGISTRATION (RF-07, RF-10)
 // -------------------------------------------------------------
+function localDateInputValue() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60 * 1000).toISOString().slice(0, 10);
+}
+
 function RequestForm({ session }) {
   const [category, setCategory] = useState('Alimentos sellados');
   const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState(1);
+  const [amount, setAmount] = useState('1');
   const [unit, setUnit] = useState('paquetes');
   const [zone, setZone] = useState(session?.zone || 'Puntarenas');
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(localDateInputValue);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { data: priorRequests = [] } = useData('/requests');
+  const today = localDateInputValue();
+  const categoryLimit = CATEGORY_LIMITS[category];
 
   const handleCatChange = (newCat) => {
     setCategory(newCat);
     setUnit(getCategoryUnit(newCat));
+    setError('');
   };
 
-  const limitCheck = checkRequestLimits(category, amount);
+  const limitCheck = checkRequestLimits(
+    category,
+    amount,
+    priorRequests.filter(request => request.beneficiaryId === session?.id)
+  );
   const isLimitExceeded = limitCheck.exceeded;
+
+  if (!session || session.role !== 'Beneficiario') {
+    return (
+      <div className="page">
+        <div className="page-head">
+          <span className="eyebrow">SOLICITUD DE APOYO</span>
+          <h1>Acceso para personas beneficiarias</h1>
+          <p>Iniciá sesión con una cuenta beneficiaria para registrar y consultar solicitudes propias.</p>
+        </div>
+        <Link className="btn primary" to="/acceso">Iniciar sesión</Link>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (saving) return;
 
     const cleanDescription = description.trim();
     const parsedAmount = Number(amount);
 
-    if (!cleanDescription) {
-      setError('Ingresá una descripción clara del apoyo solicitado.');
+    if (!cleanDescription || cleanDescription.length > 500) {
+      setError('Escribí una descripción clara de hasta 500 caracteres.');
       return;
     }
 
@@ -1339,10 +1775,12 @@ function RequestForm({ session }) {
       setError('La cantidad debe ser mayor que cero.');
       return;
     }
+    if (!date || date > today) {
+      setError('Elegí una fecha válida que no sea posterior a hoy.');
+      return;
+    }
 
-    const newId = `CC-${Date.now().toString().slice(-6)}`;
     const newReq = {
-      id: newId,
       category,
       description: cleanDescription,
       amount: parsedAmount,
@@ -1353,7 +1791,6 @@ function RequestForm({ session }) {
       priority: 'Media',     // RF-09
       goal: parsedAmount,
       received: 0,
-      beneficiaryId: session?.id || 'u2',
       limitExceeded: isLimitExceeded, // RF-10
       requiresException: isLimitExceeded,
       limitDetails: isLimitExceeded ? limitCheck.reason : null,
@@ -1362,13 +1799,16 @@ function RequestForm({ session }) {
     };
 
     try {
+      setSaving(true);
       await api('/requests', {
         method: 'POST',
         body: JSON.stringify(newReq)
       });
       setSaved(true);
-    } catch {
-      setError('No se pudo registrar la solicitud en JSON Server.');
+    } catch (requestError) {
+      setError(requestError.message || 'No se pudo registrar la solicitud.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -1380,52 +1820,77 @@ function RequestForm({ session }) {
         <p>Registrá el requerimiento de ayuda comunitaria. Quedará en estado inicial <b>En revisión</b>.</p>
       </div>
 
-      <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #dce8ec', padding: '30px', maxWidth: '640px', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="help-form-card">
         {saved ? (
-          <div style={{ textAlign: 'center', padding: '30px 10px' }}>
-            <CheckCircle2 size={42} />
-            <h3 style={{ margin: '12px 0 6px', color: '#0f5132' }}>¡Solicitud enviada exitosamente!</h3>
-            <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#556b80' }}>
+          <div className="help-form-success">
+            <span className="help-form-success-icon"><CheckCircle2 size={28} /></span>
+            <h3>¡Solicitud enviada!</h3>
+            <p>
               La solicitud fue guardada con estado inicial <b>En revisión</b>. Podés consultar su estado en el panel.
             </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button className="btn primary" onClick={() => navigate('/necesidades')}>Ver necesidades</button>
-              <button className="btn secondary" onClick={() => { setSaved(false); setDescription(''); }}>Crear otra solicitud</button>
+            <div className="help-form-actions">
+              <button type="button" className="btn primary" onClick={() => navigate('/panel')}>Ver mi solicitud</button>
+              <button type="button" className="btn secondary" onClick={() => {
+                setSaved(false);
+                setDescription('');
+                setAmount('1');
+                setDate(localDateInputValue());
+                setError('');
+              }}>Crear otra solicitud</button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Categoría de ayuda (RF-07) *</label>
-              <select value={category} onChange={e => handleCatChange(e.target.value)} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1' }}>
+          <form className="help-form" onSubmit={handleSubmit}>
+            <div className="help-form-intro">
+              <span className="help-form-step">SOLICITUD DE APOYO</span>
+              <h2>Contanos qué necesitás</h2>
+              <p>Compartí solo información general, sin direcciones exactas ni datos sensibles.</p>
+            </div>
+
+            <div className="help-form-field">
+              <label htmlFor="request-category">Categoría de ayuda <span aria-hidden="true">*</span></label>
+              <select id="request-category" required value={category} onChange={e => handleCatChange(e.target.value)}>
                 {CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
+              <small className="help-form-hint">{categoryLimit.description}</small>
             </div>
 
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Descripción del apoyo requerido *</label>
-              <input required value={description} onChange={e => setDescription(e.target.value)} placeholder="Ej. Paquetes de alimentos no perecederos para núcleo familiar" style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+            <div className="help-form-field">
+              <label htmlFor="request-description">¿Qué apoyo necesitás? <span aria-hidden="true">*</span></label>
+              <textarea
+                id="request-description"
+                required
+                maxLength={500}
+                rows={3}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Describí brevemente qué ayudaría a tu hogar o comunidad."
+                aria-describedby="request-description-count"
+                aria-invalid={Boolean(error && !description.trim())}
+              />
+              <small id="request-description-count" className="help-form-hint help-form-counter">{description.length}/500 caracteres</small>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Cantidad *</label>
-                <input type="number" min="1" required value={amount} onChange={e => setAmount(Number(e.target.value))} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+            <div className="help-form-grid">
+              <div className="help-form-field">
+                <label htmlFor="request-amount">Cantidad <span aria-hidden="true">*</span></label>
+                <input id="request-amount" type="number" min="1" max="100000" step="1" required value={amount} onChange={e => setAmount(e.target.value)} />
               </div>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Unidad *</label>
-                <input required value={unit} onChange={e => setUnit(e.target.value)} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+              <div className="help-form-field">
+                <label htmlFor="request-unit">Unidad</label>
+                <input id="request-unit" value={unit} readOnly aria-describedby="request-unit-hint" />
+                <small id="request-unit-hint" className="help-form-hint">Se define según la categoría.</small>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Zona general *</label>
-                <input required value={zone} onChange={e => setZone(e.target.value)} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+            <div className="help-form-grid">
+              <div className="help-form-field">
+                <label htmlFor="request-zone">Zona general <span aria-hidden="true">*</span></label>
+                <input id="request-zone" required maxLength={100} value={zone} onChange={e => setZone(e.target.value)} placeholder="Ej. Barranca" />
               </div>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Fecha *</label>
-                <input type="date" required value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+              <div className="help-form-field">
+                <label htmlFor="request-date">Fecha de solicitud <span aria-hidden="true">*</span></label>
+                <input id="request-date" type="date" max={today} required value={date} onChange={e => setDate(e.target.value)} />
               </div>
             </div>
 
@@ -1436,10 +1901,10 @@ function RequestForm({ session }) {
               </div>
             )}
 
-            {error && <div style={{ color: '#b91c1c', fontSize: '12px' }}>{error}</div>}
+            {error && <div className="help-form-error" role="alert">{error}</div>}
 
-            <button type="submit" className="btn primary" style={{ padding: '13px', marginTop: '6px' }}>
-              Registrar solicitud (En revisión)<ArrowRight className="i i-r" size={14} />
+            <button type="submit" className="btn primary help-form-submit" disabled={saving}>
+              {saving ? 'Enviando solicitud…' : 'Enviar solicitud'}{!saving && <ArrowRight className="i i-r" size={14} />}
             </button>
           </form>
         )}
@@ -1457,6 +1922,8 @@ function Donate({ session }) {
 
   const { data: reqs = [] } = useData('/requests');
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   const [form, setForm] = useState({
     category: 'Alimentos sellados',
     product: '',
@@ -1467,42 +1934,53 @@ function Donate({ session }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    if (saving) return;
 
     const productName = form.product.trim();
     const quantityNumber = Number(form.quantity);
-    if (!productName) {
-      alert('Especificá qué producto o aporte estás donando.');
+    if (!productName || productName.length > 200) {
+      setError('Describí el producto o aporte con un máximo de 200 caracteres.');
       return;
     }
     if (!Number.isFinite(quantityNumber) || quantityNumber <= 0) {
-      alert('La cantidad de donación debe ser mayor que cero.');
+      setError('La cantidad de donación debe ser mayor que cero.');
       return;
     }
 
-    const newDonationId = `DON-${Math.floor(1000 + Math.random() * 9000)}`;
-
     try {
+      setSaving(true);
       await api('/donations', {
         method: 'POST',
         body: JSON.stringify({
-          id: newDonationId,
-          donorId: session?.id || 'demo-donor',
-          donorType: session?.role || 'Donante individual',
           category: form.category,
-          product: form.product,
-          quantity: Number(form.quantity),
-          date: new Date().toISOString().slice(0, 10),
+          product: productName,
+          quantity: quantityNumber,
           destination: form.destination || 'Institución',
-          status: 'Registrada',
           anonymous: form.anonymous,
           requestId: form.destination !== 'Institución' ? form.destination : null
         })
       });
       setSaved(true);
-    } catch {
-      alert('Error al registrar la donación.');
+    } catch (donationError) {
+      setError(donationError.message || 'No se pudo registrar la donación.');
+    } finally {
+      setSaving(false);
     }
   };
+
+  if (!session || !['Donante individual', 'Empresa donante'].includes(session.role)) {
+    return (
+      <div className="page">
+        <div className="page-head">
+          <span className="eyebrow">REGISTRO DE DONACIONES</span>
+          <h1>Acceso para personas donantes</h1>
+          <p>Iniciá sesión con una cuenta donante para registrar aportes y darles seguimiento.</p>
+        </div>
+        <Link className="btn primary" to="/acceso">Iniciar sesión</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
@@ -1512,38 +1990,60 @@ function Donate({ session }) {
         <p>Registrá un aporte de demostración y elegí su destino comunitario.</p>
       </div>
 
-      <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #dce8ec', padding: '30px', maxWidth: '640px', boxShadow: 'var(--shadow-sm)' }}>
+      <div className="help-form-card">
         {saved ? (
-          <div style={{ textAlign: 'center', padding: '30px 10px' }}>
-            <CheckCircle2 size={42} />
-            <h3 style={{ margin: '12px 0 6px', color: '#0f5132' }}>¡Donación registrada con éxito!</h3>
-            <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#556b80' }}>
-              Tu aporte ha sido guardado en <code>db.json</code> y podés seguir su recorrido simulado en el panel.
+          <div className="help-form-success">
+            <span className="help-form-success-icon"><CheckCircle2 size={28} /></span>
+            <h3>¡Donación registrada!</h3>
+            <p>
+              Tu aporte ficticio se guardó en el servidor local y podés seguir su recorrido simulado en el panel.
             </p>
-            <Link className="btn primary" to="/panel">Ver en el panel de gestión<ArrowRight className="i i-r" size={14} /></Link>
+            <div className="help-form-actions">
+              <Link className="btn primary" to="/panel">Ver mi aporte<ArrowRight className="i i-r" size={14} /></Link>
+              <button type="button" className="btn secondary" onClick={() => {
+                setSaved(false);
+                setForm(current => ({ ...current, product: '', quantity: 1 }));
+                setError('');
+              }}>Registrar otra donación</button>
+            </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Categoría de donación *</label>
-              <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1' }}>
+          <form className="help-form" onSubmit={handleSubmit}>
+            <div className="help-form-intro">
+              <span className="help-form-step">REGISTRO DE APORTE</span>
+              <h2>Tu aporte puede ayudar</h2>
+              <p>              Elegí una necesidad aprobada o el centro comunitario.</p>
+            </div>
+
+            <div className="help-form-field">
+              <label htmlFor="donation-category">Categoría de donación <span aria-hidden="true">*</span></label>
+              <select id="donation-category" required value={form.category} onChange={e => setForm(current => ({ ...current, category: e.target.value }))}>
                 {CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Producto / Descripción del aporte *</label>
-              <input required value={form.product} onChange={e => setForm({ ...form, product: e.target.value })} placeholder="Ej. Paquetes de arroz, frijoles y leche" style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+            <div className="help-form-field">
+              <label htmlFor="donation-product">¿Qué vas a aportar? <span aria-hidden="true">*</span></label>
+              <input
+                id="donation-product"
+                required
+                maxLength={200}
+                value={form.product}
+                onChange={e => setForm(current => ({ ...current, product: e.target.value }))}
+                placeholder="Ej. Paquetes de arroz y frijoles"
+                aria-describedby="donation-product-count"
+              />
+              <small id="donation-product-count" className="help-form-hint help-form-counter">{form.product.length}/200 caracteres</small>
             </div>
 
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Cantidad de unidades *</label>
-              <input type="number" min="1" required value={form.quantity} onChange={e => setForm({ ...form, quantity: e.target.value })} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+            <div className="help-form-field">
+              <label htmlFor="donation-quantity">Cantidad de unidades <span aria-hidden="true">*</span></label>
+              <input id="donation-quantity" type="number" min="1" max="100000" step="1" required value={form.quantity} onChange={e => setForm(current => ({ ...current, quantity: e.target.value }))} />
             </div>
 
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Destino del aporte *</label>
-              <select required value={form.destination} onChange={e => setForm({ ...form, destination: e.target.value })} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1' }}>
+            <div className="help-form-field">
+              <label htmlFor="donation-destination">Destino del aporte <span aria-hidden="true">*</span></label>
+              <select id="donation-destination" required value={form.destination} onChange={e => setForm(current => ({ ...current, destination: e.target.value }))}>
                 <option value="">Seleccionar solicitud aprobada o institución...</option>
                 {(reqs || []).filter(r => r.status === 'Aprobada').map(r => (
                   <option key={r.id} value={r.id}>Solicitud #{r.id} · {r.description} ({r.zone})</option>
@@ -1552,15 +2052,16 @@ function Donate({ session }) {
               </select>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
-              <input type="checkbox" id="anon" checked={form.anonymous} onChange={e => setForm({ ...form, anonymous: e.target.checked })} style={{ width: '18px', height: '18px' }} />
-              <label htmlFor="anon" style={{ fontSize: '12.5px', color: '#334155', cursor: 'pointer' }}>
+            <div className="help-form-checkbox">
+              <input type="checkbox" id="anon" checked={form.anonymous} onChange={e => setForm(current => ({ ...current, anonymous: e.target.checked }))} />
+              <label htmlFor="anon">
                 <b>Modo anónimo:</b> Ocultar mi nombre públicamente en los registros de ayuda.
               </label>
             </div>
 
-            <button type="submit" className="btn primary" style={{ padding: '13px', marginTop: '10px' }}>
-              Registrar donación<ArrowRight className="i i-r" size={14} />
+            {error && <div className="help-form-error" role="alert">{error}</div>}
+            <button type="submit" className="btn primary help-form-submit" disabled={saving}>
+              {saving ? 'Guardando aporte…' : 'Registrar aporte'}{!saving && <ArrowRight className="i i-r" size={14} />}
             </button>
           </form>
         )}
@@ -1575,55 +2076,117 @@ function Donate({ session }) {
 function Chat() {
   const { data: answers = [], state: chatState } = useData('/chatbot');
   const [messages, setMessages] = useState([]);
+  const [question, setQuestion] = useState('');
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
+  const conversationEnd = useRef(null);
 
-  const ask = (q) => {
-    const found = answers.find(x => x.question.toLowerCase() === q.toLowerCase());
-    setMessages(prev => [...prev, { q, a: found?.answer || 'No tengo respuesta predeterminada para esa consulta en esta versión de demostración.' }]);
+  useEffect(() => {
+    conversationEnd.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, sending]);
+
+  const ask = async (value) => {
+    const cleanQuestion = value.trim();
+    if (!cleanQuestion || sending) return;
+
+    const history = messages.slice(-4).flatMap(message => [
+      { role: 'user', content: message.question },
+      { role: 'assistant', content: message.answer }
+    ]);
+    setMessages(previous => [...previous, { question: cleanQuestion, answer: null }]);
+    setQuestion('');
+    setError('');
+    setSending(true);
+    try {
+      const response = await api('/assistant/chat', {
+        method: 'POST',
+        body: JSON.stringify({ question: cleanQuestion, history })
+      });
+      setMessages(previous => previous.map((message, index) => (
+        index === previous.length - 1 && message.answer === null
+          ? { ...message, answer: response.answer }
+          : message
+      )));
+    } catch (assistantError) {
+      setMessages(previous => previous.slice(0, -1));
+      setError(assistantError.message || 'No se pudo obtener una respuesta del asistente.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
     <div className="page">
       <div className="page-head">
-        <span className="eyebrow">ASISTENTE DE DEMOSTRACIÓN</span>
+        <span className="eyebrow">ASISTENTE IA · CR CONECTA</span>
         <h1>Orientación comunitaria</h1>
-        <p>Chatbot con respuestas configuradas para guiar el flujo de demostración académica.</p>
+        <p>Preguntame cómo usar el sitio, sus roles o los flujos de solicitudes y donaciones. El asistente responde solo sobre CR Conecta.</p>
       </div>
 
       <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #dce8ec', maxWidth: '750px', overflow: 'hidden' }}>
-        <div style={{ minHeight: '260px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div aria-live="polite" aria-busy={sending} style={{ minHeight: '260px', maxHeight: '520px', overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {messages.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 10px', color: '#7a8e9f' }}>
               <MessageSquare size={30} />
               <p style={{ margin: '8px 0 0', fontSize: '13px' }}>
-                {chatState === 'loading' ? 'Cargando preguntas…' : chatState === 'error' ? 'No se pudieron cargar las preguntas. Revisá que JSON Server esté activo.' : 'Seleccioná una de las preguntas preparadas abajo:'}
+                {chatState === 'loading' ? 'Preparando el asistente…' : '¡Hola! Puedo orientarte sobre cómo funciona CR Conecta.'}
               </p>
             </div>
           ) : (
-            messages.map((m, i) => (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ alignSelf: 'flex-end', background: '#06244a', color: '#ffffff', padding: '10px 16px', borderRadius: '14px 14px 2px 14px', fontSize: '12.5px' }}>
-                  {m.q}
+            messages.map((message, index) => (
+              <div key={`${index}-${message.question}`} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ alignSelf: 'flex-end', background: '#06244a', color: '#ffffff', padding: '10px 16px', borderRadius: '14px 14px 2px 14px', fontSize: '12.5px', maxWidth: '85%' }}>
+                  {message.question}
                 </div>
-                <div style={{ alignSelf: 'flex-start', background: '#eef5f8', color: '#09274c', padding: '12px 16px', borderRadius: '2px 14px 14px 14px', fontSize: '13px', maxWidth: '85%' }}>
-                  {m.a}
-                </div>
+                {message.answer === null
+                  ? <div role="status" style={{ alignSelf: 'flex-start', color: '#64748b', padding: '10px', fontSize: '13px' }}>Estoy buscando en la información del sitio…</div>
+                  : <div style={{ alignSelf: 'flex-start', background: '#eef5f8', color: '#09274c', padding: '12px 16px', borderRadius: '2px 14px 14px 14px', fontSize: '13px', maxWidth: '85%', whiteSpace: 'pre-wrap' }}>{message.answer}</div>}
               </div>
             ))
           )}
+          <div ref={conversationEnd} />
         </div>
 
-        <div style={{ background: '#f8fafc', padding: '16px 20px', borderTop: '1px solid #edf2f5', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {answers.map(a => (
-            <button
-              key={a.id}
-              onClick={() => ask(a.question)}
-              style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '20px', padding: '7px 14px', fontSize: '12px', color: '#06244a', fontWeight: '600' }}
-            >
-              {a.question}
+        {error && (
+          <p role="alert" style={{ color: '#b91c1c', padding: '0 20px', margin: '0 0 12px', fontSize: '13px' }}>
+            {error}
+          </p>
+        )}
+
+        <form onSubmit={event => { event.preventDefault(); void ask(question); }} style={{ background: '#f8fafc', padding: '16px 20px', borderTop: '1px solid #edf2f5' }}>
+          <label htmlFor="assistant-question" style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tu pregunta sobre CR Conecta</label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              id="assistant-question"
+              value={question}
+              maxLength={1200}
+              onChange={event => setQuestion(event.target.value)}
+              placeholder="Ej. ¿Cómo registro una donación?"
+              style={{ flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: '20px', border: '1px solid #cbd5e1' }}
+              disabled={sending}
+            />
+            <button className="btn primary" type="submit" disabled={sending || !question.trim()}>
+              {sending ? 'Consultando…' : 'Enviar'}
             </button>
-          ))}
-        </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+            {answers.map(answer => (
+              <button
+                key={answer.id}
+                type="button"
+                disabled={sending}
+                onClick={() => void ask(answer.question)}
+                style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '20px', padding: '7px 14px', fontSize: '12px', color: '#06244a', fontWeight: '600' }}
+              >
+                {answer.question}
+              </button>
+            ))}
+          </div>
+        </form>
       </div>
+      <p style={{ maxWidth: '750px', fontSize: '12px', color: '#64748b' }}>
+        La IA solo orienta sobre el prototipo. No compartas información personal o sensible; sus respuestas pueden equivocarse.
+      </p>
     </div>
   );
 }
