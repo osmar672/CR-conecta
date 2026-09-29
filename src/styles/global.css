@@ -1595,3 +1595,134 @@ footer strong {
 @media (max-width: 960px) {
   .beneficiary-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* =====================================================
+   CLOTHING CATALOG SECTION
+   ===================================================== */
+.clothing-section {
+  padding: 72px 5.5%;
+  background: linear-gradient(180deg, #f0f7fa 0%, #ffffff 100%);
+}
+
+.clothing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.clothing-card {
+  background: #ffffff;
+  border: 1px solid #dce8ec;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(6, 36, 74, 0.04);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  cursor: default;
+}
+
+.clothing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(6, 36, 74, 0.10);
+}
+
+.clothing-card-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+}
+
+.clothing-card-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.clothing-card-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #06244a;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.clothing-card-desc {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.clothing-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.clothing-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.2px;
+}
+
+.clothing-tag.gender-hombre { background: #dbeafe; color: #1e40af; }
+.clothing-tag.gender-mujer { background: #fce7f3; color: #9d174d; }
+.clothing-tag.gender-nina { background: #fce7f3; color: #be185d; }
+.clothing-tag.gender-nino { background: #dbeafe; color: #1d4ed8; }
+.clothing-tag.gender-unisex { background: #ede9fe; color: #6d28d9; }
+.clothing-tag.gender-bebe { background: #fef3c7; color: #92400e; }
+.clothing-tag.size { background: #f1f5f9; color: #475569; }
+.clothing-tag.condition-excelente { background: #dcfce7; color: #166534; }
+.clothing-tag.condition-muy-buena { background: #d1fae5; color: #065f46; }
+.clothing-tag.condition-buena { background: #e0f2fe; color: #075985; }
+.clothing-tag.condition-nueva { background: #fef08a; color: #713f12; }
+.clothing-tag.zone { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+.clothing-filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.clothing-filter-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #dce8ec;
+  background: #ffffff;
+  color: #4b657c;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.clothing-filter-btn:hover {
+  border-color: #257a9e;
+  color: #257a9e;
+}
+
+.clothing-filter-btn.active {
+  background: #06244a;
+  border-color: #06244a;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .clothing-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .clothing-section { padding: 48px 4%; }
+}
+
