@@ -1,0 +1,404 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "María Administradora",
+      "email": "admin@crconecta.demo",
+      "role": "Administrador",
+      "zone": "Puntarenas",
+      "phone": "+506 8888-0001",
+      "notes": "Coordinación general de donaciones y evaluación de casos."
+    },
+    {
+      "id": "u2",
+      "name": "Ana Beneficiaria",
+      "email": "beneficiaria@crconecta.demo",
+      "role": "Beneficiario",
+      "zone": "Barranca",
+      "phone": "+506 8888-0002",
+      "notes": "Jefa de hogar con 3 menores a cargo en Barranca."
+    },
+    {
+      "id": "u3",
+      "name": "Carlos Donante",
+      "email": "donante@crconecta.demo",
+      "role": "Donante individual",
+      "zone": "Puntarenas",
+      "phone": "+506 8888-0003",
+      "notes": "Colaborador activo de la zona de Puntarenas."
+    },
+    {
+      "id": "u4",
+      "name": "Fundación Horizonte",
+      "email": "empresa@crconecta.demo",
+      "role": "Empresa donante",
+      "zone": "San José",
+      "phone": "+506 2222-0004",
+      "notes": "Entidad corporativa con programas de responsabilidad social."
+    },
+    {
+      "id": "u5",
+      "name": "Sofía Voluntaria",
+      "email": "voluntaria@crconecta.demo",
+      "role": "Voluntario",
+      "zone": "El Roble",
+      "phone": "+506 8888-0005",
+      "notes": "Voluntaria de apoyo logístico y traslados comunitarios."
+    },
+    {
+      "id": "u6",
+      "name": "Alianza Comunitaria",
+      "email": "aliado@crconecta.demo",
+      "role": "Aliado comunitario",
+      "zone": "Chacarita",
+      "phone": "+506 8888-0006",
+      "notes": "Centro vecinal de acopio y enlace vecinal en Chacarita."
+    }
+  ],
+  "requests": [
+    {
+      "id": "CC-204",
+      "category": "Alimentos sellados",
+      "description": "Paquetes de alimentos para una familia",
+      "amount": 18,
+      "unit": "paquetes",
+      "zone": "Barranca",
+      "date": "2026-09-20",
+      "status": "Aprobada",
+      "priority": "Alta",
+      "goal": 18,
+      "received": 8,
+      "decisionReason": "Necesidad validada en demostración según informe de vulnerabilidad.",
+      "decisionDate": "2026-09-21",
+      "beneficiaryId": "u2",
+      "limitExceeded": false,
+      "deliveryConfirmed": true,
+      "deliveryConfirmationDate": "2026-09-28"
+    },
+    {
+      "id": "CC-205",
+      "category": "Vestimenta",
+      "description": "Ropa para una familia",
+      "amount": 12,
+      "unit": "piezas",
+      "zone": "El Roble",
+      "date": "2026-09-19",
+      "status": "Aprobada",
+      "priority": "Media",
+      "goal": 12,
+      "received": 9,
+      "decisionReason": "Aprobación estándar de paquete de ropa.",
+      "decisionDate": "2026-09-20",
+      "beneficiaryId": "u2",
+      "limitExceeded": false,
+      "deliveryConfirmed": true,
+      "deliveryConfirmationDate": "2026-09-28"
+    },
+    {
+      "id": "CC-206",
+      "category": "Mobiliario",
+      "description": "Mesa y sillas esenciales",
+      "amount": 1,
+      "unit": "lote",
+      "zone": "Chacarita",
+      "date": "2026-09-18",
+      "status": "En revisión",
+      "priority": "Media",
+      "goal": 1,
+      "received": 0,
+      "beneficiaryId": "u2",
+      "limitExceeded": false
+    },
+    {
+      "id": "CC-207",
+      "category": "Alimentos sellados",
+      "description": "Apoyo alimentario extraordinario para comunidad ampliada",
+      "amount": 35,
+      "unit": "paquetes",
+      "zone": "Barranca",
+      "date": "2026-09-27",
+      "status": "En revisión",
+      "priority": "Alta",
+      "goal": 35,
+      "received": 0,
+      "beneficiaryId": "u2",
+      "limitExceeded": true,
+      "requiresException": true,
+      "limitDetails": "Supera el límite máximo estándar de 20 paquetes por solicitud"
+    }
+  ],
+  "donations": [
+    {
+      "id": "DON-1001",
+      "donorId": "u3",
+      "donorType": "Donante individual",
+      "category": "Alimentos sellados",
+      "product": "Paquetes de alimentos",
+      "quantity": 8,
+      "date": "2026-09-22",
+      "destination": "Solicitud CC-204",
+      "status": "En transporte",
+      "anonymous": false,
+      "requestId": "CC-204",
+      "evidence": "demo-food.jpg"
+    },
+    {
+      "id": "DON-1002",
+      "donorId": "u4",
+      "donorType": "Empresa donante",
+      "category": "Vestimenta",
+      "product": "Ropa familiar",
+      "quantity": 9,
+      "date": "2026-09-21",
+      "destination": "Solicitud CC-205",
+      "status": "Entregada",
+      "anonymous": false,
+      "requestId": "CC-205",
+      "evidence": "demo-clothes.jpg"
+    },
+    {
+      "id": "DON-1003",
+      "donorId": "u3",
+      "donorType": "Donante individual",
+      "category": "Mobiliario",
+      "product": "Mesa y sillas",
+      "quantity": 4,
+      "date": "2026-09-23",
+      "destination": "Institución",
+      "status": "En inventario",
+      "anonymous": true,
+      "requestId": null,
+      "evidence": "demo-furniture.jpg"
+    }
+  ],
+  "inventory": [
+    {
+      "id": "inv1",
+      "product": "Mesa y sillas",
+      "category": "Mobiliario",
+      "available": 4,
+      "reserved": 0,
+      "delivered": 0,
+      "minimum": 2,
+      "location": "Centro de apoyo Puntarenas",
+      "date": "2026-09-23"
+    },
+    {
+      "id": "inv2",
+      "product": "Paquetes de alimentos",
+      "category": "Alimentos sellados",
+      "available": 14,
+      "reserved": 4,
+      "delivered": 8,
+      "minimum": 5,
+      "location": "Centro de apoyo Puntarenas",
+      "date": "2026-09-22"
+    },
+    {
+      "id": "inv3",
+      "product": "Ropa familiar",
+      "category": "Vestimenta",
+      "available": 3,
+      "reserved": 0,
+      "delivered": 9,
+      "minimum": 5,
+      "location": "Centro de apoyo El Roble",
+      "date": "2026-09-21"
+    }
+  ],
+  "movements": [
+    {
+      "id": "mov1",
+      "type": "Entrada",
+      "product": "Mesa y sillas",
+      "quantity": 4,
+      "date": "2026-09-23",
+      "destination": "Centro de apoyo Puntarenas",
+      "responsible": "María Administradora",
+      "donationId": "DON-1003"
+    },
+    {
+      "id": "mov2",
+      "type": "Salida",
+      "product": "Paquetes de alimentos",
+      "quantity": 8,
+      "date": "2026-09-24",
+      "destination": "Barranca",
+      "responsible": "Sofía Voluntaria",
+      "donationId": "DON-1001"
+    }
+  ],
+  "transfers": [
+    {
+      "id": "TR-301",
+      "donationId": "DON-1001",
+      "origin": "Centro de apoyo Puntarenas",
+      "destination": "Barranca",
+      "responsible": "Sofía Voluntaria",
+      "scheduledDate": "2026-09-24",
+      "status": "En ruta",
+      "points": [
+        "Puntarenas",
+        "El Roble",
+        "Barranca"
+      ]
+    },
+    {
+      "id": "TR-302",
+      "donationId": "DON-1002",
+      "origin": "San José",
+      "destination": "El Roble",
+      "responsible": "María Administradora",
+      "scheduledDate": "2026-09-23",
+      "status": "Entregado",
+      "points": [
+        "San José",
+        "Caldera",
+        "El Roble"
+      ]
+    }
+  ],
+  "facilities": [
+    {
+      "id": "f1",
+      "name": "Centro de apoyo Puntarenas",
+      "zone": "Puntarenas",
+      "address": "Dirección ficticia 100",
+      "hours": "L-V 8:00–16:00",
+      "type": "Centro comunitario",
+      "contact": "contacto@demo.cr"
+    },
+    {
+      "id": "f2",
+      "name": "Punto comunitario El Roble",
+      "zone": "El Roble",
+      "address": "Dirección ficticia 200",
+      "hours": "L-S 9:00–17:00",
+      "type": "Punto de entrega",
+      "contact": "elroble@demo.cr"
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "camp1",
+      "companyId": "u4",
+      "name": "Abrigo para familias",
+      "description": "Campaña ficticia de vestimenta.",
+      "start": "2026-09-01",
+      "end": "2026-10-15",
+      "goal": 30,
+      "unit": "piezas",
+      "category": "Vestimenta",
+      "status": "Activa",
+      "progress": 18
+    }
+  ],
+  "jobs": [
+    {
+      "id": "job1",
+      "companyId": "u4",
+      "company": "Fundación Horizonte",
+      "position": "Asistente de logística",
+      "description": "Apoyo en organización de entregas.",
+      "requirements": "Orden, comunicación y disponibilidad.",
+      "zone": "Puntarenas",
+      "schedule": "Tiempo completo",
+      "contact": "empleos@demo.cr",
+      "status": "Activa"
+    },
+    {
+      "id": "job2",
+      "companyId": "u4",
+      "company": "Fundación Horizonte",
+      "position": "Auxiliar comunitario",
+      "description": "Apoyo en actividades comunitarias.",
+      "requirements": "Trabajo en equipo.",
+      "zone": "El Roble",
+      "schedule": "Medio tiempo",
+      "contact": "empleos@demo.cr",
+      "status": "Activa"
+    }
+  ],
+  "allies": [
+    {
+      "id": "a1",
+      "name": "Red Comunitaria Puntarenas",
+      "type": "Organización local",
+      "zone": "Puntarenas",
+      "category": "Alianza Comunitaria",
+      "contact": "aliado@demo.cr",
+      "support": "Espacios comunitarios, acopio y validación vecinal",
+      "badge": "Aliado Local",
+      "status": "Activo"
+    },
+    {
+      "id": "a2",
+      "name": "Fundación Horizonte",
+      "type": "Empresa donante",
+      "zone": "San José & Pacífico",
+      "category": "Patrocinador Platino",
+      "contact": "empresa@demo.cr",
+      "support": "Campañas de abrigo, financiamiento logístico y empleo",
+      "badge": "Patrocinador Principal",
+      "status": "Activo"
+    },
+    {
+      "id": "a3",
+      "name": "Banco de Alimentos del Pacífico",
+      "type": "Organización alimentaria",
+      "zone": "Barranca",
+      "category": "Alianza Logística",
+      "contact": "alimentos@demo.cr",
+      "support": "Cadena de distribución de paquetes alimentarios sellados",
+      "badge": "Seguridad Alimentaria",
+      "status": "Activo"
+    },
+    {
+      "id": "a4",
+      "name": "Cooperativa del Pacífico R.L.",
+      "type": "Entidad cooperativa",
+      "zone": "Puntarenas",
+      "category": "Patrocinador Comunitario",
+      "contact": "coope@demo.cr",
+      "support": "Donación de insumos agrícolas y voluntariado empresarial",
+      "badge": "Cooperativa Aliada",
+      "status": "Activo"
+    },
+    {
+      "id": "a5",
+      "name": "Transportes & Logística Solidaria",
+      "type": "Operador logístico",
+      "zone": "El Roble & Chacarita",
+      "category": "Alianza de Transporte",
+      "contact": "rutas@demo.cr",
+      "support": "Flota de vehículos para rutas de entrega comunitaria",
+      "badge": "Logística y Movilidad",
+      "status": "Activo"
+    }
+  ],
+  "chatbot": [
+    {
+      "id": "c1",
+      "question": "¿Qué puedo donar?",
+      "answer": "Se admiten alimentos sellados, electrodomésticos, mobiliario y vestimenta."
+    },
+    {
+      "id": "c2",
+      "question": "¿Cómo funciona una donación?",
+      "answer": "Elegís una necesidad aprobada o la institución, registrás el aporte y podés consultar el recorrido simulado."
+    },
+    {
+      "id": "c3",
+      "question": "¿Dónde hay instalaciones?",
+      "answer": "El prototipo incluye el Centro de apoyo Puntarenas y el Punto comunitario El Roble."
+    },
+    {
+      "id": "c4",
+      "question": "¿El GPS es real?",
+      "answer": "No. El mapa, las rutas y los estados son datos ficticios guardados en db.json."
+    }
+  ],
+  "certificates": [],
+  "deliveries": [],
+  "$schema": "./node_modules/json-server/schema.json"
+}

@@ -1,0 +1,155 @@
+import React, { useState } from 'react';
+import { ArrowRight, Info } from 'lucide-react';
+
+// Google 'G' official multi-color SVG icon
+export function GoogleIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+    </svg>
+  );
+}
+
+const ROLE_BADGES = {
+  'Administrador': { bg: '#e8f0fe', color: '#1967d2', border: '#c2e7ff' },
+  'Beneficiario': { bg: '#e6f4ea', color: '#137333', border: '#ceead6' },
+  'Donante individual': { bg: '#fef7e0', color: '#b06000', border: '#feefc3' },
+  'Empresa donante': { bg: '#f3e8fd', color: '#8430ce', border: '#e8d0fb' },
+  'Voluntario': { bg: '#e0f2fe', color: '#0284c7', border: '#bae6fd' },
+  'Aliado comunitario': { bg: '#fce8e6', color: '#c5221f', border: '#fad2cf' }
+};
+
+export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-backdrop" onClick={onClose} style={{ animation: 'fadeIn 0.2s ease' }}>
+      <div 
+        className="google-modal-card" 
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: '#ffffff',
+          width: 'min(500px, 94vw)',
+          borderRadius: '20px',
+          boxShadow: '0 24px 60px rgba(6,36,74,0.18)',
+          border: '1px solid #dce7eb',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Google Header */}
+        <div style={{ padding: '28px 28px 18px', textAlign: 'center', borderBottom: '1px solid #edf2f5' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: '#f8fafc', border: '1px solid #e2e8f0', marginBottom: 12 }}>
+            <GoogleIcon size={24} />
+          </div>
+          <h2 style={{ margin: '0 0 6px', fontSize: '20px', color: '#1f2937', fontWeight: '700' }}>
+            Acceso simulado con Google / Gmail
+          </h2>
+          <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+            Elegí una cuenta ficticia guardada en <code>db.json</code> para entrar como un perfil del prototipo:
+          </p>
+        </div>
+
+        {/* Disclaimer Warning according to RF-02 */}
+        <div style={{ background: '#f8fafc', padding: '12px 24px', borderBottom: '1px solid #edf2f5', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+          <Info size={15} style={{ flexShrink: 0 }} />
+          <p style={{ margin: 0, fontSize: '12px', color: '#475569', lineHeight: '1.45' }}>
+            <strong>Aviso de demostración (RF-02):</strong> Este acceso asocia correos ficticios de <code>db.json</code>. Google/Gmail y flujos con n8n son simulados con fines de presentación académica y no realizan autenticación real.
+          </p>
+        </div>
+
+        {/* List of demo Google accounts */}
+        <div style={{ padding: '16px 20px', maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {users.map((u) => {
+            const badge = ROLE_BADGES[u.role] || { bg: '#f1f5f9', color: '#334155', border: '#e2e8f0' };
+            const initials = u.name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+            
+            return (
+              <button
+                key={u.id}
+                onClick={() => {
+                  onSelectUser(u);
+                  onClose();
+                }}
+                className="google-account-row"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '12px 14px',
+                  borderRadius: '12px',
+                  border: '1px solid #e5e9ec',
+                  background: '#ffffff',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {/* Avatar with initial */}
+                <div 
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    background: '#06244a',
+                    color: '#ffffff',
+                    display: 'grid',
+                    placeItems: 'center',
+                    fontWeight: '700',
+                    fontSize: '14px',
+                    flexShrink: 0
+                  }}
+                >
+                  {initials}
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: '700', fontSize: '14px', color: '#0f172a' }}>{u.name}</span>
+                    <span 
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        padding: '2px 8px',
+                        borderRadius: '20px',
+                        background: badge.bg,
+                        color: badge.color,
+                        border: `1px solid ${badge.border}`
+                      }}
+                    >
+                      {u.role}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    {u.email}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '1px' }}>
+                    Zona: {u.zone} {u.phone ? `· ${u.phone}` : ''}
+                  </div>
+                </div>
+
+                <div style={{ color: '#0284c7', fontSize: '13px', fontWeight: '700' }}>
+                  Entrar<ArrowRight className="i i-r" size={14} />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Modal footer */}
+        <div style={{ padding: '16px 24px', background: '#fcfdfd', borderTop: '1px solid #edf2f5', display: 'flex', justifyContent: 'flex-end' }}>
+          <button 
+            type="button" 
+            className="btn secondary" 
+            onClick={onClose}
+            style={{ padding: '10px 18px', fontSize: '12.5px' }}
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
