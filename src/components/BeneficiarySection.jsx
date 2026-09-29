@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { API_URL } from '../constants/config';
 import { AlertTriangle, ArrowRight, Check, ClipboardList, Mail, MapPin, Pencil, Phone, Star } from 'lucide-react';
-import { CATEGORY_LIMITS, checkRequestLimits } from '../constants/limits';
+import { CATEGORY_LIMITS, CATEGORY_OPTIONS, checkRequestLimits, getCategoryUnit } from '../constants/limits';
 
 export function BeneficiarySection({ session, onOpenEditProfile, requests = [], onRefreshRequests }) {
   const [category, setCategory] = useState('Alimentos sellados');
@@ -19,10 +19,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
   // Unit auto-adaptation by category
   const handleCategoryChange = (newCat) => {
     setCategory(newCat);
-    if (newCat === 'Alimentos sellados') setUnit('paquetes');
-    else if (newCat === 'Vestimenta') setUnit('piezas');
-    else if (newCat === 'Mobiliario') setUnit('lotes');
-    else if (newCat === 'Electrodomésticos') setUnit('unidades');
+    setUnit(getCategoryUnit(newCat));
   };
 
   // RF-10 Real-time limit verification
@@ -35,18 +32,33 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
     setSubmitting(true);
     setNotification(null);
 
-    const newRequestId = `CC-${Math.floor(200 + Math.random() * 800)}`;
+    const cleanDescription = description.trim();
+    const parsedAmount = Number(amount);
+
+    if (!cleanDescription) {
+      setNotification({ type: 'error', text: 'Ingresá una descripción clara del apoyo solicitado.' });
+      setSubmitting(false);
+      return;
+    }
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      setNotification({ type: 'error', text: 'La cantidad debe ser mayor que cero.' });
+      setSubmitting(false);
+      return;
+    }
+
+    const newRequestId = `CC-${Date.now().toString().slice(-6)}`;
     const newRequest = {
       id: newRequestId,
       category,
-      description,
-      amount: Number(amount),
+      description: cleanDescription,
+      amount: parsedAmount,
       unit,
       zone,
       date,
       status: 'En revisión', // RF-07: asignarle En revisión como estado inicial
       priority: 'Media',     // Default priority pending admin evaluation (RF-09)
-      goal: Number(amount),
+      goal: parsedAmount,
       received: 0,
       beneficiaryId: session?.id || 'u2',
       limitExceeded: isLimitExceeded, // RF-10: Comparación y alerta de exceso
@@ -123,21 +135,18 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-          <div 
+          <img
+            src="/logo-mark.png"
+            alt="Beneficiario"
             style={{
               width: 58,
               height: 58,
               borderRadius: '50%',
-              background: '#06244a',
-              color: '#ffffff',
-              display: 'grid',
-              placeItems: 'center',
-              fontSize: '18px',
-              fontWeight: '800'
+              objectFit: 'cover',
+              border: '1px solid rgba(6, 36, 74, 0.08)',
+              background: '#fff'
             }}
-          >
-            BE
-          </div>
+          />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <h2 style={{ margin: 0, fontSize: '22px', color: '#09274c' }}>{session?.name}</h2>
@@ -219,7 +228,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                 onChange={e => handleCategoryChange(e.target.value)}
                 style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px' }}
               >
-                {Object.keys(CATEGORY_LIMITS).map(cat => (
+                {CATEGORY_OPTIONS.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>

@@ -17,18 +17,36 @@ import { SponsorsSection } from './components/SponsorsSection';
 import { HowItWorksSection } from './components/HowItWorksSection';
 import { CommunityCoverageSection } from './components/CommunityCoverageSection';
 import { AidServicesSection } from './components/AidServicesSection';
-import { CATEGORY_LIMITS, checkRequestLimits } from './constants/limits';
+import { CATEGORY_LIMITS, CATEGORY_OPTIONS, checkRequestLimits, getCategoryUnit } from './constants/limits';
 
 const API = API_URL;
 const roles = ['Administrador', 'Beneficiario', 'Donante individual', 'Empresa donante', 'Voluntario', 'Aliado comunitario'];
 const roleIcons = {
-  'Administrador': 'AD',
-  'Beneficiario': 'BE',
-  'Donante individual': 'DO',
-  'Empresa donante': 'EM',
-  'Voluntario': 'VO',
-  'Aliado comunitario': 'AL'
+  'Administrador': '/logo-mark.png',
+  'Beneficiario': '/logo-mark.png',
+  'Donante individual': '/logo-mark.png',
+  'Empresa donante': '/logo.jpg',
+  'Voluntario': '/logo-mark.png',
+  'Aliado comunitario': '/logo.jpg'
 };
+
+function RoleAvatar({ src, alt, size = 42 }) {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      style={{
+        width: size,
+        height: size,
+        objectFit: 'cover',
+        borderRadius: '12px',
+        display: 'block',
+        border: '1px solid rgba(6, 36, 74, 0.08)',
+        background: '#fff'
+      }}
+    />
+  );
+}
 
 async function api(path, options = {}) {
   const r = await fetch(`${API}${path}`, {
@@ -144,7 +162,7 @@ function Shell() {
           {session ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button className="profile-chip" onClick={() => navigate('/perfil')}>
-                <span>{roleIcons[session.role] || 'US'}</span>
+                <RoleAvatar src={roleIcons[session.role] || '/logo-mark.png'} alt={session.role} size={36} />
                 <div>
                   <div style={{ lineHeight: '1.1' }}>{session.name.split(' ')[0]}</div>
                   <small style={{ fontSize: '11px', color: '#52758e', fontWeight: '600' }}>{session.role}</small>
@@ -235,6 +253,18 @@ function Home({ onOpenNeedModal, onOpenGoogleAuth }) {
   const { data: allies = [] } = useData('/allies');
   const { data: facilities = [] } = useData('/facilities');
   const navigate = useNavigate();
+  const [selectedMapZone, setSelectedMapZone] = useState('Puntarenas Centro');
+
+  const mapZones = [
+    { name: 'Puntarenas Centro', lat: 9.9763, lon: -84.8384, detail: 'Centro de coordinación y acopio' },
+    { name: 'Barranca', lat: 9.9846, lon: -84.7163, detail: 'Atención y entrega de víveres' },
+    { name: 'El Roble', lat: 9.9882, lon: -84.7348, detail: 'Vestimenta y apoyo comunitario' },
+    { name: 'Chacarita', lat: 9.9778, lon: -84.7467, detail: 'Red vecinal y artículos para el hogar' }
+  ];
+  const activeMapZone = mapZones.find(zone => zone.name === selectedMapZone) || mapZones[0];
+  const mapBounds = `${activeMapZone.lon - 0.018},${activeMapZone.lat - 0.012},${activeMapZone.lon + 0.018},${activeMapZone.lat + 0.012}`;
+  const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(mapBounds)}&layer=mapnik&marker=${activeMapZone.lat},${activeMapZone.lon}`;
+  const mapLinkUrl = `https://www.openstreetmap.org/?mlat=${activeMapZone.lat}&mlon=${activeMapZone.lon}#map=15/${activeMapZone.lat}/${activeMapZone.lon}`;
 
   // Pick sample requests or fallback to mockup items
   const displayNeeds = useMemo(() => {
@@ -275,58 +305,49 @@ function Home({ onOpenNeedModal, onOpenGoogleAuth }) {
           </div>
         </div>
 
-        {/* Right Map Card matching Mockup */}
+        {/* Interactive community map without an API key */}
         <div className="map-card">
           <div className="section-head">
-            <h3>Conexiones en la comunidad</h3>
-            <span className="tag">MAPA SIMULADO</span>
+            <div>
+              <span className="eyebrow">RED LOCAL · PUNTARENAS</span>
+              <h3>La ayuda, más cerca</h3>
+            </div>
+            <a className="map-open-link" href={mapLinkUrl} target="_blank" rel="noreferrer">
+              Abrir mapa<ArrowUpRight size={15} />
+            </a>
           </div>
 
-          <div className="map">
-            {/* Ambient wavy SVG background */}
-            <svg className="map-bg-svg" viewBox="0 0 500 330" preserveAspectRatio="none">
-              <path d="M-10 140 Q 140 60 280 160 T 520 120 L 520 340 L -10 340 Z" fill="#c7e1ec" opacity="0.65" />
-              <path d="M-10 190 Q 150 130 310 220 T 520 180 L 520 340 L -10 340 Z" fill="#e2f1f5" opacity="0.8" />
-              {/* Dotted route curve with smooth GPU-optimized animated dash */}
-              <path 
-                className="route-dash-animated"
-                d="M 140 89 Q 255 40 370 125 Q 330 190 240 181" 
-                stroke="#257a9e" 
-                strokeWidth="4" 
-                strokeDasharray="6,8" 
-                fill="none" 
-                vectorEffect="non-scaling-stroke" 
-              />
-            </svg>
+          <div className="map-zone-list" aria-label="Seleccionar zona comunitaria">
+            {mapZones.map(zone => (
+              <button
+                key={zone.name}
+                type="button"
+                className={selectedMapZone === zone.name ? 'map-zone-button active' : 'map-zone-button'}
+                aria-pressed={selectedMapZone === zone.name}
+                onClick={() => setSelectedMapZone(zone.name)}
+              >
+                {zone.name}
+              </button>
+            ))}
+          </div>
 
-            <div className="map-label">PUNTARENAS</div>
-
-            {/* Nodos del mapa (posición en % para que coincidan con la ruta) */}
-            <div className="map-node" style={{ left: '28%', top: '27%' }}>1</div>
-            <div className="map-node" style={{ left: '74%', top: '38%' }}>2</div>
-            <div className="map-node alt" style={{ left: '48%', top: '55%' }}>3</div>
-
-            {/* Floating Delivery Status Card at Bottom of Map */}
-            <div className="delivery-card">
-              <div className="delivery-card-top">
-                <b>Ejemplo de entrega · #CC-204</b>
-                <span>En ruta</span>
-              </div>
-              <div className="stepper-line">
-                <div className="stepper-node n1" />
-                <div className="stepper-node n2" />
-                <div className="stepper-node n3" />
-              </div>
-              <div className="stepper-labels">
-                <span>Registrada</span>
-                <span style={{ color: '#257a9e', fontWeight: '700' }}>En traslado</span>
-                <span>Entregada</span>
-              </div>
+          <div className="map-frame">
+            <iframe
+              key={selectedMapZone}
+              title={`Mapa de referencia: ${activeMapZone.name}, Puntarenas`}
+              src={mapEmbedUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            <div className="map-location-card">
+              <span className="map-location-icon"><MapPin size={17} /></span>
+              <span><strong>{activeMapZone.name}</strong><small>{activeMapZone.detail}</small></span>
+              <span className="map-active-indicator">Zona de referencia</span>
             </div>
           </div>
 
           <div className="map-note">
-            <i /> Ubicaciones representadas con datos de ejemplo
+            <i /> Mapa de OpenStreetMap. Zonas referenciales; no representan domicilios exactos.
           </div>
         </div>
       </section>
@@ -381,14 +402,18 @@ function MockupNeedCard({ r, index, onSelect }) {
     ? Math.min(100, Math.round((r.received / r.goal) * 100))
     : (mockPercentages[index % 3] || 50);
 
-  const icons = [<Package size={22} />, <Shirt size={22} />, <House size={22} />];
+  const icons = ['/logo-mark.png', '/logo.jpg', '/logo-mark.png'];
 
   return (
     <article className={`need-card c${index % 3}`}>
       {/* Top Graphic Header */}
       <div className="need-top">
         <div className="icon-square">
-          {icons[index % 3]}
+          <img
+            src={icons[index % 3]}
+            alt={r.category || 'Necesidad'}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '14px' }}
+          />
         </div>
       </div>
 
@@ -599,7 +624,7 @@ function Access({ onLogin, onOpenGoogleAuth }) {
               onClick={() => handleSelect(u)}
             >
               <div className="avatar">
-                {roleIcons[u.role] || 'US'}
+                <RoleAvatar src={roleIcons[u.role] || '/logo-mark.png'} alt={u.role} size={40} />
               </div>
               <div>
                 <b>{u.name}</b>
@@ -1228,9 +1253,7 @@ function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }) {
         }}
       >
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ width: 68, height: 68, borderRadius: '50%', background: '#06244a', color: '#ffffff', display: 'grid', placeItems: 'center', fontSize: '22px', fontWeight: '800' }}>
-            {roleIcons[session.role] || 'US'}
-          </div>
+          <RoleAvatar src={roleIcons[session.role] || '/logo-mark.png'} alt={session.role} size={68} />
           <div>
             <h2 style={{ margin: 0, fontSize: '22px', color: '#06244a' }}>{session.name}</h2>
             <div style={{ display: 'flex', gap: '10px', marginTop: '6px', alignItems: 'center' }}>
@@ -1294,10 +1317,7 @@ function RequestForm({ session }) {
 
   const handleCatChange = (newCat) => {
     setCategory(newCat);
-    if (newCat === 'Alimentos sellados') setUnit('paquetes');
-    else if (newCat === 'Vestimenta') setUnit('piezas');
-    else if (newCat === 'Mobiliario') setUnit('lotes');
-    else if (newCat === 'Electrodomésticos') setUnit('unidades');
+    setUnit(getCategoryUnit(newCat));
   };
 
   const limitCheck = checkRequestLimits(category, amount);
@@ -1307,18 +1327,31 @@ function RequestForm({ session }) {
     e.preventDefault();
     setError('');
 
-    const newId = `CC-${Math.floor(200 + Math.random() * 800)}`;
+    const cleanDescription = description.trim();
+    const parsedAmount = Number(amount);
+
+    if (!cleanDescription) {
+      setError('Ingresá una descripción clara del apoyo solicitado.');
+      return;
+    }
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      setError('La cantidad debe ser mayor que cero.');
+      return;
+    }
+
+    const newId = `CC-${Date.now().toString().slice(-6)}`;
     const newReq = {
       id: newId,
       category,
-      description,
-      amount: Number(amount),
+      description: cleanDescription,
+      amount: parsedAmount,
       unit,
       zone,
       date,
       status: 'En revisión', // RF-07
       priority: 'Media',     // RF-09
-      goal: Number(amount),
+      goal: parsedAmount,
       received: 0,
       beneficiaryId: session?.id || 'u2',
       limitExceeded: isLimitExceeded, // RF-10
@@ -1365,7 +1398,7 @@ function RequestForm({ session }) {
             <div>
               <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Categoría de ayuda (RF-07) *</label>
               <select value={category} onChange={e => handleCatChange(e.target.value)} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1' }}>
-                {Object.keys(CATEGORY_LIMITS).map(c => <option key={c} value={c}>{c}</option>)}
+                {CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
@@ -1434,6 +1467,18 @@ function Donate({ session }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const productName = form.product.trim();
+    const quantityNumber = Number(form.quantity);
+    if (!productName) {
+      alert('Especificá qué producto o aporte estás donando.');
+      return;
+    }
+    if (!Number.isFinite(quantityNumber) || quantityNumber <= 0) {
+      alert('La cantidad de donación debe ser mayor que cero.');
+      return;
+    }
+
     const newDonationId = `DON-${Math.floor(1000 + Math.random() * 9000)}`;
 
     try {
@@ -1482,7 +1527,7 @@ function Donate({ session }) {
             <div>
               <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>Categoría de donación *</label>
               <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1' }}>
-                {['Alimentos sellados', 'Vestimenta', 'Mobiliario', 'Electrodomésticos'].map(c => <option key={c} value={c}>{c}</option>)}
+                {CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 

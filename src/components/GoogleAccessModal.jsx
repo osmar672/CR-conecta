@@ -64,7 +64,7 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
         <div style={{ padding: '16px 20px', maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {users.map((u) => {
             const badge = ROLE_BADGES[u.role] || { bg: '#f1f5f9', color: '#334155', border: '#e2e8f0' };
-            const initials = u.name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+            const avatarSrc = u.role === 'Empresa donante' ? '/logo.jpg' : '/logo-mark.png';
             
             return (
               <button
@@ -87,23 +87,18 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
                   transition: 'all 0.15s ease'
                 }}
               >
-                {/* Avatar with initial */}
-                <div 
+                <img
+                  src={avatarSrc}
+                  alt={u.name}
                   style={{
                     width: 40,
                     height: 40,
                     borderRadius: '50%',
-                    background: '#06244a',
-                    color: '#ffffff',
-                    display: 'grid',
-                    placeItems: 'center',
-                    fontWeight: '700',
-                    fontSize: '14px',
-                    flexShrink: 0
+                    objectFit: 'cover',
+                    flexShrink: 0,
+                    border: '1px solid rgba(6, 36, 74, 0.08)'
                   }}
-                >
-                  {initials}
-                </div>
+                />
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>

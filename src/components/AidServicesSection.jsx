@@ -24,19 +24,35 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
     },
     {
       id: 'vestimenta',
-      name: 'Vestimenta y calzado',
+      name: 'Vestimenta',
       tag: 'ABRIGO FAMILIAR',
       icon: <Shirt size={22} />,
       headerBg: '#def1f6',
       accentColor: '#1e6888',
-      summary: 'Prendas limpias, seleccionadas y clasificadas por tallas para niñas, niños y adultos.',
+      summary: 'Prendas limpias y clasificadas por tallas para niñas, niños y adultos.',
       includes: [
         'Ropa escolar e infantil por edades',
-        'Calzado adecuado para clima de la zona',
-        'Cobijas, sábanas y abrigo para el hogar'
+        'Prendas de abrigo para temporada fría',
+        'Sábanas y textiles de hogar'
       ],
       limitTag: 'Hasta 15 piezas por hogar (RF-10)',
       targetCategory: 'Vestimenta'
+    },
+    {
+      id: 'calzado',
+      name: 'Calzado',
+      tag: 'MOVILIDAD Y CONFORT',
+      icon: <Handshake size={22} />,
+      headerBg: '#edfaf4',
+      accentColor: '#1b7a5b',
+      summary: 'Calzado seguro y funcional para estudiantes, adultos mayores y personas en actividad laboral.',
+      includes: [
+        'Zapatos escolares y de trabajo',
+        'Sandalias y calzado resistente',
+        'Ajuste para clima y protección del pie'
+      ],
+      limitTag: 'Hasta 10 pares por caso (RF-10)',
+      targetCategory: 'Calzado'
     },
     {
       id: 'mobiliario',
@@ -69,8 +85,171 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
       ],
       limitTag: 'Máximo 1 unidad esencial (RF-10)',
       targetCategory: 'Electrodomésticos'
+    },
+    {
+      id: 'salud',
+      name: 'Salud y medicamentos',
+      tag: 'ATENCIÓN BÁSICA',
+      icon: <Handshake size={22} />,
+      headerBg: '#fef3ec',
+      accentColor: '#c2692d',
+      summary: 'Kits de apoyo para continuidad de tratamientos, cuidado personal y apoyo médico básico.',
+      includes: [
+        'Medicamentos básicos y suplementos',
+        'Kits de higiene y cuidado personal',
+        'Apoyo para continuidad de atención'
+      ],
+      limitTag: 'Hasta 12 kits por caso (RF-10)',
+      targetCategory: 'Salud y medicamentos'
+    },
+    {
+      id: 'higiene',
+      name: 'Higiene y cuidado personal',
+      tag: 'SALUD Y DIGNIDAD',
+      icon: <Package size={22} />,
+      headerBg: '#fff4ef',
+      accentColor: '#d76c53',
+      summary: 'Kits de higiene para familias con necesidades urgentes de cuidado y prevención.',
+      includes: [
+        'Jabón, papel higiénico y toallas',
+        'Artículos de cuidado personal infantil y adulto',
+        'Productos para prevención y limpieza diaria'
+      ],
+      limitTag: 'Hasta 10 kits por hogar (RF-10)',
+      targetCategory: 'Higiene y cuidado personal'
+    },
+    {
+      id: 'tecnologia',
+      name: 'Tecnología y conectividad',
+      tag: 'ACCESO DIGITAL',
+      icon: <Zap size={22} />,
+      headerBg: '#ecf7ff',
+      accentColor: '#0d6fa5',
+      summary: 'Acompañamiento y equipos básicos para mantener acceso a educación, trámites y comunicación.',
+      includes: [
+        'Kits con acceso a internet o datos',
+        'Dispositivos y accesorios básicos',
+        'Soporte para estudiantes y personas en búsqueda laboral'
+      ],
+      limitTag: 'Hasta 3 kits por familia (RF-10)',
+      targetCategory: 'Tecnología y conectividad'
+    },
+    {
+      id: 'transporte',
+      name: 'Transporte y movilidad',
+      tag: 'ACCESO Y MOVILIDAD',
+      icon: <House size={22} />,
+      headerBg: '#f3f0ff',
+      accentColor: '#5f4dac',
+      summary: 'Traslados puntuales para acceder a centros de salud, trabajo, educación o servicios básicos.',
+      includes: [
+        'Traslado a instituciones de salud',
+        'Viajes de ida y vuelta para educación',
+        'Apoyo para desplazamiento laboral o administrativo'
+      ],
+      limitTag: 'Hasta 6 viajes por caso (RF-10)',
+      targetCategory: 'Transporte y movilidad'
+    },
+    {
+      id: 'legal',
+      name: 'Asistencia legal y documentación',
+      tag: 'PROTECCIÓN Y DERECHOS',
+      icon: <ClipboardList size={22} />,
+      headerBg: '#edf8f3',
+      accentColor: '#26735a',
+      summary: 'Gestión de documentos y orientación legal para fortalecer la protección y el acceso a derechos.',
+      includes: [
+        'Trámites de identificación y documentación',
+        'Apoyo a casos de protección y empoderamiento',
+        'Orientación para servicios públicos y comunitarios'
+      ],
+      limitTag: 'Hasta 2 trámites por caso (RF-10)',
+      targetCategory: 'Asistencia legal y documentación'
+    },
+    {
+      id: 'adultos-mayores',
+      name: 'Apoyo para adultos mayores',
+      tag: 'CUIDADO Y ACOMPAÑAMIENTO',
+      icon: <Handshake size={22} />,
+      headerBg: '#fff7dd',
+      accentColor: '#b18614',
+      summary: 'Acompañamiento para personas mayores con necesidades de cuidado, movilidad y contención.',
+      includes: [
+        'Sesiones de acompañamiento domiciliario',
+        'Revisión de seguridad y alimentación',
+        'Coordination con voluntariado y salud comunitaria'
+      ],
+      limitTag: 'Hasta 5 sesiones por caso (RF-10)',
+      targetCategory: 'Apoyo para adultos mayores'
+    },
+    {
+      id: 'emergencia',
+      name: 'Emergencia y contingencia',
+      tag: 'RESPUESTA RÁPIDA',
+      icon: <Package size={22} />,
+      headerBg: '#fdecec',
+      accentColor: '#b33535',
+      summary: 'Soporte inmediato para crisis temporales, desastres o interrupciones severas del hogar.',
+      includes: [
+        'Kits para contingencias domésticas',
+        'Apoyo urgente en momentos de crisis',
+        'Coordination con redes comunitarias y de salud'
+      ],
+      limitTag: 'Hasta 4 kits por evento (RF-10)',
+      targetCategory: 'Emergencia y contingencia'
     }
   ];
+
+  const donationImages = {
+    alimentos: {
+      src: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80',
+      alt: 'Alimentos frescos preparados para compartir'
+    },
+    vestimenta: {
+      src: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=900&q=80',
+      alt: 'Prendas de vestir listas para donar'
+    },
+    calzado: {
+      src: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80',
+      alt: 'Calzado deportivo en buen estado'
+    },
+    mobiliario: {
+      src: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80',
+      alt: 'Mobiliario esencial para el hogar'
+    },
+    electrodomesticos: {
+      src: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?auto=format&fit=crop&w=900&q=80',
+      alt: 'Electrodomésticos para el hogar'
+    },
+    salud: {
+      src: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&w=900&q=80',
+      alt: 'Insumos de salud y primeros auxilios'
+    },
+    higiene: {
+      src: 'https://images.unsplash.com/photo-1600857062241-98e421ad8411?auto=format&fit=crop&w=900&q=80',
+      alt: 'Productos de higiene y cuidado personal'
+    },
+    tecnologia: {
+      src: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=900&q=80',
+      alt: 'Computadora portátil para acceso digital'
+    },
+    transporte: {
+      src: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=900&q=80',
+      alt: 'Vehículo para apoyar traslados comunitarios'
+    },
+    legal: {
+      src: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=900&q=80',
+      alt: 'Documentos para orientación y asistencia legal'
+    },
+    'adultos-mayores': {
+      src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=900&q=80',
+      alt: 'Acompañamiento y cuidado para personas mayores'
+    },
+    emergencia: {
+      src: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=900&q=80',
+      alt: 'Paquetes de ayuda para atención de emergencias'
+    }
+  };
 
   return (
     <section className="needs-section animate-on-scroll" id="ayudas-ofrecidas">
@@ -86,7 +265,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
               ¿Qué ayudas ofrecemos?
             </h2>
             <p style={{ margin: 0, fontSize: '15.5px', color: '#597084', lineHeight: '1.6' }}>
-              En CR Conecta coordinamos y canalizamos asistencia en 4 líneas prioritarias para las familias en condición de vulnerabilidad de Puntarenas, con validación comunitaria y límites que aseguran equidad.
+              En CR Conecta coordinamos y canalizamos asistencia en 12 líneas prioritarias para las familias en condición de vulnerabilidad de Puntarenas, con validación comunitaria, respuesta rápida y límites que aseguran equidad.
             </p>
           </div>
 
@@ -131,88 +310,60 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
 
         {/* TAB 1: 4 CATEGORIES OF ASSISTANCE WE OFFER */}
         {activeTab === 'categories' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginTop: '30px' }} className="aid-categories-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginTop: '30px' }} className="aid-categories-grid">
             {aidCategories.map((cat, idx) => (
-              <div
+              <article
                 key={cat.id}
                 className="aid-category-card card-gpu-optimized"
                 style={{
-                  background: '#ffffff',
-                  borderRadius: '18px',
-                  border: '1px solid #dce8ec',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  boxShadow: '0 8px 24px rgba(6, 36, 74, 0.04)'
+                  '--category-accent': cat.accentColor
                 }}
               >
-                {/* Visual Header matching Mockup Aesthetics */}
-                <div
-                  style={{
-                    height: '92px',
-                    background: cat.headerBg,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '52px',
-                      height: '52px',
-                      borderRadius: '50%',
-                      background: '#ffffff',
-                      display: 'grid',
-                      placeItems: 'center',
-                      fontSize: '22px',
-                      color: '#06244a',
-                      boxShadow: '0 4px 12px rgba(6, 36, 74, 0.08)'
-                    }}
-                  >
-                    {cat.icon}
-                  </div>
+                <div className="aid-card-image">
+                  <img
+                    src={donationImages[cat.id].src}
+                    alt={donationImages[cat.id].alt}
+                    loading="lazy"
+                  />
+                  <span className="aid-image-icon" aria-hidden="true">{cat.icon}</span>
                 </div>
 
-                {/* Card Body */}
-                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.8px', color: cat.accentColor, marginBottom: '6px' }}>
+                <div className="aid-card-body">
+                  <span className="aid-card-tag">
                     {cat.tag}
                   </span>
 
-                  <h3 style={{ fontSize: '18px', color: '#072448', margin: '0 0 8px', fontWeight: '700' }}>
+                  <h3>
                     {cat.name}
                   </h3>
 
-                  <p style={{ fontSize: '12px', color: '#5e758a', lineHeight: '1.5', margin: '0 0 14px' }}>
+                  <p className="aid-card-summary">
                     {cat.summary}
                   </p>
 
-                  {/* Bullet Points */}
-                  <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #edf2f6', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#334155' }}>¿Qué incluye?</span>
+                  <div className="aid-card-includes">
+                    <span className="aid-includes-title">¿Qué incluye?</span>
                     {cat.includes.map((item, i) => (
-                      <div key={i} style={{ fontSize: '12px', color: '#64748b', display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
-                        <span style={{ color: '#257a9e', fontWeight: '800' }}>•</span>
+                      <div key={i} className="aid-include-item">
+                        <span aria-hidden="true">•</span>
                         <span>{item}</span>
                       </div>
                     ))}
                   </div>
 
-                  {/* Limit guideline */}
-                  <div style={{ marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid #edf2f5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '11px', color: '#166534', background: '#dcfce7', padding: '3px 8px', borderRadius: '6px', fontWeight: '700' }}>
+                  <div className="aid-card-footer">
+                    <span className="aid-limit-tag">
                       {cat.limitTag}
                     </span>
                     <Link
                       to="/solicitar"
-                      style={{ fontSize: '12px', color: '#257a9e', fontWeight: '800', textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}
+                      className="aid-request-link"
                     >
                       Solicitar<ArrowRight className="i i-r" size={14} />
                     </Link>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}

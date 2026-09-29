@@ -3,16 +3,16 @@ import { API_URL } from '../constants/config';
 import { ArrowRight, Info } from 'lucide-react';
 
 export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
-  if (!isOpen || !user) return null;
-
   const [form, setForm] = useState({
-    name: user.name || '',
-    phone: user.phone || '+506 8888-0000',
-    zone: user.zone || 'Puntarenas',
-    notes: user.notes || ''
+    name: user?.name || '',
+    phone: user?.phone || '+506 8888-0000',
+    zone: user?.zone || 'Puntarenas',
+    notes: user?.notes || ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  if (!isOpen || !user) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

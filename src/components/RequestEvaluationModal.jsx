@@ -3,13 +3,13 @@ import { AlertTriangle, ArrowRight, Ban, Check, CheckCircle2, MapPin, X } from '
 import { CATEGORY_LIMITS, checkRequestLimits } from '../constants/limits';
 
 export function RequestEvaluationModal({ isOpen, onClose, request, allRequests = [], adminSession, onSave }) {
-  if (!isOpen || !request) return null;
-
   const todayStr = new Date().toISOString().slice(0, 10);
-  const limitCheck = checkRequestLimits(request.category, request.amount, allRequests.filter(r => r.id !== request.id && r.beneficiaryId === request.beneficiaryId));
-  const isExceeded = request.limitExceeded || limitCheck.exceeded;
+  const limitCheck = request
+    ? checkRequestLimits(request.category, request.amount, allRequests.filter(r => r.id !== request.id && r.beneficiaryId === request.beneficiaryId))
+    : { exceeded: false, reason: '' };
+  const isExceeded = request ? (request.limitExceeded || limitCheck.exceeded) : false;
 
-  const [decision, setDecision] = useState(request.status === 'Aprobada' ? 'Aprobada' : request.status === 'Denegada' ? 'Denegada' : 'Aprobada');
+  const [decision, setDecision] = useState(request?.status === 'Aprobada' ? 'Aprobada' : request?.status === 'Denegada' ? 'Denegada' : 'Aprobada');
   const [priority, setPriority] = useState(request.priority || 'Media');
   const [reason, setReason] = useState(request.decisionReason || '');
   const [decisionDate, setDecisionDate] = useState(request.decisionDate || todayStr);
@@ -20,6 +20,8 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
   const [authorizedBy, setAuthorizedBy] = useState(request.exceptionAuthorizedBy || adminSession?.name || 'Administración CR Conecta');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  if (!isOpen || !request) return null;
 
   useEffect(() => {
     if (!reason) {
