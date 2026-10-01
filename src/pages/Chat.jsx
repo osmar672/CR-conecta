@@ -1,15 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { validateAssistantPath } from '../constants/assistantNavigation';
 import { api } from '../lib/api';
 import { useData } from '../lib/useData';
 
 export function Chat() {
+  const navigate = useNavigate();
   const { data: answers = [], state: chatState } = useData('/chatbot');
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState('');
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
   const conversationEnd = useRef(null);
+  const navigationTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(navigationTimer.current), []);
 
   useEffect(() => {
     conversationEnd.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -32,11 +38,16 @@ export function Chat() {
         method: 'POST',
         body: JSON.stringify({ question: cleanQuestion, history })
       });
+      const destination = validateAssistantPath(response.destination?.path);
       setMessages(previous => previous.map((message, index) => (
         index === previous.length - 1 && message.answer === null
-          ? { ...message, answer: response.answer }
+          ? { ...message, answer: response.answer, destination }
           : message
       )));
+      if (destination && destination.path !== '/chat') {
+        clearTimeout(navigationTimer.current);
+        navigationTimer.current = setTimeout(() => navigate(destination.path), 1800);
+      }
     } catch (assistantError) {
       setMessages(previous => previous.slice(0, -1));
       setError(assistantError.message || 'No se pudo obtener una respuesta del asistente.');
@@ -50,7 +61,7 @@ export function Chat() {
       <div className="page-head">
         <span className="eyebrow">ASISTENTE IA · CR CONECTA</span>
         <h1>Orientación comunitaria</h1>
-        <p>Preguntame cómo usar el sitio, sus roles o los flujos de solicitudes y donaciones. El asistente responde solo sobre CR Conecta.</p>
+        <p>Preguntame lo que necesites. También puedo llevarte a las secciones públicas de CR Conecta, como Donar o Necesidades.</p>
       </div>
 
       <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #dce8ec', maxWidth: '750px', overflow: 'hidden' }}>
@@ -69,8 +80,20 @@ export function Chat() {
                   {message.question}
                 </div>
                 {message.answer === null
-                  ? <div role="status" style={{ alignSelf: 'flex-start', color: '#64748b', padding: '10px', fontSize: '13px' }}>Estoy buscando en la información del sitio…</div>
-                  : <div style={{ alignSelf: 'flex-start', background: '#eef5f8', color: '#09274c', padding: '12px 16px', borderRadius: '2px 14px 14px 14px', fontSize: '13px', maxWidth: '85%', whiteSpace: 'pre-wrap' }}>{message.answer}</div>}
+                  ? <div role="status" style={{ alignSelf: 'flex-start', color: '#64748b', padding: '10px', fontSize: '13px' }}>Estoy preparando la respuesta…</div>
+                  : <div style={{ alignSelf: 'flex-start', background: '#eef5f8', color: '#09274c', padding: '12px 16px', borderRadius: '2px 14px 14px 14px', fontSize: '13px', maxWidth: '85%', whiteSpace: 'pre-wrap' }}>
+                    {message.answer}
+                    {message.destination && message.destination.path !== '/chat' && (
+                      <div style={{ marginTop: '12px' }}>
+                        <button className="btn primary" type="button" onClick={() => {
+                          clearTimeout(navigationTimer.current);
+                          navigate(message.destination.path);
+                        }}>
+                          Ir a {message.destination.label}
+                        </button>
+                      </div>
+                    )}
+                  </div>}
               </div>
             ))
           )}
@@ -84,7 +107,7 @@ export function Chat() {
         )}
 
         <form onSubmit={event => { event.preventDefault(); void ask(question); }} style={{ background: '#f8fafc', padding: '16px 20px', borderTop: '1px solid #edf2f5' }}>
-          <label htmlFor="assistant-question" style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tu pregunta sobre CR Conecta</label>
+          <label htmlFor="assistant-question" style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tu pregunta</label>
           <div style={{ display: 'flex', gap: '8px' }}>
             <input
               id="assistant-question"
@@ -115,7 +138,7 @@ export function Chat() {
         </form>
       </div>
       <p style={{ maxWidth: '750px', fontSize: '12px', color: '#64748b' }}>
-        La IA solo orienta sobre el prototipo. No compartas información personal o sensible; sus respuestas pueden equivocarse.
+        La IA puede equivocarse. No compartas información personal o sensible. Solo puede abrir secciones públicas de CR Conecta.
       </p>
     </div>
   );

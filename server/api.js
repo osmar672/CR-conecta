@@ -259,14 +259,14 @@ export function createApiServer({
         assistantAttempts.set(clientKey, recentAttempts);
 
         const body = await readBody(request);
-        const answer = await answerSiteQuestion({
+        const result = await answerSiteQuestion({
           question: body.question,
           history: body.history,
           apiKey: assistantApiKey,
           model: assistantModel,
           fetchImpl: assistantFetch
         });
-        send(response, 200, { answer }, corsHeaders);
+        send(response, 200, result, corsHeaders);
         return;
       }
 
