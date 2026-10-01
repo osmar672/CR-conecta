@@ -958,8 +958,13 @@
   ],
   "activity": [
     {
+<<<<<<< HEAD
       "id": "b97b2427-fd1e-496e-9ca4-544f40577970",
       "timestamp": "2026-10-01T14:19:21.968Z",
+=======
+      "id": "4f032bcc-e897-49da-91e4-a4f9937025a7",
+      "timestamp": "2026-10-01T15:03:20.817Z",
+>>>>>>> 76fd0abefbfa11cbb3ed2e7504579328fb183949
       "actor": "María Administradora",
       "actorRole": "Administrador",
       "action": "inició sesión",

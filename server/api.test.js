@@ -114,7 +114,7 @@ test('assistant endpoint keeps the provider key server-side and answers through 
     assistantApiKey: 'server-only-key',
     assistantFetch: async (_url, options) => {
       providerAuthorization = options.headers.Authorization;
-      return { ok: true, json: async () => ({ choices: [{ message: { content: 'Desde Necesidades.' } }] }) };
+      return { ok: true, json: async () => ({ choices: [{ message: { content: '{"answer":"Desde Necesidades.","destination":"necesidades"}' } }] }) };
     }
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -127,7 +127,7 @@ test('assistant endpoint keeps the provider key server-side and answers through 
     body: JSON.stringify({ question: '¿Dónde veo necesidades?', history: [] })
   });
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { answer: 'Desde Necesidades.' });
+  assert.deepEqual(await response.json(), { answer: 'Desde Necesidades.', destination: { path: '/necesidades', label: 'Necesidades' } });
   assert.equal(providerAuthorization, 'Bearer server-only-key');
 });
 

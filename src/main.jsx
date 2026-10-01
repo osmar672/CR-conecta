@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TriangleAlert, AlertTriangle, ArrowRight, ArrowRightLeft, ArrowUpRight, BarChart3, Check, CheckCircle2, CircleCheck, Clock3, FileText, HeartHandshake, Info, Lock, MapPin, MessageSquare, Package, PackageCheck, PenLine, Pencil, QrCode, Route as RouteIcon, Star, UsersRound } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import QRCode from 'qrcode';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
 import './styles/global.css';
 
+<<<<<<< HEAD
 import { Logo } from './components/Logo';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { api } from './lib/api';
@@ -2201,6 +2200,8 @@ function App() {
   return <Shell />;
 }
 
+=======
+>>>>>>> 76fd0abefbfa11cbb3ed2e7504579328fb183949
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <App />

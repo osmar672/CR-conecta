@@ -28,7 +28,7 @@ Las cuentas de demostración comparten la contraseña `conecta-demo` únicamente
 
 ## Asistente de IA
 
-El chat envía las preguntas a la API Node y de ahí a Groq; la clave nunca se entrega al navegador. El contexto del modelo describe solo las páginas y flujos públicos del prototipo, no adjunta perfiles, solicitudes privadas ni datos personales. Las instrucciones del asistente le limitan a CR Conecta y le indican rechazar preguntas fuera del sitio; aun así, la IA puede equivocarse. No ingreses información personal ni sensible.
+El chat envía las preguntas a la API Node y de ahí a Groq; la clave nunca se entrega al navegador. Puede responder preguntas abiertas y orientar sobre CR Conecta. El contexto del prototipo no adjunta perfiles, solicitudes privadas ni datos personales. Cuando identifica una sección pública pertinente, puede llevar al usuario a Inicio, Necesidades, Donar, Solicitar ayuda o Acceso. El servidor y la interfaz validan cada destino contra una lista cerrada: no se permite navegar por el asistente a otros sitios web, al panel administrativo ni a perfiles personales. Las acciones de Donar y Solicitar ayuda pueden requerir una sesión. La IA puede equivocarse; no ingreses información personal ni sensible.
 
 El archivo `.env` local ya está creado con un marcador, no con una clave funcional. Reemplazá `pon-tu-clave-aqui` por tu propia clave de Groq, guardá el archivo y reiniciá `npm run server`:
 
