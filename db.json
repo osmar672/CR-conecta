@@ -958,13 +958,18 @@
   ],
   "activity": [
     {
-<<<<<<< HEAD
-      "id": "b97b2427-fd1e-496e-9ca4-544f40577970",
-      "timestamp": "2026-10-01T14:19:21.968Z",
-=======
+      "id": "fb86d937-20e8-4ba2-98a2-6a2e0de9f990",
+      "timestamp": "2026-10-01T18:05:58.360Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
       "id": "4f032bcc-e897-49da-91e4-a4f9937025a7",
       "timestamp": "2026-10-01T15:03:20.817Z",
->>>>>>> 76fd0abefbfa11cbb3ed2e7504579328fb183949
       "actor": "María Administradora",
       "actorRole": "Administrador",
       "action": "inició sesión",

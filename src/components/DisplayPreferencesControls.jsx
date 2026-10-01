@@ -1,5 +1,27 @@
 import { Moon, Palette, Sun, Type } from 'lucide-react';
-import { useDisplayPreferences } from '../lib/useDisplayPreferences';
+import { TEXT_SCALES, useDisplayPreferences } from '../lib/useDisplayPreferences';
+
+function PreferenceRow({ icon, label, description, state, active, onClick, title }) {
+  return (
+    <button
+      type="button"
+      className="display-preference-row"
+      onClick={onClick}
+      aria-pressed={active}
+      title={title}
+    >
+      <span className="display-preference-icon">{icon}</span>
+      <span className="display-preference-copy">
+        <strong>{label}</strong>
+        <small>{description}</small>
+      </span>
+      {state && <span className="display-preference-state">{state}</span>}
+      <span className={`display-switch${active ? ' on' : ''}`} aria-hidden="true">
+        <i />
+      </span>
+    </button>
+  );
+}
 
 export function DisplayPreferencesControls() {
   const {
@@ -12,42 +34,43 @@ export function DisplayPreferencesControls() {
   } = useDisplayPreferences();
 
   const scalePercent = Math.round(textScale * 100);
+  const isLargestScale = textScale === TEXT_SCALES[TEXT_SCALES.length - 1];
 
   return (
-    <div className="display-controls" role="group" aria-label="Preferencias de visualización">
-      <button
-        type="button"
-        className="display-control"
+    <div className="display-preferences">
+      <PreferenceRow
+        icon={isDark ? <Sun size={18} /> : <Moon size={18} />}
+        label="Modo oscuro"
+        description="Reduce el brillo de la pantalla con un fondo oscuro."
+        state={isDark ? 'Activado' : 'Desactivado'}
+        active={isDark}
         onClick={toggleTheme}
-        aria-pressed={isDark}
         title={isDark ? 'Cambiar a modo claro' : 'Activar modo oscuro'}
-      >
-        {isDark ? <Sun size={16} /> : <Moon size={16} />}
-        <span>Oscuro</span>
-      </button>
+      />
 
-      <button
-        type="button"
-        className="display-control"
+      <PreferenceRow
+        icon={<Type size={18} />}
+        label="Tamaño de las letras"
+        description="Aumenta el tamaño del texto para leer con mayor comodidad."
+        state={`${scalePercent}%`}
+        active={textScale > 1}
         onClick={cycleTextScale}
-        title={`Aumentar tamaño de las letras. Tamaño actual: ${scalePercent}%`}
-      >
-        <Type size={16} />
-        <span className="display-control-value">{scalePercent}%</span>
-      </button>
+        title={isLargestScale
+          ? 'Volver al tamaño normal del texto'
+          : `Aumentar el tamaño de las letras. Tamaño actual: ${scalePercent}%`}
+      />
 
-      <button
-        type="button"
-        className="display-control"
+      <PreferenceRow
+        icon={<Palette size={18} />}
+        label="Modo daltónico"
+        description="Paleta con colores distinguibles en casos de daltonismo."
+        state={isColorblind ? 'Activado' : 'Desactivado'}
+        active={isColorblind}
         onClick={toggleColorMode}
-        aria-pressed={isColorblind}
         title={isColorblind
           ? 'Desactivar modo daltónico'
           : 'Activar modo daltónico (colores distinguibles para daltonismo)'}
-      >
-        <Palette size={16} />
-        <span>Daltónico</span>
-      </button>
+      />
     </div>
   );
 }
