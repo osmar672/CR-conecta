@@ -5,21 +5,21 @@ import { ArrowRight, Check, Handshake, MapPin } from 'lucide-react';
 export function SponsorIcon({ type = 'corporate', size = 32 }) {
   if (type === 'corporate') {
     return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#06244a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" color="var(--navy)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 21h18M3 7v14M21 7v14M6 11h4M6 15h4M14 11h4M14 15h4M12 3l9 4H3l9-4z" />
       </svg>
     );
   }
   if (type === 'food') {
     return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#257a9e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" color="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
       </svg>
     );
   }
   if (type === 'community') {
     return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#b06000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" color="var(--accent-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -29,7 +29,7 @@ export function SponsorIcon({ type = 'corporate', size = 32 }) {
   }
   if (type === 'logistics') {
     return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#137333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" color="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="1" y="3" width="15" height="13" />
         <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
         <circle cx="5.5" cy="18.5" r="2.5" />
@@ -38,7 +38,7 @@ export function SponsorIcon({ type = 'corporate', size = 32 }) {
     );
   }
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" color="var(--accent-violet)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24" />
     </svg>
@@ -167,7 +167,7 @@ export function SponsorsSection({ allies = [] }) {
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '5px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '5px' }}>
                     Nombre de la Empresa o Entidad *
                   </label>
                   <input
@@ -176,19 +176,19 @@ export function SponsorsSection({ allies = [] }) {
                     value={partnerForm.orgName}
                     onChange={e => setPartnerForm({ ...partnerForm, orgName: e.target.value })}
                     placeholder="Ej. Distribuidora del Pacífico S.A."
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '13px', boxSizing: 'border-box' }}
                   />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '5px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '5px' }}>
                       Tipo de Entidad
                     </label>
                     <select
                       value={partnerForm.type}
                       onChange={e => setPartnerForm({ ...partnerForm, type: e.target.value })}
-                      style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12.5px' }}
+                      style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '12.5px' }}
                     >
                       <option value="Empresa privada">Empresa privada</option>
                       <option value="Cooperativa local">Cooperativa local</option>
@@ -198,13 +198,13 @@ export function SponsorsSection({ allies = [] }) {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '5px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '5px' }}>
                       Zona prioritaria
                     </label>
                     <select
                       value={partnerForm.zone}
                       onChange={e => setPartnerForm({ ...partnerForm, zone: e.target.value })}
-                      style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12.5px' }}
+                      style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '12.5px' }}
                     >
                       <option value="Puntarenas">Puntarenas centro</option>
                       <option value="Barranca">Barranca</option>
@@ -216,7 +216,7 @@ export function SponsorsSection({ allies = [] }) {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '5px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '5px' }}>
                     Tipo de Apoyo o Patrocinio propuesto *
                   </label>
                   <input
@@ -225,7 +225,7 @@ export function SponsorsSection({ allies = [] }) {
                     value={partnerForm.supportType}
                     onChange={e => setPartnerForm({ ...partnerForm, supportType: e.target.value })}
                     placeholder="Ej. Espacio para acopio temporal, vehículos o víveres"
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--line)', fontSize: '13px', boxSizing: 'border-box' }}
                   />
                 </div>
 

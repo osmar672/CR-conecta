@@ -99,11 +99,11 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
         className="evaluation-modal" 
         onClick={e => e.stopPropagation()}
         style={{
-          background: '#ffffff',
+          background: 'var(--white)',
           width: 'min(680px, 95vw)',
           borderRadius: '20px',
           boxShadow: '0 25px 70px rgba(6,36,74,0.22)',
-          border: '1px solid #dce7eb',
+          border: '1px solid var(--line)',
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
@@ -129,16 +129,16 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
         <form onSubmit={handleSubmit} style={{ overflowY: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           {/* Summary Box */}
-          <div style={{ background: '#f8fafc', padding: '16px 18px', borderRadius: '14px', border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+          <div style={{ background: 'var(--surface-soft)', padding: '16px 18px', borderRadius: '14px', border: '1px solid var(--line-light)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
             <div>
-              <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Categoría & Ayuda</span>
-              <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>{request.category}</strong>
-              <div style={{ fontSize: '12.5px', color: '#334155', marginTop: '2px' }}>{request.description}</div>
+              <span style={{ fontSize: '12px', color: 'var(--muted)', display: 'block' }}>Categoría & Ayuda</span>
+              <strong style={{ fontSize: '13.5px', color: 'var(--navy)' }}>{request.category}</strong>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '2px' }}>{request.description}</div>
             </div>
             <div>
-              <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Cantidad solicitada & Zona</span>
-              <strong style={{ fontSize: '15px', color: '#0f172a' }}>{request.amount} {request.unit}</strong>
-              <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}><MapPin className="i i-l" size={13} />{request.zone} · Fecha: {request.date}</div>
+              <span style={{ fontSize: '12px', color: 'var(--muted)', display: 'block' }}>Cantidad solicitada & Zona</span>
+              <strong style={{ fontSize: '15px', color: 'var(--navy)' }}>{request.amount} {request.unit}</strong>
+              <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}><MapPin className="i i-l" size={13} />{request.zone} · Fecha: {request.date}</div>
             </div>
           </div>
 
@@ -170,7 +170,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
             </p>
 
             {isExceeded && (
-              <div style={{ fontSize: '12px', background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #fecaca', color: '#b91c1c' }}>
+              <div style={{ fontSize: '12px', background: 'var(--white)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--line)', color: 'var(--danger)' }}>
                 <strong>Regla de negocio:</strong> La aprobación está <u>bloqueada</u> por defecto hasta que un administrador registre formalmente una excepción con su justificación correspondiente.
               </div>
             )}
@@ -180,7 +180,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             {/* RF-08 Decision */}
             <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '7px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '7px' }}>
                 Decisión administrativa (RF-08) *
               </label>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -223,7 +223,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
 
             {/* RF-09 Priority */}
             <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '7px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '7px' }}>
                 Asignar Prioridad (RF-09) *
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -289,7 +289,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                         borderRadius: '8px',
                         border: '1px solid #d97706',
                         fontSize: '12px',
-                        background: '#ffffff',
+                        background: 'var(--white)',
                         boxSizing: 'border-box'
                       }}
                     />
@@ -309,7 +309,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                         borderRadius: '8px',
                         border: '1px solid #d97706',
                         fontSize: '12px',
-                        background: '#ffffff',
+                        background: 'var(--white)',
                         boxSizing: 'border-box'
                       }}
                     />
@@ -322,7 +322,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
           {/* Decision Reason & Date (RF-08) */}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
             <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '6px' }}>
                 Motivo de la decisión (RF-08) *
               </label>
               <textarea
@@ -335,14 +335,14 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                   width: '100%',
                   padding: '10px',
                   borderRadius: '9px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--line)',
                   fontSize: '12.5px',
                   boxSizing: 'border-box'
                 }}
               />
             </div>
             <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '6px' }}>
                 Fecha de la decisión *
               </label>
               <input
@@ -354,7 +354,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                   width: '100%',
                   padding: '9px',
                   borderRadius: '9px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--line)',
                   fontSize: '12.5px',
                   boxSizing: 'border-box'
                 }}
@@ -364,19 +364,19 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
 
           {/* Error notice if blocked */}
           {isApprovalBlocked && (
-            <div style={{ background: '#fef2f2', border: '1px solid #f87171', color: '#b91c1c', padding: '10px 14px', borderRadius: '8px', fontSize: '12px' }}>
+            <div style={{ background: '#fef2f2', border: '1px solid var(--line)', color: 'var(--danger)', padding: '10px 14px', borderRadius: '8px', fontSize: '12px' }}>
               <Ban className="i i-l" size={14} /><strong>Aprobación bloqueada:</strong> Esta solicitud supera el límite permitido. Marcá "Registrar excepción administrativa" y detallá la justificación para proceder.
             </div>
           )}
 
           {errorMsg && (
-            <div style={{ background: '#fef2f2', border: '1px solid #f87171', color: '#b91c1c', padding: '10px 14px', borderRadius: '8px', fontSize: '12px' }}>
+            <div style={{ background: '#fef2f2', border: '1px solid var(--line)', color: 'var(--danger)', padding: '10px 14px', borderRadius: '8px', fontSize: '12px' }}>
               {errorMsg}
             </div>
           )}
 
           {/* Modal Footer Actions */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '10px', borderTop: '1px solid var(--line-light)' }}>
             <button
               type="button"
               className="btn secondary"

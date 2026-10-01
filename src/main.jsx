@@ -19,6 +19,7 @@ import { SponsorsSection } from './components/SponsorsSection';
 import { HowItWorksSection } from './components/HowItWorksSection';
 import { CommunityCoverageSection } from './components/CommunityCoverageSection';
 import { AidServicesSection } from './components/AidServicesSection';
+import { DisplayPreferencesControls } from './components/DisplayPreferencesControls';
 import { CATEGORY_LIMITS, CATEGORY_OPTIONS, checkRequestLimits, getCategoryUnit } from './constants/limits';
 
 const roleIcons = {
@@ -42,7 +43,7 @@ function RoleAvatar({ src, alt, size = 42 }) {
         borderRadius: '12px',
         display: 'block',
         border: '1px solid rgba(6, 36, 74, 0.08)',
-        background: '#fff'
+        background: 'var(--white)'
       }}
     />
   );
@@ -57,7 +58,7 @@ function Confirm({ title, text, error, onConfirm, onCancel }) {
         <div className="modal-mark">!</div>
         <h3 id="confirm-title">{title}</h3>
         <p>{text}</p>
-        {error && <p role="alert" style={{ color: '#b91c1c' }}>{error}</p>}
+        {error && <p role="alert" style={{ color: 'var(--danger)' }}>{error}</p>}
         <div className="modal-actions">
           <button className="btn secondary" onClick={onCancel}>Cancelar</button>
           <button className="btn primary" onClick={onConfirm}>Continuar</button>
@@ -160,6 +161,8 @@ function Shell() {
         </nav>
 
         <div className="header-actions">
+          <DisplayPreferencesControls />
+
           {session ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button className="profile-chip" onClick={() => navigate('/perfil')}>
@@ -635,8 +638,8 @@ function Access({ onOpenGoogleAuth }) {
       {/* Prominent Google Access Card (RF-02) */}
       <div 
         style={{
-          background: '#ffffff',
-          border: '1px solid #dce8ec',
+          background: 'var(--white)',
+          border: '1px solid var(--line)',
           borderRadius: '18px',
           padding: '28px',
           marginBottom: '32px',
@@ -651,11 +654,11 @@ function Access({ onOpenGoogleAuth }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <GoogleIcon size={24} />
-            <h3 style={{ margin: 0, fontSize: '18px', color: '#09274c' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--navy)' }}>
               Acceso visual tipo Google / Gmail (RF-02)
             </h3>
           </div>
-          <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#63788b', maxWidth: '580px' }}>
+          <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)', maxWidth: '580px' }}>
             Simula la experiencia de autenticación de un clic vinculando un correo ficticio de <code>db.json</code> con su respectivo perfil y rol.
           </p>
         </div>
@@ -668,7 +671,7 @@ function Access({ onOpenGoogleAuth }) {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '10px',
-            border: '1.5px solid #d5e1e7',
+            border: '1.5px solid var(--line)',
             padding: '12px 24px',
             fontSize: '13.5px',
             fontWeight: '700'
@@ -682,8 +685,8 @@ function Access({ onOpenGoogleAuth }) {
       {/* Disclaimer Notice */}
       <div 
         style={{
-          background: '#eef5f8',
-          border: '1px solid #d5e6ec',
+          background: 'var(--surface-soft)',
+          border: '1px solid var(--line)',
           borderRadius: '12px',
           padding: '14px 18px',
           display: 'flex',
@@ -691,7 +694,7 @@ function Access({ onOpenGoogleAuth }) {
           alignItems: 'center',
           marginBottom: '28px',
           fontSize: '12px',
-          color: '#34556e'
+          color: 'var(--muted)'
         }}
       >
         <Info size={16} style={{ flexShrink: 0 }} />
@@ -701,7 +704,7 @@ function Access({ onOpenGoogleAuth }) {
       </div>
 
       {/* Grid of All Preloaded Accounts */}
-      <h3 style={{ margin: '0 0 16px', fontSize: '17px', color: '#09274c' }}>
+      <h3 style={{ margin: '0 0 16px', fontSize: '17px', color: 'var(--navy)' }}>
         O elegí directamente una cuenta de demostración por rol (RF-01):
       </h3>
 
@@ -1061,8 +1064,8 @@ function Panel({ session, onLogin, onOpenGoogleAuth }) {
           <h1>Acceso restringido por rol</h1>
           <p>Para ver las funciones de demostración, iniciá sesión con una cuenta de prueba.</p>
         </div>
-        <div style={{ textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '18px', border: '1px solid #dce8ec' }}>
-          <h3 style={{ marginBottom: '12px', color: '#09274c' }}>Ingresá con una cuenta para ver su panel</h3>
+        <div style={{ textAlign: 'center', padding: '60px 20px', background: 'var(--white)', borderRadius: '18px', border: '1px solid var(--line)' }}>
+          <h3 style={{ marginBottom: '12px', color: 'var(--navy)' }}>Ingresá con una cuenta para ver su panel</h3>
           <button className="btn primary" onClick={onOpenGoogleAuth} style={{ display: 'inline-flex', gap: '8px' }}>
             <GoogleIcon size={18} /> Iniciar sesión de demostración
           </button>
@@ -1209,9 +1212,9 @@ function PanelInner({ session, onUpdateSession }) {
       {(tab === 'solicitudes (RF-08/09/10)' || (isAdmin && tab === 'solicitudes')) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Header filter controls */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '16px 20px', borderRadius: '14px', border: '1px solid #dce8ec', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--white)', padding: '16px 20px', borderRadius: '14px', border: '1px solid var(--line)', flexWrap: 'wrap', gap: '10px' }}>
             <div className="request-filter-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>Filtrar por estado:</span>
+              <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)' }}>Filtrar por estado:</span>
               <select 
                 value={filterStatus} 
                 onChange={e => setFilterStatus(e.target.value)}
@@ -1223,7 +1226,7 @@ function PanelInner({ session, onUpdateSession }) {
                 <option value="Denegada">Denegada</option>
               </select>
 
-              <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginLeft: '10px' }}>Prioridad (RF-09):</span>
+              <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginLeft: '10px' }}>Prioridad (RF-09):</span>
               <select 
                 value={filterPriority} 
                 onChange={e => setFilterPriority(e.target.value)}
@@ -1236,7 +1239,7 @@ function PanelInner({ session, onUpdateSession }) {
               </select>
             </div>
 
-            <span style={{ fontSize: '12px', color: '#64748b' }}>
+            <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
               Total: {(reqs || []).length} solicitudes registradas
             </span>
           </div>
@@ -1267,7 +1270,7 @@ function PanelInner({ session, onUpdateSession }) {
 
                     return (
                       <tr key={r.id}>
-                        <td style={{ fontWeight: '800', color: '#06244a' }}>#{r.id}</td>
+                        <td style={{ fontWeight: '800', color: 'var(--navy)' }}>#{r.id}</td>
                         <td>
                           <b>{r.description}</b>
                           <small>{r.category} · Beneficiario: {r.beneficiaryId}</small>
@@ -1275,7 +1278,7 @@ function PanelInner({ session, onUpdateSession }) {
                         <td>
                           <strong>{r.amount} {r.unit}</strong>
                           {isExceeded && (
-                            <span style={{ display: 'block', fontSize: '11px', color: '#b91c1c', fontWeight: '800', marginTop: '2px' }}>
+                            <span style={{ display: 'block', fontSize: '11px', color: 'var(--danger)', fontWeight: '800', marginTop: '2px' }}>
                               <AlertTriangle className="i i-l" size={14} />Excede límite estándar
                             </span>
                           )}
@@ -1313,8 +1316,8 @@ function PanelInner({ session, onUpdateSession }) {
                         <td style={{ maxWidth: '240px' }}>
                           {r.decisionReason ? (
                             <div>
-                              <span style={{ fontSize: '12px', color: '#334155' }}>{r.decisionReason}</span>
-                              <small style={{ color: '#64748b' }}>Fecha: {r.decisionDate}</small>
+                              <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{r.decisionReason}</span>
+                              <small style={{ color: 'var(--muted)' }}>Fecha: {r.decisionDate}</small>
                               {r.exceptionGranted && (
                                 <span style={{ display: 'block', fontSize: '11px', color: '#b45309', fontWeight: '700', marginTop: '2px' }}>
                                   <Star className="i i-l" size={14} />Excepción concedida
@@ -1322,7 +1325,7 @@ function PanelInner({ session, onUpdateSession }) {
                               )}
                             </div>
                           ) : (
-                            <span style={{ color: '#64748b', fontSize: '12px' }}>Pendiente de evaluación</span>
+                            <span style={{ color: 'var(--muted)', fontSize: '12px' }}>Pendiente de evaluación</span>
                           )}
                         </td>
                         <td>
@@ -1365,15 +1368,15 @@ function PanelInner({ session, onUpdateSession }) {
               <span className="eyebrow">{item.category}</span>
               <h3>{item.product}</h3>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', margin: '10px 0' }}>
-                <strong style={{ fontSize: '36px', color: '#06244a' }}>{item.available}</strong>
-                <span style={{ fontSize: '12px', color: '#64748b' }}>disponibles</span>
+                <strong style={{ fontSize: '36px', color: 'var(--navy)' }}>{item.available}</strong>
+                <span style={{ fontSize: '12px', color: 'var(--muted)' }}>disponibles</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b', borderTop: '1px solid #edf2f5', paddingTop: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)', borderTop: '1px solid var(--line-light)', paddingTop: '10px' }}>
                 <span>Reservadas: {item.reserved}</span>
                 <span>Entregadas: {item.delivered}</span>
               </div>
               {item.available <= item.minimum && (
-                <div style={{ marginTop: '10px', background: '#fee2e2', color: '#b91c1c', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>
+                <div style={{ marginTop: '10px', background: '#fee2e2', color: 'var(--danger)', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>
                   Alerta: Nivel por debajo del mínimo ({item.minimum})
                 </div>
               )}
@@ -1388,24 +1391,24 @@ function PanelInner({ session, onUpdateSession }) {
           {trans.map(t => (
             <div key={t.id} className="dashboard-card">
               <div className="transfer-card-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong style={{ color: '#06244a' }}>Traslado #{t.id}</strong>
+                <strong style={{ color: 'var(--navy)' }}>Traslado #{t.id}</strong>
                 <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' }}>
                   {t.status}
                 </span>
               </div>
               <h3 style={{ margin: '8px 0 4px', fontSize: '16px' }}>{t.origin} <ArrowRight className="i" size={14} /> {t.destination}</h3>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
+              <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)' }}>
                 Donación {t.donationId} · Responsable: {t.responsible}
               </p>
               <div className="transfer-points" style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '16px 0', fontSize: '12px' }}>
                 {(t.points || []).map((p, idx) => (
                   <React.Fragment key={p}>
-                    <span style={{ background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px', fontWeight: '600' }}>{p}</span>
-                    {idx < t.points.length - 1 && <span style={{ color: '#64748b' }}><ArrowRight className="i" size={14} /></span>}
+                    <span style={{ background: 'var(--surface-soft)', padding: '6px 10px', borderRadius: '6px', fontWeight: '600' }}>{p}</span>
+                    {idx < t.points.length - 1 && <span style={{ color: 'var(--muted)' }}><ArrowRight className="i" size={14} /></span>}
                   </React.Fragment>
                 ))}
               </div>
-              <small style={{ fontSize: '11px', color: '#64748b' }}>GPS Y RUTA SIMULADOS (PROTOTIPO ACADÉMICO)</small>
+              <small style={{ fontSize: '11px', color: 'var(--muted)' }}>GPS Y RUTA SIMULADOS (PROTOTIPO ACADÉMICO)</small>
               {t.status === 'En ruta' && (
                 <button 
                   className="btn primary" 
@@ -1436,7 +1439,7 @@ function PanelInner({ session, onUpdateSession }) {
             <div key={a.id} className="dashboard-card">
               <span className="eyebrow">{a.type}</span>
               <h3>{a.name}</h3>
-              <p style={{fontSize:'12px', color:'#64748b'}}>Zona: {a.zone} | Contacto: {a.contact}</p>
+              <p style={{fontSize:'12px', color: 'var(--muted)'}}>Zona: {a.zone} | Contacto: {a.contact}</p>
               <div style={{marginTop:'10px', background:'#e0f2fe', color:'#0369a1', padding:'6px 10px', borderRadius:'6px', fontSize:'11px', fontWeight:'700'}}>
                 Apoyo: {a.support}
               </div>
@@ -1454,7 +1457,7 @@ function PanelInner({ session, onUpdateSession }) {
               <div key={c.id} className="dashboard-card">
                 <span className="eyebrow">{c.category}</span>
                 <h3>{c.name}</h3>
-                <p style={{fontSize:'12px', color:'#64748b'}}>{c.description}</p>
+                <p style={{fontSize:'12px', color: 'var(--muted)'}}>{c.description}</p>
                 <div style={{display:'flex', justifyContent:'space-between', marginTop:'10px', fontSize:'11px', fontWeight:'700'}}>
                   <span>Progreso: {c.progress} / {c.goal} {c.unit}</span>
                   <span style={{color:'#15803d'}}>{c.status}</span>
@@ -1469,8 +1472,8 @@ function PanelInner({ session, onUpdateSession }) {
               <div key={j.id} className="dashboard-card">
                 <span className="eyebrow">{j.schedule}</span>
                 <h3>{j.position}</h3>
-                <p style={{fontSize:'12px', color:'#64748b'}}>{j.description}</p>
-                <div style={{marginTop:'10px', fontSize:'11px', color:'#334155'}}>
+                <p style={{fontSize:'12px', color: 'var(--muted)'}}>{j.description}</p>
+                <div style={{marginTop:'10px', fontSize:'11px', color: 'var(--muted)'}}>
                   <b>Requisitos:</b> {j.requirements}
                 </div>
               </div>
@@ -1486,8 +1489,8 @@ function PanelInner({ session, onUpdateSession }) {
             <div key={j.id} className="dashboard-card">
               <span className="eyebrow">{j.company} · {j.zone}</span>
               <h3>{j.position}</h3>
-              <p style={{fontSize:'12px', color:'#64748b'}}>{j.description}</p>
-              <div style={{marginTop:'10px', fontSize:'11px', color:'#334155', marginBottom:'16px'}}>
+              <p style={{fontSize:'12px', color: 'var(--muted)'}}>{j.description}</p>
+              <div style={{marginTop:'10px', fontSize:'11px', color: 'var(--muted)', marginBottom:'16px'}}>
                 <b>Requisitos:</b> {j.requirements}
               </div>
               <button className="btn primary" onClick={() => alert('Postulación de demostración enviada. (RF-41)')}>
@@ -1502,7 +1505,7 @@ function PanelInner({ session, onUpdateSession }) {
       {tab === 'colaboraciones' && (
         <div className="dashboard-card wide">
           <h3>Mis espacios comunitarios</h3>
-          <p style={{fontSize:'12px', color:'#64748b'}}>Sos un aliado clave en el prototipo. Podés coordinar las entregas y facilitar el acopio local.</p>
+          <p style={{fontSize:'12px', color: 'var(--muted)'}}>Sos un aliado clave en el prototipo. Podés coordinar las entregas y facilitar el acopio local.</p>
           <div style={{marginTop:'16px'}}>
             <button className="btn secondary" onClick={() => alert('Función de demostración')}>
               Ver agenda comunitaria
@@ -1586,7 +1589,7 @@ function DonationsView({ data = [] }) {
                   <button
                     type="button"
                     onClick={() => generateQR(d)}
-                    style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer', marginRight: '4px' }}
+                    style={{ background: 'var(--white)', border: '1px solid var(--line)', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer', marginRight: '4px' }}
                   >
                     QR<QrCode className="i i-r" size={14} />
                   </button>
@@ -1609,10 +1612,10 @@ function DonationsView({ data = [] }) {
           <div className="modal" ref={qrModalRef} role="dialog" aria-modal="true" aria-labelledby="qr-title" tabIndex={-1} onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
             <span className="eyebrow">CONSULTA LOCAL SIMULADA</span>
             <h3 id="qr-title" style={{ margin: '8px 0 4px' }}>Comprobante #{qrModal.donation.id}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#64748b' }}>
+            <p style={{ margin: '0 0 16px', fontSize: '12px', color: 'var(--muted)' }}>
               Código QR de demostración para verificar el aporte en centros comunitarios.
             </p>
-            <img src={qrModal.qrUrl} alt="QR de donación" style={{ width: '160px', height: '160px', border: '1px solid #dce8ec', borderRadius: '12px', padding: '8px' }} />
+            <img src={qrModal.qrUrl} alt="QR de donación" style={{ width: '160px', height: '160px', border: '1px solid var(--line)', borderRadius: '12px', padding: '8px' }} />
             <div style={{ marginTop: '20px' }}>
               <button className="btn secondary" onClick={() => setQrModal(null)}>Cerrar</button>
             </div>
@@ -1652,9 +1655,9 @@ function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }) {
 
       <div 
         style={{
-          background: '#ffffff',
+          background: 'var(--white)',
           borderRadius: '20px',
-          border: '1px solid #dce8ec',
+          border: '1px solid var(--line)',
           padding: '30px',
           maxWidth: '680px',
           boxShadow: 'var(--shadow-sm)'
@@ -1663,17 +1666,17 @@ function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }) {
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '24px' }}>
           <RoleAvatar src={roleIcons[session.role] || '/logo-mark.png'} alt={session.role} size={68} />
           <div>
-            <h2 style={{ margin: 0, fontSize: '22px', color: '#06244a' }}>{session.name}</h2>
+            <h2 style={{ margin: 0, fontSize: '22px', color: 'var(--navy)' }}>{session.name}</h2>
             <div style={{ display: 'flex', gap: '10px', marginTop: '6px', alignItems: 'center' }}>
               <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 10px', borderRadius: '14px', fontSize: '12px', fontWeight: '700' }}>
                 Rol: {session.role}
               </span>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>Zona: {session.zone}</span>
+              <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Zona: {session.zone}</span>
             </div>
           </div>
         </div>
 
-        <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+        <div style={{ background: 'var(--surface-soft)', padding: '18px', borderRadius: '12px', border: '1px solid var(--line-light)', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
           <div><strong>Correo ficticio:</strong> {session.email}</div>
           <div><strong>Teléfono:</strong> {session.phone || '+506 8888-0000'}</div>
           <div><strong>Zona comunitaria:</strong> {session.zone}</div>
@@ -1689,7 +1692,7 @@ function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }) {
               Cambiar cuenta<ArrowRightLeft className="i i-r" size={14} />
             </button>
           </div>
-          <button className="btn secondary" onClick={onLogout} style={{ color: '#b91c1c' }}>
+          <button className="btn secondary" onClick={onLogout} style={{ color: 'var(--danger)' }}>
             Cerrar sesión
           </button>
         </div>
@@ -2123,7 +2126,7 @@ function Chat() {
         <p>Preguntame cómo usar el sitio, sus roles o los flujos de solicitudes y donaciones. El asistente responde solo sobre CR Conecta.</p>
       </div>
 
-      <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #dce8ec', maxWidth: '750px', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--white)', borderRadius: '20px', border: '1px solid var(--line)', maxWidth: '750px', overflow: 'hidden' }}>
         <div aria-live="polite" aria-busy={sending} style={{ minHeight: '260px', maxHeight: '520px', overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {messages.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 10px', color: '#7a8e9f' }}>
@@ -2139,8 +2142,8 @@ function Chat() {
                   {message.question}
                 </div>
                 {message.answer === null
-                  ? <div role="status" style={{ alignSelf: 'flex-start', color: '#64748b', padding: '10px', fontSize: '13px' }}>Estoy buscando en la información del sitio…</div>
-                  : <div style={{ alignSelf: 'flex-start', background: '#eef5f8', color: '#09274c', padding: '12px 16px', borderRadius: '2px 14px 14px 14px', fontSize: '13px', maxWidth: '85%', whiteSpace: 'pre-wrap' }}>{message.answer}</div>}
+                  ? <div role="status" style={{ alignSelf: 'flex-start', color: 'var(--muted)', padding: '10px', fontSize: '13px' }}>Estoy buscando en la información del sitio…</div>
+                  : <div style={{ alignSelf: 'flex-start', background: 'var(--surface-soft)', color: 'var(--navy)', padding: '12px 16px', borderRadius: '2px 14px 14px 14px', fontSize: '13px', maxWidth: '85%', whiteSpace: 'pre-wrap' }}>{message.answer}</div>}
               </div>
             ))
           )}
@@ -2148,12 +2151,12 @@ function Chat() {
         </div>
 
         {error && (
-          <p role="alert" style={{ color: '#b91c1c', padding: '0 20px', margin: '0 0 12px', fontSize: '13px' }}>
+          <p role="alert" style={{ color: 'var(--danger)', padding: '0 20px', margin: '0 0 12px', fontSize: '13px' }}>
             {error}
           </p>
         )}
 
-        <form onSubmit={event => { event.preventDefault(); void ask(question); }} style={{ background: '#f8fafc', padding: '16px 20px', borderTop: '1px solid #edf2f5' }}>
+        <form onSubmit={event => { event.preventDefault(); void ask(question); }} style={{ background: 'var(--surface-soft)', padding: '16px 20px', borderTop: '1px solid var(--line-light)' }}>
           <label htmlFor="assistant-question" style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tu pregunta sobre CR Conecta</label>
           <div style={{ display: 'flex', gap: '8px' }}>
             <input
@@ -2162,7 +2165,7 @@ function Chat() {
               maxLength={1200}
               onChange={event => setQuestion(event.target.value)}
               placeholder="Ej. ¿Cómo registro una donación?"
-              style={{ flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: '20px', border: '1px solid #cbd5e1' }}
+              style={{ flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: '20px', border: '1px solid var(--line)' }}
               disabled={sending}
             />
             <button className="btn primary" type="submit" disabled={sending || !question.trim()}>
@@ -2176,7 +2179,7 @@ function Chat() {
                 type="button"
                 disabled={sending}
                 onClick={() => void ask(answer.question)}
-                style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '20px', padding: '7px 14px', fontSize: '12px', color: '#06244a', fontWeight: '600' }}
+                style={{ background: 'var(--white)', border: '1px solid var(--line)', borderRadius: '20px', padding: '7px 14px', fontSize: '12px', color: 'var(--navy)', fontWeight: '600' }}
               >
                 {answer.question}
               </button>
@@ -2184,7 +2187,7 @@ function Chat() {
           </div>
         </form>
       </div>
-      <p style={{ maxWidth: '750px', fontSize: '12px', color: '#64748b' }}>
+      <p style={{ maxWidth: '750px', fontSize: '12px', color: 'var(--muted)' }}>
         La IA solo orienta sobre el prototipo. No compartas información personal o sensible; sus respuestas pueden equivocarse.
       </p>
     </div>

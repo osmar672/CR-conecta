@@ -261,16 +261,16 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
             <span className="eyebrow" style={{ display: 'inline-block', marginBottom: '8px' }}>
               PROGRAMAS Y MODALIDADES DE APOYO
             </span>
-            <h2 style={{ margin: '0 0 10px', fontSize: '38px', letterSpacing: '-1.5px', color: '#06244a', fontWeight: '800' }}>
+            <h2 style={{ margin: '0 0 10px', fontSize: '38px', letterSpacing: '-1.5px', color: 'var(--navy)', fontWeight: '800' }}>
               ¿Qué ayudas ofrecemos?
             </h2>
-            <p style={{ margin: 0, fontSize: '15.5px', color: '#597084', lineHeight: '1.6' }}>
+            <p style={{ margin: 0, fontSize: '15.5px', color: 'var(--muted)', lineHeight: '1.6' }}>
               En CR Conecta coordinamos y canalizamos asistencia en 12 líneas prioritarias para las familias en condición de vulnerabilidad de Puntarenas, con validación comunitaria, respuesta rápida y límites que aseguran equidad.
             </p>
           </div>
 
           {/* Switcher Toggle */}
-          <div style={{ display: 'flex', gap: '8px', background: '#edf4f7', padding: '5px', borderRadius: '30px' }}>
+          <div style={{ display: 'flex', gap: '8px', background: 'var(--surface-soft)', padding: '5px', borderRadius: '30px' }}>
             <button
               type="button"
               onClick={() => setActiveTab('categories')}
@@ -372,7 +372,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
         {activeTab === 'active-cases' && (
           <div style={{ marginTop: '30px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontSize: '12.5px', color: '#5b7388' }}>
+              <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
                 Mostrando solicitudes aprobadas de demostración en Puntarenas con identidad protegida (RF-06):
               </span>
               <Link to="/necesidades" className="text-link" style={{ fontSize: '12.5px' }}>
@@ -427,9 +427,9 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
         <div 
           style={{
             marginTop: '34px',
-            background: '#ffffff',
+            background: 'var(--white)',
             borderRadius: '16px',
-            border: '1px solid #dce8ec',
+            border: '1px solid var(--line)',
             padding: '20px 28px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -443,10 +443,10 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <Handshake size={26} />
             <div>
-              <strong style={{ fontSize: '14px', color: '#06244a', display: 'block' }}>
+              <strong style={{ fontSize: '14px', color: 'var(--navy)', display: 'block' }}>
                 ¿Tu familia o comunidad necesita alguna de estas ayudas?
               </strong>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>
+              <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
                 Podés formular una solicitud en línea. Se registrará en estado "En revisión" para validación comunitaria.
               </span>
             </div>

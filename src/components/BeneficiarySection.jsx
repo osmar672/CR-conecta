@@ -126,9 +126,9 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
       {/* RF-05 Beneficiary Profile Card */}
       <div
         style={{
-          background: '#ffffff',
+          background: 'var(--white)',
           borderRadius: '18px',
-          border: '1px solid #dce7eb',
+          border: '1px solid var(--line)',
           padding: '22px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -148,23 +148,23 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
               borderRadius: '50%',
               objectFit: 'cover',
               border: '1px solid rgba(6, 36, 74, 0.08)',
-              background: '#fff'
+              background: 'var(--white)'
             }}
           />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontSize: '22px', color: '#09274c' }}>{session?.name}</h2>
+              <h2 style={{ margin: 0, fontSize: '22px', color: 'var(--navy)' }}>{session?.name}</h2>
               <span style={{ background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6', borderRadius: '14px', padding: '3px 10px', fontSize: '12px', fontWeight: '700' }}>
                 Rol: Beneficiario (RF-05)
               </span>
             </div>
-            <div style={{ display: 'flex', gap: '14px', color: '#627689', fontSize: '12.5px', marginTop: '6px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '14px', color: 'var(--muted)', fontSize: '12.5px', marginTop: '6px', flexWrap: 'wrap' }}>
               <span><Mail className="i i-l" size={13} />{session?.email}</span>
               <span><Phone className="i i-l" size={13} />{session?.phone || '+506 8888-0002'}</span>
               <span><MapPin className="i i-l" size={13} />{session?.zone || 'Barranca'}</span>
             </div>
             {session?.notes && (
-              <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#7a8e9e' }}>
+              <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
                 <em>"{session.notes}"</em>
               </p>
             )}
@@ -206,9 +206,9 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
         {/* Formulate Request Box */}
         <section className="beneficiary-panel"
           style={{
-            background: '#ffffff',
+            background: 'var(--white)',
             borderRadius: '18px',
-            border: '1px solid #dce7eb',
+            border: '1px solid var(--line)',
             padding: '22px',
             boxShadow: '0 8px 25px rgba(6,36,74,0.03)'
           }}
@@ -331,9 +331,9 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
         {/* Mis Solicitudes y Ayudas Consultadas (RF-05) */}
         <section className="beneficiary-panel"
           style={{
-            background: '#ffffff',
+            background: 'var(--white)',
             borderRadius: '18px',
-            border: '1px solid #dce7eb',
+            border: '1px solid var(--line)',
             padding: '22px',
             boxShadow: '0 8px 25px rgba(6,36,74,0.03)',
             display: 'flex',
@@ -342,17 +342,17 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
         >
           <div style={{ marginBottom: '16px' }}>
             <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#2b789e', fontWeight: '800' }}>SEGUIMIENTO</span>
-            <h3 style={{ margin: '4px 0 0', fontSize: '20px', color: '#09274c' }}>
+            <h3 style={{ margin: '4px 0 0', fontSize: '20px', color: 'var(--navy)' }}>
               Mis solicitudes
             </h3>
-            <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#687d91' }}>
+            <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>
               Consultá el estado de cada apoyo.
             </p>
           </div>
 
           <div className="beneficiary-request-list">
             {myRequests.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 16px', color: '#889baa' }}>
+              <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--muted)' }}>
                 <ClipboardList size={32} />
                 <p style={{ margin: '10px 0 0', fontSize: '13px' }}>Aún no has registrado solicitudes de ayuda.</p>
               </div>
@@ -366,18 +366,18 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                     key={r.id}
                     className="beneficiary-request-card"
                     style={{
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid var(--line-light)',
                       borderRadius: '14px',
                       padding: '13px',
-                      background: '#fafcff',
+                      background: 'var(--surface-soft)',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: '8px'
                     }}
                   >
                     <div className="beneficiary-request-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: '800', color: '#06244a', fontSize: '13px' }}>
-                        #{r.id} · <span style={{ color: '#5b7185', fontWeight: '600' }}>{r.category}</span>
+                      <span style={{ fontWeight: '800', color: 'var(--navy)', fontSize: '13px' }}>
+                        #{r.id} · <span style={{ color: 'var(--muted)', fontWeight: '600' }}>{r.category}</span>
                       </span>
                       <div className="beneficiary-request-badges" style={{ display: 'flex', gap: '6px' }}>
                         <span
@@ -411,7 +411,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                       {r.description}
                     </div>
 
-                    <div className="beneficiary-request-meta" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b' }}>
+                    <div className="beneficiary-request-meta" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)' }}>
                       <span>Zona: {r.zone}</span>
                       <span>Cantidad: {r.amount} {r.unit}</span>
                     </div>
@@ -420,7 +420,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                       <summary>Ver avance y detalles</summary>
                       <p className="beneficiary-request-full-description">{r.description}</p>
                       <div className="beneficiary-request-progress">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--muted)', marginBottom: '4px' }}>
                           <span>Progreso de donaciones</span>
                           <span>{r.received || 0} / {r.goal || r.amount} {r.unit} ({progress}%)</span>
                         </div>
@@ -430,7 +430,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                       </div>
 
                       {r.decisionReason && (
-                        <div style={{ background: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: '#334155', marginTop: '10px' }}>
+                        <div style={{ background: 'var(--surface-soft)', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: 'var(--muted)', marginTop: '10px' }}>
                           <strong>Dictamen administrativo:</strong> {r.decisionReason} ({r.decisionDate})
                           {r.exceptionGranted && (
                             <div style={{ color: '#b45309', fontWeight: '600', marginTop: '2px' }}>

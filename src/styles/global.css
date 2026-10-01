@@ -22,6 +22,16 @@
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-full: 9999px;
+
+  /* Tokens de tema: los modos oscuro y daltónico solo redefinen esta capa. */
+  --surface-soft: #f2f7f9;
+  --accent-primary: #257a9e;
+  --accent-secondary: #2b7a9e;
+  --accent-violet: #6366f1;
+  --success: #137333;
+  --warning: #b06000;
+  --danger: #b91c1c;
+  --on-accent: #ffffff;
 }
 
 * {
@@ -3057,4 +3067,560 @@ footer strong {
 @media (max-width: 768px) {
   .clothing-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .clothing-section { padding: 48px 4%; }
+}
+
+/* ==================================================================
+   PREFERENCIAS DE VISUALIZACIÓN
+   Modo oscuro · Tamaño de letra · Modo daltónico
+   ================================================================== */
+
+/* CONTROLES DEL ENCABEZADO */
+.display-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-full);
+  background: var(--surface-soft);
+}
+
+.display-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  padding: 6px 11px;
+  background: transparent;
+  color: var(--ink-secondary);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.display-control:hover {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--navy);
+}
+
+.display-control[aria-pressed='true'] {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--on-accent);
+}
+
+.display-control-value {
+  font-variant-numeric: tabular-nums;
+  min-width: 34px;
+  text-align: center;
+}
+
+.display-control:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1180px) {
+  .display-control span:not(.display-control-value) { display: none; }
+  .display-control { padding: 7px 9px; }
+}
+
+@media (max-width: 960px) {
+  .display-controls { order: 4; }
+}
+
+/* ------------------------------------------------------------------
+   MODO OSCURO
+   Fondo #121212 · Superficie elevada #1E1E1E · Superficie #2C2C2C
+   Acento primario #BB86FC · Acento secundario #03DAC6
+   Texto #E1E1E1 / #A0A0A0 · Error #CF6679
+   ------------------------------------------------------------------ */
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --navy: #e1e1e1;
+  --navy-dark: #9e6df0;
+  --navy-light: #2c2c2c;
+  --blue: #bb86fc;
+  --blue-hover: #9e6df0;
+  --blue-light: #2c2c2c;
+  --cream: #1e1e1e;
+  --ink: #e1e1e1;
+  --ink-secondary: #a0a0a0;
+  --muted: #a0a0a0;
+  --line: #2c2c2c;
+  --line-light: #262626;
+  --bg-page: #121212;
+  --white: #1e1e1e;
+  --surface-soft: #2c2c2c;
+
+  --accent-primary: #bb86fc;
+  --accent-secondary: #03dac6;
+  --accent-violet: #bb86fc;
+  --success: #03dac6;
+  --warning: #e0b062;
+  --danger: #cf6679;
+  --on-accent: #17121f;
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.55);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+html[data-theme='dark'] body {
+  background: #121212;
+  color: #e1e1e1;
+}
+
+/* Superficies que en el tema claro eran azul marino sólido */
+html[data-theme='dark'] .top-strip,
+html[data-theme='dark'] .impact-strip {
+  background: #1e1e1e;
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] .btn.primary {
+  background: #bb86fc;
+  color: #17121f;
+}
+
+html[data-theme='dark'] .btn.primary:hover {
+  background: #9e6df0;
+}
+
+html[data-theme='dark'] .btn.secondary {
+  background: #2c2c2c;
+  border-color: #3a3a3a;
+  color: #e1e1e1;
+}
+
+html[data-theme='dark'] .btn.secondary:hover {
+  background: #383838;
+  border-color: #4a4a4a;
+}
+
+html[data-theme='dark'] .profile-chip,
+html[data-theme='dark'] .display-controls {
+  background: #2c2c2c;
+  border-color: #3a3a3a;
+  color: #e1e1e1;
+}
+
+html[data-theme='dark'] .profile-chip:hover {
+  background: #383838;
+  border-color: #4a4a4a;
+}
+
+html[data-theme='dark'] .profile-chip span,
+html[data-theme='dark'] .avatar {
+  background: #bb86fc;
+  color: #17121f;
+}
+
+html[data-theme='dark'] .display-control {
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] .display-control:hover {
+  background: #383838;
+  border-color: #4a4a4a;
+  color: #e1e1e1;
+}
+
+html[data-theme='dark'] .display-control[aria-pressed='true'] {
+  background: #bb86fc;
+  border-color: #bb86fc;
+  color: #17121f;
+}
+
+html[data-theme='dark'] nav a {
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] nav a:hover,
+html[data-theme='dark'] nav a.active {
+  background: #2c2c2c;
+  color: #bb86fc;
+}
+
+/* Superficies elevadas (tarjetas, tablas, modales, paneles) */
+html[data-theme='dark'] .header,
+html[data-theme='dark'] .map-card,
+html[data-theme='dark'] .how-it-works-section,
+html[data-theme='dark'] .coverage-section,
+html[data-theme='dark'] .account-card,
+html[data-theme='dark'] .aid-category-card,
+html[data-theme='dark'] .clothing-card,
+html[data-theme='dark'] .clothing-filter-btn,
+html[data-theme='dark'] .coverage-card,
+html[data-theme='dark'] .coverage-facility-box,
+html[data-theme='dark'] .dashboard>.metric,
+html[data-theme='dark'] .dashboard-card,
+html[data-theme='dark'] .dashboard-metric-card,
+html[data-theme='dark'] .error-panel,
+html[data-theme='dark'] .modal,
+html[data-theme='dark'] .needs-list-card,
+html[data-theme='dark'] .pills button,
+html[data-theme='dark'] .panel-tabs button,
+html[data-theme='dark'] .sponsor-card,
+html[data-theme='dark'] .sponsor-cta-banner,
+html[data-theme='dark'] .state,
+html[data-theme='dark'] .step-card,
+html[data-theme='dark'] .step-card.step-active,
+html[data-theme='dark'] .table-wrap,
+html[data-theme='dark'] .aid-card-includes,
+html[data-theme='dark'] .zone-filter-pills button,
+html[data-theme='dark'] footer {
+  background: #1e1e1e;
+  border-color: #2c2c2c;
+  color: #e1e1e1;
+}
+
+html[data-theme='dark'] .help-form-card,
+html[data-theme='dark'] .admin-dashboard-toolbar,
+html[data-theme='dark'] .clothing-section,
+html[data-theme='dark'] .help-form-checkbox {
+  background: linear-gradient(150deg, #1e1e1e, #232323);
+  border-color: #2c2c2c;
+  color: #e1e1e1;
+}
+
+html[data-theme='dark'] .header {
+  background: #1e1e1e;
+  box-shadow: 0 1px 0 #2c2c2c;
+}
+
+/* Superficies secundarias (pocillos de icono, campos, pistas) */
+html[data-theme='dark'] .cta-icon-pill,
+html[data-theme='dark'] .dashboard-bar-track,
+html[data-theme='dark'] .dashboard-chart-icon,
+html[data-theme='dark'] .dashboard-chart-total,
+html[data-theme='dark'] .dashboard-column-track,
+html[data-theme='dark'] .dashboard-insight-icon,
+html[data-theme='dark'] .dashboard-insight-tag,
+html[data-theme='dark'] .dashboard-metric-icon,
+html[data-theme='dark'] .eyebrow-pill,
+html[data-theme='dark'] .flow-pill,
+html[data-theme='dark'] .help-form-field input,
+html[data-theme='dark'] .help-form-field input[readonly],
+html[data-theme='dark'] .help-form-field select,
+html[data-theme='dark'] .help-form-field textarea,
+html[data-theme='dark'] .map-frame,
+html[data-theme='dark'] .map-zone-button,
+html[data-theme='dark'] .needs-list-card .progress,
+html[data-theme='dark'] .sponsor-icon-wrap,
+html[data-theme='dark'] .sponsors-badge,
+html[data-theme='dark'] .state-icon,
+html[data-theme='dark'] .step-number,
+html[data-theme='dark'] th,
+html[data-theme='dark'] .clothing-tag.size,
+html[data-theme='dark'] .clothing-tag.zone,
+html[data-theme='dark'] .coverage-tag {
+  background: #2c2c2c;
+  border-color: #3a3a3a;
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] .help-form-field input,
+html[data-theme='dark'] .help-form-field select,
+html[data-theme='dark'] .help-form-field textarea {
+  color: #e1e1e1;
+  border-color: #3a3a3a;
+}
+
+html[data-theme='dark'] .pills button,
+html[data-theme='dark'] .panel-tabs button,
+html[data-theme='dark'] .clothing-filter-btn,
+html[data-theme='dark'] .map-zone-button {
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] .pills button.active,
+html[data-theme='dark'] .panel-tabs button.active,
+html[data-theme='dark'] .clothing-filter-btn.active,
+html[data-theme='dark'] .map-zone-button.active,
+html[data-theme='dark'] .zone-filter-pills button.active {
+  background: #bb86fc;
+  border-color: #bb86fc;
+  color: #17121f;
+}
+
+html[data-theme='dark'] .pills button:hover,
+html[data-theme='dark'] .clothing-filter-btn:hover {
+  color: #e1e1e1;
+  border-color: #bb86fc;
+}
+
+/* Iconografía que usaba azul de marca sobre fondos claros */
+html[data-theme='dark'] .state-icon,
+html[data-theme='dark'] .step-number,
+html[data-theme='dark'] .map-location-icon,
+html[data-theme='dark'] .eyebrow-pill,
+html[data-theme='dark'] .flow-pill,
+html[data-theme='dark'] .step-subtitle,
+html[data-theme='dark'] .eyebrow-pill,
+html[data-theme='dark'] .help-form-step,
+html[data-theme='dark'] .need-foot a:hover,
+html[data-theme='dark'] .need-foot button:hover {
+  color: #bb86fc;
+}
+
+html[data-theme='dark'] .hero h1,
+html[data-theme='dark'] .hero h1 em,
+html[data-theme='dark'] .hero h1 span.accent-text {
+  color: #bb86fc;
+}
+
+html[data-theme='dark'] .sponsors-header h2,
+html[data-theme='dark'] .coverage-header-flex h2,
+html[data-theme='dark'] .section-header-centered h2,
+html[data-theme='dark'] .section-intro h2,
+html[data-theme='dark'] .page-head h1,
+html[data-theme='dark'] .section-head h3,
+html[data-theme='dark'] .dashboard-card h3,
+html[data-theme='dark'] .dashboard-chart-heading h3,
+html[data-theme='dark'] .dashboard-metric-card strong,
+html[data-theme='dark'] .dashboard-bar-label strong,
+html[data-theme='dark'] .dashboard-chart-total strong,
+html[data-theme='dark'] .dashboard-column-value,
+html[data-theme='dark'] .dashboard-community-summary strong,
+html[data-theme='dark'] .dashboard-insight strong,
+html[data-theme='dark'] .dashboard-activity-row strong,
+html[data-theme='dark'] .admin-dashboard-toolbar strong,
+html[data-theme='dark'] .modal h3,
+html[data-theme='dark'] .account-card b,
+html[data-theme='dark'] .error-panel,
+html[data-theme='dark'] footer strong,
+html[data-theme='dark'] .step-card h3,
+html[data-theme='dark'] .sponsor-body h3,
+html[data-theme='dark'] .sponsor-cta-content h3,
+html[data-theme='dark'] .coverage-card h3,
+html[data-theme='dark'] .aid-card-body h3,
+html[data-theme='dark'] .clothing-card-name,
+html[data-theme='dark'] .facility-title,
+html[data-theme='dark'] .needs-list-card .need-body h3,
+html[data-theme='dark'] .map-location-card strong {
+  color: #e1e1e1;
+}
+
+html[data-theme='dark'] .modal p,
+html[data-theme='dark'] .simulated,
+html[data-theme='dark'] .dashboard-empty-note,
+html[data-theme='dark'] .sponsor-support,
+html[data-theme='dark'] .sponsor-type,
+html[data-theme='dark'] .step-feature-item,
+html[data-theme='dark'] .aid-includes-title,
+html[data-theme='dark'] .help-form-field>label,
+html[data-theme='dark'] .help-form-checkbox label,
+html[data-theme='dark'] .beneficiary-request-full-description,
+html[data-theme='dark'] .beneficiary-request-details summary,
+html[data-theme='dark'] .clothing-tag,
+html[data-theme='dark'] .dashboard-insight-tag,
+html[data-theme='dark'] .map-active-indicator,
+html[data-theme='dark'] .needs-list-card .need-foot button {
+  color: #a0a0a0;
+}
+
+/* Distintivos de estado */
+html[data-theme='dark'] .success-banner,
+html[data-theme='dark'] .aid-limit-tag,
+html[data-theme='dark'] .help-form-success-icon,
+html[data-theme='dark'] .coverage-badge-live,
+html[data-theme='dark'] .check-bullet,
+html[data-theme='dark'] .sponsor-footer {
+  background: rgba(3, 218, 198, 0.14);
+  border-color: rgba(3, 218, 198, 0.32);
+  color: #6fe8da;
+}
+
+html[data-theme='dark'] .help-form-error,
+html[data-theme='dark'] .modal-mark,
+html[data-theme='dark'] .needs-list-card .priority,
+html[data-theme='dark'] .aid-card-image::after {
+  background: rgba(207, 102, 121, 0.15);
+  border-color: rgba(207, 102, 121, 0.34);
+  color: #e5919f;
+}
+
+html[data-theme='dark'] .needs-list-card .priority {
+  border: 1px solid rgba(207, 102, 121, 0.34);
+}
+
+html[data-theme='dark'] .sponsor-category-pill,
+html[data-theme='dark'] .clothing-tag.gender-hombre,
+html[data-theme='dark'] .clothing-tag.gender-nino {
+  background: rgba(187, 134, 252, 0.16);
+  color: #cdb0ff;
+}
+
+html[data-theme='dark'] .api-banner {
+  background: rgba(224, 176, 98, 0.14);
+  border-bottom-color: rgba(224, 176, 98, 0.32);
+  color: #e6c48a;
+}
+
+html[data-theme='dark'] .api-banner button {
+  background: #2c2c2c;
+  border-color: rgba(224, 176, 98, 0.4);
+  color: #e6c48a;
+}
+
+html[data-theme='dark'] .api-banner code {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme='dark'] .modal-backdrop {
+  background: rgba(0, 0, 0, 0.68);
+}
+
+/* Fondos con degradado propio */
+html[data-theme='dark'] .needs-page {
+  background:
+    radial-gradient(ellipse at 92% 7%, rgba(3, 218, 198, 0.09), transparent 29%),
+    linear-gradient(180deg, #121212 0%, #161616 100%);
+}
+
+html[data-theme='dark'] .needs-page .pills button,
+html[data-theme='dark'] .needs-page .pills .btn.primary,
+html[data-theme='dark'] .needs-page .pills button.active {
+  background: #2c2c2c;
+  color: #e1e1e1;
+  border-color: #3a3a3a;
+}
+
+html[data-theme='dark'] .needs-page .pills .btn.primary,
+html[data-theme='dark'] .needs-page .pills button.active {
+  background: #bb86fc;
+  border-color: #bb86fc;
+  color: #17121f;
+}
+
+html[data-theme='dark'] .needs-count-note {
+  background: #1e1e1e;
+  border-color: #2c2c2c;
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] .needs-list-card .need-top {
+  background: #2c2c2c;
+}
+
+html[data-theme='dark'] .map-location-card {
+  background: rgba(30, 30, 30, 0.96);
+  border-color: #2c2c2c;
+  color: #e1e1e1;
+}
+
+html[data-theme='dark'] .eyebrow,
+html[data-theme='dark'] .map-open-link,
+html[data-theme='dark'] .dashboard-activity-status,
+html[data-theme='dark'] .need-zone,
+html[data-theme='dark'] .beneficiary-request-details {
+  color: #a0a0a0;
+}
+
+html[data-theme='dark'] .micro,
+html[data-theme='dark'] .map-note {
+  color: #8a8a8a;
+}
+
+html[data-theme='dark'] .aid-image-icon {
+  background: #2c2c2c;
+  color: #bb86fc;
+}
+
+html[data-theme='dark'] .aid-card-image {
+  background: #2c2c2c;
+}
+
+html[data-theme='dark'] .role-avatar,
+html[data-theme='dark'] img {
+  border-color: #2c2c2c;
+}
+
+html[data-theme='dark'] .dashboard-bars-columns .dashboard-bar-row:hover {
+  background: #2c2c2c;
+}
+
+/* ------------------------------------------------------------------
+   MODO DALTÓNICO
+   Paleta derivada de Okabe-Ito: azul, naranja, verde azulado y amarillo
+   se distinguen en protanopía, deuteranopía y tritanopía.
+   ------------------------------------------------------------------ */
+html[data-color-mode='colorblind'] {
+  --navy: #003049;
+  --navy-dark: #001f30;
+  --blue: #0072b2;
+  --blue-hover: #005488;
+  --blue-light: #e2eff8;
+  --ink: #10222c;
+  --ink-secondary: #40555f;
+  --muted: #40555f;
+  --line: #b4c9d6;
+  --line-light: #d5e3eb;
+  --bg-page: #f4f8fa;
+  --surface-soft: #eaf2f7;
+
+  --accent-primary: #0072b2;
+  --accent-secondary: #e69f00;
+  --accent-violet: #cc79a7;
+  --success: #00795e;
+  --warning: #a35c00;
+  --danger: #b00020;
+  --on-accent: #ffffff;
+}
+
+/* El color nunca es la única señal: cada estado suma borde y forma. */
+html[data-color-mode='colorblind'] .needs-list-card .priority,
+html[data-color-mode='colorblind'] .clothing-tag,
+html[data-color-mode='colorblind'] .pills button.active,
+html[data-color-mode='colorblind'] .zone-filter-pills button.active {
+  border: 1.5px solid currentColor;
+}
+
+html[data-color-mode='colorblind'] .needs-list-card .priority.alta,
+html[data-color-mode='colorblind'] .clothing-tag.condition-nueva {
+  box-shadow: inset 0 0 0 1px rgba(176, 0, 32, 0.25);
+}
+
+html[data-color-mode='colorblind'] .needs-list-card .priority.media {
+  box-shadow: inset 0 0 0 1px rgba(163, 92, 0, 0.25);
+}
+
+html[data-color-mode='colorblind'] .needs-list-card .priority.baja {
+  box-shadow: inset 0 0 0 1px rgba(0, 114, 178, 0.25);
+}
+
+html[data-color-mode='colorblind'] .progress span,
+html[data-color-mode='colorblind'] .needs-list-card .progress span {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+html[data-color-mode='colorblind'] .dashboard-bar-track>span,
+html[data-color-mode='colorblind'] .dashboard-column-track>span {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.35) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+html[data-color-mode='colorblind'] .text-link,
+html[data-color-mode='colorblind'] a {
+  text-decoration-thickness: 1.5px;
+}
+
+@media (prefers-contrast: more) {
+  html[data-color-mode='colorblind'] {
+    --line: #7d97a6;
+    --muted: #2c3d45;
+  }
 }
