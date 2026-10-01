@@ -958,6 +958,16 @@
   ],
   "activity": [
     {
+      "id": "4f032bcc-e897-49da-91e4-a4f9937025a7",
+      "timestamp": "2026-10-01T15:03:20.817Z",
+      "actor": "María Administradora",
+      "actorRole": "Administrador",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u1",
+      "detail": ""
+    },
+    {
       "id": "2f18f9a7-d086-4348-9193-b20e07b602ab",
       "timestamp": "2026-09-29T20:51:02.038Z",
       "actor": "María Administradora",
