@@ -363,7 +363,7 @@ function PanelInner({ session, onUpdateSession }) {
             />
       )}
 
-<<<<<<< HEAD
+ HEAD
  erian-feature
       {((isAdmin && tab === 'resumen') || (isCompany && tab === 'campañas y empleo')) && (
         <CampaignProjection campaigns={campaigns} />
@@ -518,11 +518,11 @@ function PanelInner({ session, onUpdateSession }) {
 
 
  main
-=======
+
       {/* CUENTAS */}
       {tab === 'cuentas' && <AccountsSection sessionRole={role} />}
 
->>>>>>> 0a80d23 (inicio secion)
+ (inicio secion)
       {/* DONATIONS TABLE */}
       {(tab === 'donaciones' || tab === 'mis donaciones') && (
         <DonationsView data={dons} />
