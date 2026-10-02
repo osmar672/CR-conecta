@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
-import { ArrowRight, ArrowUpRight, MapPin } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, MapPin, Minus, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useData } from '../lib/useData';
 import { SponsorsSection } from '../components/SponsorsSection';
 import { HowItWorksSection } from '../components/HowItWorksSection';
 import { CommunityCoverageSection } from '../components/CommunityCoverageSection';
 import { AidServicesSection } from '../components/AidServicesSection';
+import { DEFAULT_MAP_ZOOM, getMapBounds, MAX_MAP_ZOOM, MIN_MAP_ZOOM } from '../lib/mapZoom';
 
 export function Home({ onOpenNeedModal }) {
   const { data: reqs = [] } = useData('/requests');
@@ -13,6 +14,7 @@ export function Home({ onOpenNeedModal }) {
   const { data: allies = [] } = useData('/allies');
   const { data: facilities = [] } = useData('/facilities');
   const [selectedMapZone, setSelectedMapZone] = useState('Puntarenas Centro');
+  const [mapZoom, setMapZoom] = useState(DEFAULT_MAP_ZOOM);
 
   const mapZones = [
     { name: 'Puntarenas Centro', lat: 9.9763, lon: -84.8384, detail: 'Centro de coordinación y acopio' },
@@ -21,9 +23,9 @@ export function Home({ onOpenNeedModal }) {
     { name: 'Chacarita', lat: 9.9778, lon: -84.7467, detail: 'Red vecinal y artículos para el hogar' }
   ];
   const activeMapZone = mapZones.find(zone => zone.name === selectedMapZone) || mapZones[0];
-  const mapBounds = `${activeMapZone.lon - 0.018},${activeMapZone.lat - 0.012},${activeMapZone.lon + 0.018},${activeMapZone.lat + 0.012}`;
+  const mapBounds = getMapBounds(activeMapZone, mapZoom);
   const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(mapBounds)}&layer=mapnik&marker=${activeMapZone.lat},${activeMapZone.lon}`;
-  const mapLinkUrl = `https://www.openstreetmap.org/?mlat=${activeMapZone.lat}&mlon=${activeMapZone.lon}#map=15/${activeMapZone.lat}/${activeMapZone.lon}`;
+  const mapLinkUrl = `https://www.openstreetmap.org/?mlat=${activeMapZone.lat}&mlon=${activeMapZone.lon}#map=${mapZoom}/${activeMapZone.lat}/${activeMapZone.lon}`;
 
   // Pick sample requests or fallback to mockup items
   const displayNeeds = useMemo(() => {
@@ -91,13 +93,26 @@ export function Home({ onOpenNeedModal }) {
           </div>
 
           <div className="map-frame">
-            <iframe
-              key={selectedMapZone}
-              title={`Mapa de referencia: ${activeMapZone.name}, Puntarenas`}
-              src={mapEmbedUrl}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+            <div className="map-embed-viewport">
+              <iframe
+                title={`Mapa de referencia: ${activeMapZone.name}, Puntarenas`}
+                src={mapEmbedUrl}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+            <div className="map-zoom-controls" role="group" aria-label="Zoom del mapa">
+              <button type="button" aria-label="Acercar mapa" title="Acercar mapa"
+                disabled={mapZoom >= MAX_MAP_ZOOM}
+                onClick={() => setMapZoom(current => Math.min(MAX_MAP_ZOOM, current + 1))}>
+                <Plus size={18} aria-hidden="true" />
+              </button>
+              <button type="button" aria-label="Alejar mapa" title="Alejar mapa"
+                disabled={mapZoom <= MIN_MAP_ZOOM}
+                onClick={() => setMapZoom(current => Math.max(MIN_MAP_ZOOM, current - 1))}>
+                <Minus size={18} aria-hidden="true" />
+              </button>
+            </div>
             <div className="map-location-card">
               <span className="map-location-icon"><MapPin size={17} /></span>
               <span><strong>{activeMapZone.name}</strong><small>{activeMapZone.detail}</small></span>

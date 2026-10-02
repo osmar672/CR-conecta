@@ -33,6 +33,7 @@ export function DonationsView({ data = [] }) {
               <tr key={d.id}>
                 <td style={{ fontWeight: '800' }}>#{d.id}</td>
                 <td>
+                  {d.photo && <img className="donation-photo-thumbnail" src={d.photo} alt={`Producto donado: ${d.product}`} loading="lazy" />}
                   <b>{d.product}</b>
                   <small>{d.anonymous ? <><Lock className="i i-l" size={12} />Anónimo (Protegido)</> : `Donante: ${d.donorType}`}</small>
                 </td>

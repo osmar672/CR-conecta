@@ -1,0 +1,95 @@
+{
+  "name": "CR Conecta | Necesidades aprobadas y donaciones",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cr-conecta-solicitud-aprobada",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "cr-approval-webhook",
+      "name": "Solicitud aprobada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 160],
+      "webhookId": "cr-conecta-solicitud-aprobada"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nif (body?.type !== 'request.approved' || !body.data?.id || !body.data?.category) throw new Error('Evento de aprobación inválido');\nconst d = body.data;\nconst esc = value => String(value ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nreturn [{ json: { subject: `CR Conecta: necesidad aprobada #${d.id}`, html: `<h2>Necesidad lista para recibir donaciones</h2><p><strong>Solicitud:</strong> ${esc(d.id)}</p><p><strong>Categoría:</strong> ${esc(d.category)}</p><p><strong>Zona:</strong> ${esc(d.zone)}</p><p><strong>Cantidad:</strong> ${esc(d.amount)} ${esc(d.unit)}</p><p><strong>Prioridad:</strong> ${esc(d.priority)}</p><p>Revisá la necesidad aprobada en CR Conecta antes de coordinar aportes.</p><small>Aviso de un prototipo académico; datos simulados.</small>` } }];"
+      },
+      "id": "cr-format-approval",
+      "name": "Preparar aviso de necesidad",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 160]
+    },
+    {
+      "parameters": {
+        "fromEmail": "avisos@ejemplo.invalid",
+        "toEmail": "equipo@ejemplo.invalid",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "cr-email-approval",
+      "name": "Avisar al equipo",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [760, 160]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cr-conecta-donacion-registrada",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "cr-donation-webhook",
+      "name": "Donación registrada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 440],
+      "webhookId": "cr-conecta-donacion-registrada"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nif (body?.type !== 'donation.registered' || !body.data?.id || !body.data?.product) throw new Error('Evento de donación inválido');\nconst d = body.data;\nconst esc = value => String(value ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nreturn [{ json: { subject: `CR Conecta: nueva donación #${d.id}`, html: `<h2>Nuevo aporte registrado</h2><p>El equipo tiene una nueva donación pendiente de seguimiento.</p><hr><h3>Comprobante de registro #${esc(d.id)}</h3><p><strong>Fecha:</strong> ${esc(d.date)}</p><p><strong>Producto:</strong> ${esc(d.product)}</p><p><strong>Categoría:</strong> ${esc(d.category)}</p><p><strong>Cantidad:</strong> ${esc(d.quantity)}</p><p><strong>Destino:</strong> ${esc(d.destination)}</p><p><strong>Estado:</strong> ${esc(d.status)}</p><p><strong>Tipo:</strong> ${d.anonymous ? 'Anónimo' : 'Registrado'}</p><hr><small>Comprobante de registro de un prototipo académico. No confirma recepción física, entrega ni beneficio fiscal.</small>` } }];"
+      },
+      "id": "cr-format-donation",
+      "name": "Preparar aviso y comprobante",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 440]
+    },
+    {
+      "parameters": {
+        "fromEmail": "avisos@ejemplo.invalid",
+        "toEmail": "equipo@ejemplo.invalid",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "cr-email-donation",
+      "name": "Enviar aporte y comprobante",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [760, 440]
+    }
+  ],
+  "connections": {
+    "Solicitud aprobada": { "main": [[{ "node": "Preparar aviso de necesidad", "type": "main", "index": 0 }]] },
+    "Preparar aviso de necesidad": { "main": [[{ "node": "Avisar al equipo", "type": "main", "index": 0 }]] },
+    "Donación registrada": { "main": [[{ "node": "Preparar aviso y comprobante", "type": "main", "index": 0 }]] },
+    "Preparar aviso y comprobante": { "main": [[{ "node": "Enviar aporte y comprobante", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

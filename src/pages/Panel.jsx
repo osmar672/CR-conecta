@@ -8,6 +8,7 @@ import { BeneficiarySection } from '../components/BeneficiarySection';
 import { ProfileEditModal } from '../components/ProfileEditModal';
 import { DashboardBarChart, DashboardMetric, dashboardCounts } from '../components/DashboardCharts';
 import { DonationsView } from '../components/DonationsView';
+import { CampaignProjection } from '../components/CampaignProjection';
 
 function AdminOverview({ reqs, dons, inv, trans, campaigns, jobs, refreshCount, onRefresh }) {
   const { data: users = [], state: usersState } = useData('/users', refreshCount);
@@ -393,6 +394,10 @@ function PanelInner({ session, onUpdateSession }) {
               trans={trans}
               campaigns={campaigns}
             />
+      )}
+
+      {((isAdmin && tab === 'resumen') || (isCompany && tab === 'campañas y empleo')) && (
+        <CampaignProjection campaigns={campaigns} />
       )}
 
       {/* ADMIN EVALUATION OF REQUESTS (RF-08, RF-09, RF-10) */}

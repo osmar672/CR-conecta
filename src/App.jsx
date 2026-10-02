@@ -97,6 +97,7 @@ function Shell() {
         <nav>
           <NavLink to="/" end>Inicio</NavLink>
           <NavLink to="/necesidades">Necesidades</NavLink>
+          <NavLink to="/donar">Donar</NavLink>
           <NavLink to="/panel">Panel de gestión</NavLink>
           <NavLink to="/chat">Asistente</NavLink>
         </nav>

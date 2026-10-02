@@ -958,13 +958,13 @@
   ],
   "activity": [
     {
-      "id": "4f032bcc-e897-49da-91e4-a4f9937025a7",
-      "timestamp": "2026-10-01T15:03:20.817Z",
-      "actor": "María Administradora",
-      "actorRole": "Administrador",
+      "id": "fe8c7be6-70cc-40a5-81c0-14cc339703ce",
+      "timestamp": "2026-10-02T15:34:15.720Z",
+      "actor": "Carlos Donante",
+      "actorRole": "Donante individual",
       "action": "inició sesión",
       "entity": "sesión",
-      "entityId": "u1",
+      "entityId": "u3",
       "detail": ""
     },
     {

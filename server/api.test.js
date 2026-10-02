@@ -1,3 +1,4 @@
+const donationPhoto = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAACAAIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDxyiiiv3E8w//Z';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createApiServer } from './api.js';
@@ -143,6 +144,40 @@ test('assistant endpoint returns a clear configuration error when no key is pres
   assert.match((await response.json()).message, /GROQ_API_KEY/);
 });
 
+test('campaign projection is role protected and scopes company data before contacting AI', async t => {
+  const database = createDatabase();
+  database.users.push({ id: 'company', name: 'Company Demo', role: 'Empresa donante' });
+  database.campaigns = [
+    { id: 'own', companyId: 'company', category: 'Vestimenta', goal: 30, progress: 10 },
+    { id: 'other', companyId: 'another', category: 'Alimentos sellados', goal: 90, progress: 80 }
+  ];
+  database.donations = [
+    { id: 'own', donorId: 'company', category: 'Vestimenta', quantity: 4 },
+    { id: 'other', donorId: 'another', category: 'Alimentos sellados', quantity: 40 }
+  ];
+  let providerInput;
+  const server = createApiServer({ database, persist: async () => {}, assistantApiKey: 'server-only-key',
+    assistantFetch: async (_url, options) => {
+      providerInput = JSON.parse(options.body).messages[1].content;
+      return { ok: true, json: async () => ({ choices: [{ message: { content: '{"summary":"Escenario estimado.","assumptions":["Datos escasos"],"weeklyUnits":[3,4]}' } }] }) };
+    }
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const url = `http://127.0.0.1:${server.address().port}`;
+  const options = cookie => ({ method: 'POST', headers: { 'Content-Type': 'application/json', ...(cookie ? { Cookie: cookie } : {}) },
+    body: JSON.stringify({ category: 'Vestimenta', goal: 20, weeks: 2 }) });
+  assert.equal((await fetch(`${url}/assistant/campaign-projection`, options())).status, 401);
+  const beneficiary = await login(url, 'beneficiary');
+  assert.equal((await fetch(`${url}/assistant/campaign-projection`, options(beneficiary.cookie))).status, 403);
+  const company = await login(url, 'company');
+  const response = await fetch(`${url}/assistant/campaign-projection`, options(company.cookie));
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).weeklyUnits, [3, 4]);
+  assert.match(providerInput, /Vestimenta/);
+  assert.doesNotMatch(providerInput, /Alimentos sellados|another/);
+});
+
 test('public and beneficiary request reads do not disclose private records', async t => {
   const app = await startServer();
   t.after(app.close);
@@ -260,11 +295,57 @@ test('donations require a donor role and an approved request destination', async
   });
   assert.equal(invalidDestination.status, 400);
 
-  const donation = await fetch(`${app.url}/donations`, {
+  const withoutPhoto = await fetch(`${app.url}/donations`, {
     method: 'POST',
     headers: { Cookie: donor.cookie, 'Content-Type': 'application/json' },
     body: JSON.stringify({ category: 'Alimentos sellados', product: 'Arroz', quantity: 1, requestId: 'approved-1' })
   });
+  assert.equal(withoutPhoto.status, 400);
+  assert.match((await withoutPhoto.json()).message, /foto/);
+
+  const donation = await fetch(`${app.url}/donations`, {
+    method: 'POST',
+    headers: { Cookie: donor.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category: 'Alimentos sellados', product: 'Arroz', photo: donationPhoto, quantity: 1, requestId: 'approved-1' })
+  });
   assert.equal(donation.status, 201);
-  assert.equal((await donation.json()).donorId, 'donor');
+  const savedDonation = await donation.json();
+  assert.equal(savedDonation.donorId, 'donor');
+  assert.equal(savedDonation.photo, donationPhoto);
+});
+
+test('n8n receives only approved transitions and new donations after persistence, without personal data', async t => {
+  const database = createDatabase();
+  const delivered = [];
+  let persisted = false;
+  const server = createApiServer({ database, persist: async () => { persisted = true; },
+    n8nApprovalUrl: 'https://n8n.example/webhook/approval', n8nDonationUrl: 'https://n8n.example/webhook/donation',
+    n8nToken: 'server-token', n8nFetch: async (url, options) => {
+      assert.equal(persisted, true);
+      assert.equal(options.headers['X-CR-Conecta-Token'], 'server-token');
+      delivered.push({ url, ...JSON.parse(options.body) });
+      return { ok: true };
+    }
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const url = `http://127.0.0.1:${server.address().port}`;
+  const admin = await login(url, 'admin');
+  const approval = { status: 'Aprobada', priority: 'Alta', decisionReason: 'Validada', decisionDate: '2026-09-29',
+    exceptionGranted: true, exceptionReason: 'Necesidad urgente' };
+  const patch = () => fetch(`${url}/requests/private-1`, { method: 'PATCH',
+    headers: { Cookie: admin.cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(approval) });
+  assert.equal((await patch()).status, 200);
+  assert.equal((await patch()).status, 200);
+  const donor = await login(url, 'donor');
+  const donation = await fetch(`${url}/donations`, { method: 'POST',
+    headers: { Cookie: donor.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category: 'Alimentos sellados', product: 'Arroz', photo: donationPhoto, quantity: 2, requestId: 'private-1', anonymous: true }) });
+  assert.equal(donation.status, 201);
+  assert.equal(delivered.length, 2);
+  assert.deepEqual(delivered.map(event => event.type), ['request.approved', 'donation.registered']);
+  assert.deepEqual(delivered.map(event => event.url), ['https://n8n.example/webhook/approval', 'https://n8n.example/webhook/donation']);
+  assert.equal(delivered[0].data.id, 'private-1');
+  assert.equal(delivered[1].data.anonymous, true);
+  assert.doesNotMatch(JSON.stringify(delivered), /beneficiaryId|donorId|donor@example|notes|email/);
 });

@@ -360,11 +360,74 @@ nav a.active {
   background: #eaf2f3;
 }
 
-.map-frame iframe {
+.donation-photo-preview {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: min(100%, 320px);
+  max-height: 240px;
+  object-fit: contain;
+  border: 1px solid #dce8ed;
+  border-radius: 12px;
+  background: #f7fafb;
+}
+
+.donation-photo-thumbnail {
+  display: block;
+  width: 88px;
+  height: 70px;
+  margin-bottom: 8px;
+  object-fit: contain;
+  border: 1px solid #dce8ed;
+  border-radius: 8px;
+  background: #f7fafb;
+}
+
+.map-embed-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.map-embed-viewport iframe {
+  /* Move OpenStreetMap's built-in top-left zoom buttons outside the viewport. */
+  display: block;
+  width: calc(100% + 60px);
+  height: calc(100% + 90px);
   border: 0;
+  transform: translate(-60px, -90px);
+}
+
+.map-zoom-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: grid;
+  gap: 5px;
+}
+
+.map-zoom-controls button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid #dce8ed;
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--navy);
+  box-shadow: 0 3px 12px rgba(6, 36, 74, 0.14);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.map-zoom-controls button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.map-zoom-controls button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 .map-location-card {
