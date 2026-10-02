@@ -1,0 +1,23 @@
+CONEXIÓN LOCAL CON N8N
+
+Este ZIP ya trae un archivo .env con las dos URL de prueba de n8n y un token de ejemplo.
+
+1. Abre .env y copia el valor que aparece después de N8N_WEBHOOK_TOKEN=.
+2. En n8n, abre la credencial Header Auth usada por los dos nodos Webhook.
+   Name: X-CR-Conecta-Token
+   Value: pega el token del paso 1 y guarda la credencial.
+   Si cada Webhook usa otra credencial, actualiza las dos.
+3. Inicia el proyecto en dos terminales: npm run server y npm run dev.
+4. En n8n pulsa «Listen for test event» en el Webhook de donación.
+   Después registra una donación nueva en la página mientras el Webhook escucha.
+
+Las direcciones /webhook-test/ solo funcionan durante una prueba activa.
+Para usar el flujo continuamente, actívalo en n8n y cambia las URL del .env
+de /webhook-test/ a /webhook/; luego reinicia npm run server.
+
+Si ya tenías un .env con GROQ_API_KEY, conserva esa clave cuando integres
+este archivo: es necesaria para el asistente y las proyecciones con IA.
+
+Este token es solo para pruebas locales. Cámbialo antes de publicar o
+compartir el proyecto. Configura también tus credenciales SMTP y los
+correos reales en los nodos Send Email para recibir los mensajes.

@@ -7,6 +7,7 @@ import { BeneficiarySection } from '../components/BeneficiarySection';
 import { ProfileEditModal } from '../components/ProfileEditModal';
 import { DashboardBarChart, DashboardMetric, dashboardCounts } from '../components/DashboardCharts';
 import { DonationsView } from '../components/DonationsView';
+import { CampaignProjection } from '../components/CampaignProjection';
 
 function AdminOverview({ dons, inv, trans, campaigns, jobs, refreshCount, onRefresh }) {
   const { data: users = [], state: usersState } = useData('/users', refreshCount);
@@ -361,6 +362,160 @@ function PanelInner({ session, onUpdateSession }) {
             />
       )}
 
+ erian-feature
+      {((isAdmin && tab === 'resumen') || (isCompany && tab === 'campañas y empleo')) && (
+        <CampaignProjection campaigns={campaigns} />
+      )}
+
+      {/* ADMIN EVALUATION OF REQUESTS (RF-08, RF-09, RF-10) */}
+      {(tab === 'solicitudes (RF-08/09/10)' || (isAdmin && tab === 'solicitudes')) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Header filter controls */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '16px 20px', borderRadius: '14px', border: '1px solid #dce8ec', flexWrap: 'wrap', gap: '10px' }}>
+            <div className="request-filter-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>Filtrar por estado:</span>
+              <select 
+                value={filterStatus} 
+                onChange={e => setFilterStatus(e.target.value)}
+                style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '12px' }}
+              >
+                <option value="Todas">Todos los estados</option>
+                <option value="En revisión">En revisión</option>
+                <option value="Aprobada">Aprobada</option>
+                <option value="Denegada">Denegada</option>
+              </select>
+
+              <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', marginLeft: '10px' }}>Prioridad (RF-09):</span>
+              <select 
+                value={filterPriority} 
+                onChange={e => setFilterPriority(e.target.value)}
+                style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '12px' }}
+              >
+                <option value="Todas">Todas las prioridades</option>
+                <option value="Alta">Alta</option>
+                <option value="Media">Media</option>
+                <option value="Baja">Baja</option>
+              </select>
+            </div>
+
+            <span style={{ fontSize: '12px', color: '#64748b' }}>
+              Total: {(reqs || []).length} solicitudes registradas
+            </span>
+          </div>
+
+          {/* Table */}
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Necesidad / Categoría</th>
+                  <th>Cantidad & Límites (RF-10)</th>
+                  <th>Zona</th>
+                  <th>Prioridad (RF-09)</th>
+                  <th>Estado</th>
+                  <th>Dictamen / Excepción</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(reqs || [])
+                  .filter(r => (filterStatus === 'Todas' || r.status === filterStatus) && (filterPriority === 'Todas' || r.priority === filterPriority))
+                  .map(r => {
+                    const isExceeded = r.limitExceeded || r.requiresException;
+                    const isApproved = r.status === 'Aprobada';
+                    const isDenied = r.status === 'Denegada';
+                    const isPending = r.status === 'En revisión';
+
+                    return (
+                      <tr key={r.id}>
+                        <td style={{ fontWeight: '800', color: '#06244a' }}>#{r.id}</td>
+                        <td>
+                          <b>{r.description}</b>
+                          <small>{r.category} · Beneficiario: {r.beneficiaryId}</small>
+                        </td>
+                        <td>
+                          <strong>{r.amount} {r.unit}</strong>
+                          {isExceeded && (
+                            <span style={{ display: 'block', fontSize: '11px', color: '#b91c1c', fontWeight: '800', marginTop: '2px' }}>
+                              <AlertTriangle className="i i-l" size={14} />Excede límite estándar
+                            </span>
+                          )}
+                        </td>
+                        <td><MapPin className="i i-l" size={13} />{r.zone}</td>
+                        <td>
+                          <span 
+                            style={{
+                              padding: '3px 8px',
+                              borderRadius: '12px',
+                              fontSize: '11px',
+                              fontWeight: '800',
+                              background: r.priority === 'Alta' ? '#ffebe8' : r.priority === 'Baja' ? '#e2f4f8' : '#fef4dc',
+                              color: r.priority === 'Alta' ? '#c0392b' : r.priority === 'Baja' ? '#2980b9' : '#d35400',
+                              border: '1px solid currentColor'
+                            }}
+                          >
+                            {r.priority || 'Media'}
+                          </span>
+                        </td>
+                        <td>
+                          <span 
+                            style={{
+                              padding: '4px 9px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              background: isApproved ? '#dcfce7' : isDenied ? '#fee2e2' : '#fef3c7',
+                              color: isApproved ? '#15803d' : isDenied ? '#b91c1c' : '#b45309'
+                            }}
+                          >
+                            {r.status}
+                          </span>
+                        </td>
+                        <td style={{ maxWidth: '240px' }}>
+                          {r.decisionReason ? (
+                            <div>
+                              <span style={{ fontSize: '12px', color: '#334155' }}>{r.decisionReason}</span>
+                              <small style={{ color: '#64748b' }}>Fecha: {r.decisionDate}</small>
+                              {r.exceptionGranted && (
+                                <span style={{ display: 'block', fontSize: '11px', color: '#b45309', fontWeight: '700', marginTop: '2px' }}>
+                                  <Star className="i i-l" size={14} />Excepción concedida
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span style={{ color: '#64748b', fontSize: '12px' }}>Pendiente de evaluación</span>
+                          )}
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={() => setEvaluatingRequest(r)}
+                            style={{
+                              background: isPending ? '#06244a' : '#ffffff',
+                              color: isPending ? '#ffffff' : '#06244a',
+                              border: '1px solid #06244a',
+                              borderRadius: '8px',
+                              padding: '6px 12px',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {isPending ? <>Evaluar (RF-08/10)<ArrowRight className="i i-r" size={14} /></> : 'Editar dictamen'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+
+ main
       {/* DONATIONS TABLE */}
       {(tab === 'donaciones' || tab === 'mis donaciones') && (
         <DonationsView data={dons} />

@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useData } from '../lib/useData';
 import { CATEGORY_OPTIONS } from '../constants/limits';
+import { prepareDonationPhoto } from '../lib/donationPhoto';
 
 export function Donate({ session }) {
   const [searchParams] = useSearchParams();
@@ -13,6 +14,25 @@ export function Donate({ session }) {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [photo, setPhoto] = useState('');
+  const [photoBusy, setPhotoBusy] = useState(false);
+
+  const handlePhoto = async (event) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    setPhoto('');
+    setError('');
+    if (!file) return;
+    setPhotoBusy(true);
+    try {
+      setPhoto(await prepareDonationPhoto(file));
+    } catch (photoError) {
+      input.value = '';
+      setError(photoError.message || 'No se pudo leer la foto. Seleccioná otra imagen.');
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
   const [form, setForm] = useState({
     category: 'Alimentos sellados',
     product: '',
@@ -24,7 +44,11 @@ export function Donate({ session }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (saving) return;
+    if (saving || photoBusy) return;
+    if (!photo) {
+      setError('Subí una foto del producto que vas a donar.');
+      return;
+    }
 
     const productName = form.product.trim();
     const quantityNumber = Number(form.quantity);
@@ -44,6 +68,7 @@ export function Donate({ session }) {
         body: JSON.stringify({
           category: form.category,
           product: productName,
+          photo,
           quantity: quantityNumber,
           destination: form.destination || 'Institución',
           anonymous: form.anonymous,
@@ -91,6 +116,7 @@ export function Donate({ session }) {
               <Link className="btn primary" to="/panel">Ver mi aporte<ArrowRight className="i i-r" size={14} /></Link>
               <button type="button" className="btn secondary" onClick={() => {
                 setSaved(false);
+                setPhoto('');
                 setForm(current => ({ ...current, product: '', quantity: 1 }));
                 setError('');
               }}>Registrar otra donación</button>
@@ -126,6 +152,18 @@ export function Donate({ session }) {
             </div>
 
             <div className="help-form-field">
+              <label htmlFor="donation-photo">Foto del producto donado <span aria-hidden="true">*</span></label>
+              <input id="donation-photo" type="file" accept="image/jpeg,image/png,image/webp"
+                required disabled={saving || photoBusy} onChange={handlePhoto}
+                aria-describedby="donation-photo-hint" />
+              <small id="donation-photo-hint" className="help-form-hint">
+                Foto obligatoria. JPG, PNG o WebP, hasta 10 MB. Se optimiza automáticamente al subirla.
+              </small>
+              {photoBusy && <small role="status">Preparando foto…</small>}
+              {photo && <img className="donation-photo-preview" src={photo} alt="Vista previa del producto que vas a donar" />}
+            </div>
+
+            <div className="help-form-field">
               <label htmlFor="donation-quantity">Cantidad de unidades <span aria-hidden="true">*</span></label>
               <input id="donation-quantity" type="number" min="1" max="100000" step="1" required value={form.quantity} onChange={e => setForm(current => ({ ...current, quantity: e.target.value }))} />
             </div>
@@ -149,7 +187,7 @@ export function Donate({ session }) {
             </div>
 
             {error && <div className="help-form-error" role="alert">{error}</div>}
-            <button type="submit" className="btn primary help-form-submit" disabled={saving}>
+            <button type="submit" className="btn primary help-form-submit" disabled={saving || photoBusy}>
               {saving ? 'Guardando aporte…' : 'Registrar aporte'}{!saving && <ArrowRight className="i i-r" size={14} />}
             </button>
           </form>

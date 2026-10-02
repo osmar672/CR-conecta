@@ -958,6 +958,12 @@
   ],
   "activity": [
     {
+ erian-feature
+      "id": "fe8c7be6-70cc-40a5-81c0-14cc339703ce",
+      "timestamp": "2026-10-02T15:34:15.720Z",
+      "actor": "Carlos Donante",
+      "actorRole": "Donante individual",
+
       "id": "7d48abfc-24d3-4701-8529-c03320ce8973",
       "timestamp": "2026-10-01T21:07:46.122Z",
       "actor": "Alianza Comunitaria",
@@ -1102,9 +1108,10 @@
       "timestamp": "2026-10-01T15:03:20.817Z",
       "actor": "María Administradora",
       "actorRole": "Administrador",
+ main
       "action": "inició sesión",
       "entity": "sesión",
-      "entityId": "u1",
+      "entityId": "u3",
       "detail": ""
     },
     {

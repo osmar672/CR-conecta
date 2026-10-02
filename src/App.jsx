@@ -97,7 +97,11 @@ function Shell() {
         <nav>
           <NavLink to="/" end>Inicio</NavLink>
           <NavLink to="/necesidades">Necesidades</NavLink>
+ erian-feature
+          <NavLink to="/donar">Donar</NavLink>
+
           <NavLink to="/solicitudes">Solicitudes</NavLink>
+ main
           <NavLink to="/panel">Panel de gestión</NavLink>
           <NavLink to="/chat">Asistente</NavLink>
         </nav>

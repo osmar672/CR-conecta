@@ -4,6 +4,9 @@ import { promisify } from 'node:util';
 import { evaluateRequest, createRequest, publicRequest, ValidationError } from './validation.js';
 import { CATEGORY_LIMITS } from '../src/constants/limits.js';
 import { answerSiteQuestion } from './assistant.js';
+import { projectCampaign } from './projection.js';
+import { notifyN8n } from './n8n.js';
+import { isValidDonationPhoto } from './donationPhoto.js';
 
 const scrypt = promisify(scryptCallback);
 const SESSION_COOKIE = 'cr_session';
@@ -139,12 +142,17 @@ export function createApiServer({
   assistantApiKey = process.env.GROQ_API_KEY,
   assistantModel = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
   assistantFetch = fetch,
+  n8nApprovalUrl = process.env.N8N_APPROVAL_WEBHOOK_URL,
+  n8nDonationUrl = process.env.N8N_DONATION_WEBHOOK_URL,
+  n8nToken = process.env.N8N_WEBHOOK_TOKEN,
+  n8nFetch = fetch,
   allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173',
   secureCookies = process.env.NODE_ENV === 'production'
 }) {
   const sessions = new Map();
   const loginAttempts = new Map();
   const assistantAttempts = new Map();
+  const projectionAttempts = new Map();
 
   async function getCurrentUser(request) {
     const token = cookieValue(request.headers.cookie, SESSION_COOKIE);
@@ -266,6 +274,27 @@ export function createApiServer({
           model: assistantModel,
           fetchImpl: assistantFetch
         });
+        send(response, 200, result, corsHeaders);
+        return;
+      }
+
+      if (path[0] === 'assistant' && path[1] === 'campaign-projection' && request.method === 'POST') {
+        if (!user || ![ADMIN, 'Empresa donante'].includes(user.role)) {
+          send(response, user ? 403 : 401, { message: 'Solo administración y empresas donantes pueden generar proyecciones.' }, corsHeaders);
+          return;
+        }
+        const now = Date.now();
+        const attempts = (projectionAttempts.get(user.id) || []).filter(time => time > now - 10 * 60 * 1000);
+        if (attempts.length >= 10) {
+          send(response, 429, { message: 'Llegaste al límite temporal de proyecciones. Intentá en unos minutos.' }, corsHeaders);
+          return;
+        }
+        const input = await readBody(request);
+        const ownCampaigns = user.role === ADMIN ? database.campaigns || [] : (database.campaigns || []).filter(item => item.companyId === user.id);
+        const ownDonations = user.role === ADMIN ? database.donations || [] : (database.donations || []).filter(item => item.donorId === user.id);
+        const result = await projectCampaign({ input, campaigns: ownCampaigns, donations: ownDonations,
+          apiKey: assistantApiKey, model: assistantModel, fetchImpl: assistantFetch });
+        projectionAttempts.set(user.id, [...attempts, now]);
         send(response, 200, result, corsHeaders);
         return;
       }
@@ -414,6 +443,10 @@ export function createApiServer({
           previousStatus !== item.status ? `${previousStatus} → ${item.status}` : 'Entrega confirmada'
         );
         await persist(database);
+        if (user.role === ADMIN && previousStatus !== 'Aprobada' && item.status === 'Aprobada') {
+          await notifyN8n({ url: n8nApprovalUrl, token: n8nToken, type: 'request.approved', fetchImpl: n8nFetch,
+            data: { id: item.id, category: item.category, zone: item.zone, amount: item.amount, unit: item.unit, priority: item.priority, status: item.status } });
+        }
         send(response, 200, item, corsHeaders);
         return;
       }
@@ -427,6 +460,10 @@ export function createApiServer({
         const quantity = Number(input.quantity);
         const requestId = typeof input.requestId === 'string' ? input.requestId : null;
         const linkedRequest = requestId && (database.requests || []).find(row => row.id === requestId);
+        if (!isValidDonationPhoto(input.photo)) {
+          send(response, 400, { message: 'Adjuntá una foto válida del producto antes de registrar la donación.' }, corsHeaders);
+          return;
+        }
         if (typeof input.product !== 'string' || !input.product.trim() || input.product.trim().length > 200
           || !Number.isFinite(quantity) || quantity <= 0 || quantity > 100000
           || !CATEGORY_LIMITS[input.category]
@@ -442,6 +479,7 @@ export function createApiServer({
           donorType: user.role,
           category: typeof input.category === 'string' ? input.category : 'Otro',
           product: input.product.trim(),
+          photo: input.photo,
           quantity,
           date: new Date().toISOString().slice(0, 10),
           destination: requestId ? `Solicitud ${requestId}` : 'Institución',
@@ -453,6 +491,9 @@ export function createApiServer({
         database.donations.push(item);
         recordActivity(database, user, 'registró', 'donación', item.id, item.status);
         await persist(database);
+        await notifyN8n({ url: n8nDonationUrl, token: n8nToken, type: 'donation.registered', fetchImpl: n8nFetch,
+          data: { id: item.id, category: item.category, product: item.product, quantity: item.quantity, date: item.date,
+            destination: item.destination, status: item.status, anonymous: item.anonymous } });
         send(response, 201, item, corsHeaders);
         return;
       }
