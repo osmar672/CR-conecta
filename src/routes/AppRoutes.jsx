@@ -3,6 +3,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Home } from '../pages/Home';
 import { Needs } from '../pages/Needs';
 import { Panel } from '../pages/Panel';
+import { RequestsAdmin } from '../pages/RequestsAdmin';
 import { Access } from '../pages/Access';
 import { Profile } from '../pages/Profile';
 import { Donate } from '../pages/Donate';
@@ -16,6 +17,7 @@ export function AppRoutes({ session, onLogin, onOpenGoogleAuth, onOpenNeedModal,
       <Routes>
         <Route path="/" element={<Home onOpenNeedModal={onOpenNeedModal} />} />
         <Route path="/necesidades" element={<Needs onOpenNeedModal={onOpenNeedModal} />} />
+        <Route path="/solicitudes" element={<RequestsAdmin session={session} onOpenGoogleAuth={onOpenGoogleAuth} />} />
         <Route path="/panel" element={<Panel session={session} onLogin={onLogin} onOpenGoogleAuth={onOpenGoogleAuth} />} />
         <Route path="/acceso" element={<Access onOpenGoogleAuth={onOpenGoogleAuth} />} />
         <Route path="/perfil" element={<Profile session={session} onUpdateSession={onLogin} onLogout={onLogout} onOpenGoogleAuth={onOpenGoogleAuth} />} />

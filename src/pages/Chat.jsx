@@ -64,10 +64,10 @@ export function Chat() {
         <p>Preguntame lo que necesites. También puedo llevarte a las secciones públicas de CR Conecta, como Donar o Necesidades.</p>
       </div>
 
-      <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #dce8ec', maxWidth: '750px', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--white)', borderRadius: '20px', border: '1px solid var(--line)', maxWidth: '750px', overflow: 'hidden' }}>
         <div aria-live="polite" aria-busy={sending} style={{ minHeight: '260px', maxHeight: '520px', overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {messages.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 10px', color: '#7a8e9f' }}>
+            <div style={{ textAlign: 'center', padding: '40px 10px', color: 'var(--muted)' }}>
               <MessageSquare size={30} />
               <p style={{ margin: '8px 0 0', fontSize: '13px' }}>
                 {chatState === 'loading' ? 'Preparando el asistente…' : '¡Hola! Puedo orientarte sobre cómo funciona CR Conecta.'}
@@ -76,12 +76,12 @@ export function Chat() {
           ) : (
             messages.map((message, index) => (
               <div key={`${index}-${message.question}`} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ alignSelf: 'flex-end', background: '#06244a', color: '#ffffff', padding: '10px 16px', borderRadius: '14px 14px 2px 14px', fontSize: '12.5px', maxWidth: '85%' }}>
+                <div style={{ alignSelf: 'flex-end', background: 'var(--brand-solid)', color: 'var(--white)', padding: '10px 16px', borderRadius: '14px 14px 2px 14px', fontSize: '12.5px', maxWidth: '85%' }}>
                   {message.question}
                 </div>
                 {message.answer === null
-                  ? <div role="status" style={{ alignSelf: 'flex-start', color: '#64748b', padding: '10px', fontSize: '13px' }}>Estoy preparando la respuesta…</div>
-                  : <div style={{ alignSelf: 'flex-start', background: '#eef5f8', color: '#09274c', padding: '12px 16px', borderRadius: '2px 14px 14px 14px', fontSize: '13px', maxWidth: '85%', whiteSpace: 'pre-wrap' }}>
+                  ? <div role="status" style={{ alignSelf: 'flex-start', color: 'var(--muted)', padding: '10px', fontSize: '13px' }}>Estoy preparando la respuesta…</div>
+                  : <div style={{ alignSelf: 'flex-start', background: 'var(--surface-soft)', color: 'var(--navy)', padding: '12px 16px', borderRadius: '2px 14px 14px 14px', fontSize: '13px', maxWidth: '85%', whiteSpace: 'pre-wrap' }}>
                     {message.answer}
                     {message.destination && message.destination.path !== '/chat' && (
                       <div style={{ marginTop: '12px' }}>
@@ -101,12 +101,12 @@ export function Chat() {
         </div>
 
         {error && (
-          <p role="alert" style={{ color: '#b91c1c', padding: '0 20px', margin: '0 0 12px', fontSize: '13px' }}>
+          <p role="alert" style={{ color: 'var(--danger-fg)', padding: '0 20px', margin: '0 0 12px', fontSize: '13px' }}>
             {error}
           </p>
         )}
 
-        <form onSubmit={event => { event.preventDefault(); void ask(question); }} style={{ background: '#f8fafc', padding: '16px 20px', borderTop: '1px solid #edf2f5' }}>
+        <form onSubmit={event => { event.preventDefault(); void ask(question); }} style={{ background: 'var(--surface-soft)', padding: '16px 20px', borderTop: '1px solid var(--line-light)' }}>
           <label htmlFor="assistant-question" style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tu pregunta</label>
           <div style={{ display: 'flex', gap: '8px' }}>
             <input
@@ -115,7 +115,7 @@ export function Chat() {
               maxLength={1200}
               onChange={event => setQuestion(event.target.value)}
               placeholder="Ej. ¿Cómo registro una donación?"
-              style={{ flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: '20px', border: '1px solid #cbd5e1' }}
+              style={{ flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: '20px', border: '1px solid var(--line)' }}
               disabled={sending}
             />
             <button className="btn primary" type="submit" disabled={sending || !question.trim()}>
@@ -129,7 +129,7 @@ export function Chat() {
                 type="button"
                 disabled={sending}
                 onClick={() => void ask(answer.question)}
-                style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '20px', padding: '7px 14px', fontSize: '12px', color: '#06244a', fontWeight: '600' }}
+                style={{ background: 'var(--white)', border: '1px solid var(--line)', borderRadius: '20px', padding: '7px 14px', fontSize: '12px', color: 'var(--navy)', fontWeight: '600' }}
               >
                 {answer.question}
               </button>
@@ -137,7 +137,7 @@ export function Chat() {
           </div>
         </form>
       </div>
-      <p style={{ maxWidth: '750px', fontSize: '12px', color: '#64748b' }}>
+      <p style={{ maxWidth: '750px', fontSize: '12px', color: 'var(--muted)' }}>
         La IA puede equivocarse. No compartas información personal o sensible. Solo puede abrir secciones públicas de CR Conecta.
       </p>
     </div>

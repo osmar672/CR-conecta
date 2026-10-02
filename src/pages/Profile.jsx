@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRightLeft, Pencil } from 'lucide-react';
 import { ProfileEditModal } from '../components/ProfileEditModal';
+import { DisplayPreferencesControls } from '../components/DisplayPreferencesControls';
 import { RoleAvatar, roleIcons } from '../components/ShellParts';
 
 export function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }) {
@@ -27,11 +28,11 @@ export function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }
         <p>Datos no sensibles y ficticios. Podés editar tu información y guardarla en <code>db.json</code>.</p>
       </div>
 
-      <div 
+      <div
         style={{
-          background: '#ffffff',
+          background: 'var(--white)',
           borderRadius: '20px',
-          border: '1px solid #dce8ec',
+          border: '1px solid var(--line)',
           padding: '30px',
           maxWidth: '680px',
           boxShadow: 'var(--shadow-sm)'
@@ -40,17 +41,17 @@ export function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '24px' }}>
           <RoleAvatar src={roleIcons[session.role] || '/logo-mark.png'} alt={session.role} size={68} />
           <div>
-            <h2 style={{ margin: 0, fontSize: '22px', color: '#06244a' }}>{session.name}</h2>
+            <h2 style={{ margin: 0, fontSize: '22px', color: 'var(--navy)' }}>{session.name}</h2>
             <div style={{ display: 'flex', gap: '10px', marginTop: '6px', alignItems: 'center' }}>
-              <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 10px', borderRadius: '14px', fontSize: '12px', fontWeight: '700' }}>
+              <span style={{ background: 'var(--info-bg)', color: 'var(--info-fg)', padding: '3px 10px', borderRadius: '14px', fontSize: '12px', fontWeight: '700' }}>
                 Rol: {session.role}
               </span>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>Zona: {session.zone}</span>
+              <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Zona: {session.zone}</span>
             </div>
           </div>
         </div>
 
-        <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+        <div style={{ background: 'var(--surface-soft)', padding: '18px', borderRadius: '12px', border: '1px solid var(--line-light)', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
           <div><strong>Correo ficticio:</strong> {session.email}</div>
           <div><strong>Teléfono:</strong> {session.phone || '+506 8888-0000'}</div>
           <div><strong>Zona comunitaria:</strong> {session.zone}</div>
@@ -66,11 +67,23 @@ export function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }
               Cambiar cuenta<ArrowRightLeft className="i i-r" size={14} />
             </button>
           </div>
-          <button className="btn secondary" onClick={onLogout} style={{ color: '#b91c1c' }}>
+          <button className="btn secondary" onClick={onLogout} style={{ color: 'var(--danger)' }}>
             Cerrar sesión
           </button>
         </div>
       </div>
+
+      <section
+        className="profile-preferences-card"
+        aria-labelledby="profile-preferences-title"
+      >
+        <span className="eyebrow">ACCESIBILIDAD</span>
+        <h2 id="profile-preferences-title">Preferencias de visualización</h2>
+        <p className="profile-preferences-note">
+          Se guardan en este navegador y se aplican a todo el sitio de inmediato.
+        </p>
+        <DisplayPreferencesControls />
+      </section>
 
       {editing && (
         <ProfileEditModal

@@ -19,8 +19,8 @@ export function Access({ onOpenGoogleAuth }) {
       {/* Prominent Google Access Card (RF-02) */}
       <div 
         style={{
-          background: '#ffffff',
-          border: '1px solid #dce8ec',
+          background: 'var(--white)',
+          border: '1px solid var(--line)',
           borderRadius: '18px',
           padding: '28px',
           marginBottom: '32px',
@@ -35,11 +35,11 @@ export function Access({ onOpenGoogleAuth }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <GoogleIcon size={24} />
-            <h3 style={{ margin: 0, fontSize: '18px', color: '#09274c' }}>
+            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--navy)' }}>
               Acceso visual tipo Google / Gmail (RF-02)
             </h3>
           </div>
-          <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#63788b', maxWidth: '580px' }}>
+          <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)', maxWidth: '580px' }}>
             Simula la experiencia de autenticación de un clic vinculando un correo ficticio de <code>db.json</code> con su respectivo perfil y rol.
           </p>
         </div>
@@ -66,8 +66,8 @@ export function Access({ onOpenGoogleAuth }) {
       {/* Disclaimer Notice */}
       <div 
         style={{
-          background: '#eef5f8',
-          border: '1px solid #d5e6ec',
+          background: 'var(--surface-soft)',
+          border: '1px solid var(--line)',
           borderRadius: '12px',
           padding: '14px 18px',
           display: 'flex',
@@ -75,7 +75,7 @@ export function Access({ onOpenGoogleAuth }) {
           alignItems: 'center',
           marginBottom: '28px',
           fontSize: '12px',
-          color: '#34556e'
+          color: 'var(--muted)'
         }}
       >
         <Info size={16} style={{ flexShrink: 0 }} />
@@ -85,7 +85,7 @@ export function Access({ onOpenGoogleAuth }) {
       </div>
 
       {/* Grid of All Preloaded Accounts */}
-      <h3 style={{ margin: '0 0 16px', fontSize: '17px', color: '#09274c' }}>
+      <h3 style={{ margin: '0 0 16px', fontSize: '17px', color: 'var(--navy)' }}>
         O elegí directamente una cuenta de demostración por rol (RF-01):
       </h3>
 

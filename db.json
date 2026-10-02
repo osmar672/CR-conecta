@@ -958,10 +958,157 @@
   ],
   "activity": [
     {
+ erian-feature
       "id": "fe8c7be6-70cc-40a5-81c0-14cc339703ce",
       "timestamp": "2026-10-02T15:34:15.720Z",
       "actor": "Carlos Donante",
       "actorRole": "Donante individual",
+
+      "id": "7d48abfc-24d3-4701-8529-c03320ce8973",
+      "timestamp": "2026-10-01T21:07:46.122Z",
+      "actor": "Alianza Comunitaria",
+      "actorRole": "Aliado comunitario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u6",
+      "detail": ""
+    },
+    {
+      "id": "4796699d-7cc3-4649-aa8f-1cddaf428fd3",
+      "timestamp": "2026-10-01T21:07:46.054Z",
+      "actor": "Sofía Voluntaria",
+      "actorRole": "Voluntario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u5",
+      "detail": ""
+    },
+    {
+      "id": "c818ccca-3bb4-4aed-8ad0-910d20b76106",
+      "timestamp": "2026-10-01T21:07:45.988Z",
+      "actor": "Fundación Horizonte",
+      "actorRole": "Empresa donante",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u4",
+      "detail": ""
+    },
+    {
+      "id": "c94f10a6-9fe7-4f9d-b5a5-ea8b97c668e0",
+      "timestamp": "2026-10-01T21:07:45.716Z",
+      "actor": "Carlos Donante",
+      "actorRole": "Donante individual",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u3",
+      "detail": ""
+    },
+    {
+      "id": "6bde8eb6-86d2-4ee3-a6ee-bac5c4acf9d3",
+      "timestamp": "2026-10-01T21:07:45.607Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "0015301d-8e1b-45f4-9eed-c3256e845134",
+      "timestamp": "2026-10-01T21:07:45.237Z",
+      "actor": "María Administradora",
+      "actorRole": "Administrador",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u1",
+      "detail": ""
+    },
+    {
+      "id": "096fac90-8fae-42cc-a63c-ebdbb89406d1",
+      "timestamp": "2026-10-01T21:00:03.230Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "c4dbc1dc-ea0d-43a3-938d-5f55c1f6a0f9",
+      "timestamp": "2026-10-01T20:59:20.256Z",
+      "actor": "María Administradora",
+      "actorRole": "Administrador",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u1",
+      "detail": ""
+    },
+    {
+      "id": "e9003f80-498f-4d66-be98-9297871eb866",
+      "timestamp": "2026-10-01T20:58:45.886Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "e7aa0526-e49d-4fea-ae74-44d385b2214c",
+      "timestamp": "2026-10-01T19:50:54.922Z",
+      "actor": "María Administradora",
+      "actorRole": "Administrador",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u1",
+      "detail": ""
+    },
+    {
+      "id": "b8a0f8b3-8ded-4f0d-a85b-71fa8094589c",
+      "timestamp": "2026-10-01T19:50:03.585Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "255a0b35-c4ad-4f70-b531-4d263226851e",
+      "timestamp": "2026-10-01T19:48:47.814Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "cac44181-3997-4338-bca5-b05d17ec9822",
+      "timestamp": "2026-10-01T19:48:28.865Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "fb86d937-20e8-4ba2-98a2-6a2e0de9f990",
+      "timestamp": "2026-10-01T18:05:58.360Z",
+      "actor": "Ana Beneficiaria",
+      "actorRole": "Beneficiario",
+      "action": "inició sesión",
+      "entity": "sesión",
+      "entityId": "u2",
+      "detail": ""
+    },
+    {
+      "id": "4f032bcc-e897-49da-91e4-a4f9937025a7",
+      "timestamp": "2026-10-01T15:03:20.817Z",
+      "actor": "María Administradora",
+      "actorRole": "Administrador",
+ main
       "action": "inició sesión",
       "entity": "sesión",
       "entityId": "u3",

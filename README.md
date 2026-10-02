@@ -77,7 +77,11 @@ La entrega local de este proyecto incluye un `.env` listo con las URL de prueba 
 
 ## Panel administrativo
 
-El resumen del administrador reúne indicadores y gráficas de cuentas por rol, solicitudes por estado y comunidad, donaciones por categoría y estado, inventario, traslados y campañas. También muestra las últimas acciones auditadas. Se registran inicios de sesión correctos, cambios de perfil, creación y actualización de solicitudes, donaciones y entregas de traslados. El historial se guarda en `db.json`, conserva hasta 500 eventos y solo el administrador puede consultarlo; no incluye acciones anteriores a esta función ni visitas o navegación por páginas.
+El resumen del administrador reúne indicadores y gráficas de cuentas por rol, donaciones por categoría y estado, inventario, traslados y campañas. También muestra las últimas acciones auditadas. Se registran inicios de sesión correctos, cambios de perfil, creación y actualización de solicitudes, donaciones y entregas de traslados. El historial se guarda en `db.json`, conserva hasta 500 eventos y solo el administrador puede consultarlo; no incluye acciones anteriores a esta función ni visitas o navegación por páginas.
+
+## Solicitudes
+
+Las solicitudes tienen su propia sección en el menú principal, separada del panel de gestión. Entra todo el mundo, pero el servidor ya devuelve información distinta según quién consulta: la administración recibe todas las solicitudes con los campos internos para dictaminarlas, la persona beneficiaria solo las propias, y el resto de los roles únicamente las solicitudes aprobadas y en su forma pública, sin datos personales. La interfaz no agrega ni oculta información por su cuenta: se limita a mostrar la que el servidor le entrega.
 
 Administración, en su resumen, y las empresas donantes, en «Campañas y empleo», pueden generar con IA una proyección semanal para la próxima campaña. Se especifican categoría, meta y duración; el resultado incluye gráfico, explicación y supuestos. La API envía a Groq solamente datos resumidos de campañas y donaciones que corresponden al rol (la empresa solo ve los suyos), sin nombres, perfiles ni información personal. Son escenarios orientativos basados en datos simulados y escasos, no resultados garantizados. Requiere `GROQ_API_KEY` y un `GROQ_MODEL` compatible configurados en `.env`.
 

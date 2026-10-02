@@ -28,7 +28,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
       tag: 'ABRIGO FAMILIAR',
       icon: <Shirt size={22} />,
       headerBg: '#def1f6',
-      accentColor: '#1e6888',
+      accentColor: 'var(--info-fg)',
       summary: 'Prendas limpias y clasificadas por tallas para niñas, niños y adultos.',
       includes: [
         'Ropa escolar e infantil por edades',
@@ -124,7 +124,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
       tag: 'ACCESO DIGITAL',
       icon: <Zap size={22} />,
       headerBg: '#ecf7ff',
-      accentColor: '#0d6fa5',
+      accentColor: 'var(--info-fg)',
       summary: 'Acompañamiento y equipos básicos para mantener acceso a educación, trámites y comunicación.',
       includes: [
         'Kits con acceso a internet o datos',
@@ -187,7 +187,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
       name: 'Emergencia y contingencia',
       tag: 'RESPUESTA RÁPIDA',
       icon: <Package size={22} />,
-      headerBg: '#fdecec',
+      headerBg: 'var(--danger-bg)',
       accentColor: '#b33535',
       summary: 'Soporte inmediato para crisis temporales, desastres o interrupciones severas del hogar.',
       includes: [
@@ -261,22 +261,22 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
             <span className="eyebrow" style={{ display: 'inline-block', marginBottom: '8px' }}>
               PROGRAMAS Y MODALIDADES DE APOYO
             </span>
-            <h2 style={{ margin: '0 0 10px', fontSize: '38px', letterSpacing: '-1.5px', color: '#06244a', fontWeight: '800' }}>
+            <h2 style={{ margin: '0 0 10px', fontSize: '38px', letterSpacing: '-1.5px', color: 'var(--navy)', fontWeight: '800' }}>
               ¿Qué ayudas ofrecemos?
             </h2>
-            <p style={{ margin: 0, fontSize: '15.5px', color: '#597084', lineHeight: '1.6' }}>
+            <p style={{ margin: 0, fontSize: '15.5px', color: 'var(--muted)', lineHeight: '1.6' }}>
               En CR Conecta coordinamos y canalizamos asistencia en 12 líneas prioritarias para las familias en condición de vulnerabilidad de Puntarenas, con validación comunitaria, respuesta rápida y límites que aseguran equidad.
             </p>
           </div>
 
           {/* Switcher Toggle */}
-          <div style={{ display: 'flex', gap: '8px', background: '#edf4f7', padding: '5px', borderRadius: '30px' }}>
+          <div style={{ display: 'flex', gap: '8px', background: 'var(--surface-soft)', padding: '5px', borderRadius: '30px' }}>
             <button
               type="button"
               onClick={() => setActiveTab('categories')}
               style={{
                 border: 'none',
-                background: activeTab === 'categories' ? '#06244a' : 'transparent',
+                background: activeTab === 'categories' ? 'var(--brand-solid)' : 'transparent',
                 color: activeTab === 'categories' ? '#ffffff' : '#4b657c',
                 padding: '9px 18px',
                 borderRadius: '24px',
@@ -293,7 +293,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
               onClick={() => setActiveTab('active-cases')}
               style={{
                 border: 'none',
-                background: activeTab === 'active-cases' ? '#06244a' : 'transparent',
+                background: activeTab === 'active-cases' ? 'var(--brand-solid)' : 'transparent',
                 color: activeTab === 'active-cases' ? '#ffffff' : '#4b657c',
                 padding: '9px 18px',
                 borderRadius: '24px',
@@ -372,7 +372,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
         {activeTab === 'active-cases' && (
           <div style={{ marginTop: '30px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontSize: '12.5px', color: '#5b7388' }}>
+              <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
                 Mostrando solicitudes aprobadas de demostración en Puntarenas con identidad protegida (RF-06):
               </span>
               <Link to="/necesidades" className="text-link" style={{ fontSize: '12.5px' }}>
@@ -427,9 +427,9 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
         <div 
           style={{
             marginTop: '34px',
-            background: '#ffffff',
+            background: 'var(--white)',
             borderRadius: '16px',
-            border: '1px solid #dce8ec',
+            border: '1px solid var(--line)',
             padding: '20px 28px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -443,10 +443,10 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <Handshake size={26} />
             <div>
-              <strong style={{ fontSize: '14px', color: '#06244a', display: 'block' }}>
+              <strong style={{ fontSize: '14px', color: 'var(--navy)', display: 'block' }}>
                 ¿Tu familia o comunidad necesita alguna de estas ayudas?
               </strong>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>
+              <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
                 Podés formular una solicitud en línea. Se registrará en estado "En revisión" para validación comunitaria.
               </span>
             </div>

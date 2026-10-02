@@ -99,11 +99,11 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
         className="evaluation-modal" 
         onClick={e => e.stopPropagation()}
         style={{
-          background: '#ffffff',
+          background: 'var(--white)',
           width: 'min(680px, 95vw)',
           borderRadius: '20px',
           boxShadow: '0 25px 70px rgba(6,36,74,0.22)',
-          border: '1px solid #dce7eb',
+          border: '1px solid var(--line)',
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
@@ -111,16 +111,16 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
         }}
       >
         {/* Header */}
-        <div style={{ background: '#06244a', padding: '20px 28px', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'var(--brand-solid)', padding: '20px 28px', color: 'var(--white)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#8ec5db', fontWeight: '800' }}>
+            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: 'var(--brand-eyebrow)', fontWeight: '800' }}>
               EVALUACIÓN ADMINISTRATIVA (RF-08, RF-09, RF-10)
             </span>
             <h3 id="request-evaluation-title" style={{ margin: '3px 0 0', fontSize: '20px', color: '#ffffff' }}>
               Evaluar Solicitud #{request.id}
             </h3>
           </div>
-          <span style={{ background: '#133e6f', color: '#d8ebf5', padding: '5px 12px', borderRadius: '14px', fontSize: '12px', fontWeight: '700' }}>
+          <span style={{ background: 'var(--brand-chip)', color: 'var(--brand-chip-fg)', padding: '5px 12px', borderRadius: '14px', fontSize: '12px', fontWeight: '700' }}>
             Estado actual: {request.status}
           </span>
         </div>
@@ -129,16 +129,16 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
         <form onSubmit={handleSubmit} style={{ overflowY: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           {/* Summary Box */}
-          <div style={{ background: '#f8fafc', padding: '16px 18px', borderRadius: '14px', border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+          <div style={{ background: 'var(--surface-soft)', padding: '16px 18px', borderRadius: '14px', border: '1px solid var(--line-light)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
             <div>
-              <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Categoría & Ayuda</span>
-              <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>{request.category}</strong>
-              <div style={{ fontSize: '12.5px', color: '#334155', marginTop: '2px' }}>{request.description}</div>
+              <span style={{ fontSize: '12px', color: 'var(--muted)', display: 'block' }}>Categoría & Ayuda</span>
+              <strong style={{ fontSize: '13.5px', color: 'var(--navy)' }}>{request.category}</strong>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '2px' }}>{request.description}</div>
             </div>
             <div>
-              <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Cantidad solicitada & Zona</span>
-              <strong style={{ fontSize: '15px', color: '#0f172a' }}>{request.amount} {request.unit}</strong>
-              <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}><MapPin className="i i-l" size={13} />{request.zone} · Fecha: {request.date}</div>
+              <span style={{ fontSize: '12px', color: 'var(--muted)', display: 'block' }}>Cantidad solicitada & Zona</span>
+              <strong style={{ fontSize: '15px', color: 'var(--navy)' }}>{request.amount} {request.unit}</strong>
+              <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}><MapPin className="i i-l" size={13} />{request.zone} · Fecha: {request.date}</div>
             </div>
           </div>
 
@@ -148,29 +148,29 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
               padding: '16px 18px',
               borderRadius: '14px',
               border: isExceeded ? '1.5px solid #f87171' : '1px solid #cbd5e1',
-              background: isExceeded ? '#fff5f5' : '#f0fdf4'
+              background: isExceeded ? 'var(--danger-bg)' : 'var(--ok-bg)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '18px' }}>{isExceeded ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}</span>
-                <strong style={{ fontSize: '13.5px', color: isExceeded ? '#991b1b' : '#166534' }}>
+                <strong style={{ fontSize: '13.5px', color: isExceeded ? 'var(--danger-fg)' : 'var(--ok-fg)' }}>
                   {isExceeded ? 'Control de límites: EXCESO DETECTADO (RF-10)' : 'Control de límites: DENTRO DE LOS PARÁMETROS'}
                 </strong>
               </div>
-              <span style={{ fontSize: '12px', fontWeight: '700', padding: '3px 8px', borderRadius: '6px', background: isExceeded ? '#fee2e2' : '#dcfce7', color: isExceeded ? '#b91c1c' : '#15803d' }}>
+              <span style={{ fontSize: '12px', fontWeight: '700', padding: '3px 8px', borderRadius: '6px', background: isExceeded ? 'var(--danger-bg)' : 'var(--ok-bg)', color: isExceeded ? 'var(--danger-fg)' : 'var(--ok-fg)' }}>
                 {isExceeded ? 'Bloqueo activo' : 'Normal'}
               </span>
             </div>
 
-            <p style={{ margin: '0 0 8px', fontSize: '12px', color: isExceeded ? '#7f1d1d' : '#14532d', lineHeight: '1.45' }}>
+            <p style={{ margin: '0 0 8px', fontSize: '12px', color: isExceeded ? 'var(--danger-fg)' : 'var(--ok-fg)', lineHeight: '1.45' }}>
               {isExceeded 
                 ? (request.limitDetails || limitCheck.reason || `La cantidad solicitada (${request.amount} ${request.unit}) supera el límite de ${categoryConfig?.maxPerRequest || 20} ${categoryConfig?.unit || 'unidades'} configurado para esta categoría.`)
                 : `La cantidad solicitada (${request.amount} ${request.unit}) respeta el límite estándar de hasta ${categoryConfig?.maxPerRequest || 20} ${categoryConfig?.unit || 'unidades'}.`}
             </p>
 
             {isExceeded && (
-              <div style={{ fontSize: '12px', background: '#ffffff', padding: '10px 12px', borderRadius: '8px', border: '1px solid #fecaca', color: '#b91c1c' }}>
+              <div style={{ fontSize: '12px', background: 'var(--white)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--line)', color: 'var(--danger)' }}>
                 <strong>Regla de negocio:</strong> La aprobación está <u>bloqueada</u> por defecto hasta que un administrador registre formalmente una excepción con su justificación correspondiente.
               </div>
             )}
@@ -180,7 +180,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             {/* RF-08 Decision */}
             <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '7px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '7px' }}>
                 Decisión administrativa (RF-08) *
               </label>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -192,8 +192,8 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                     padding: '11px',
                     borderRadius: '10px',
                     border: decision === 'Aprobada' ? '2px solid #059669' : '1px solid #cbd5e1',
-                    background: decision === 'Aprobada' ? '#ecfdf5' : '#ffffff',
-                    color: decision === 'Aprobada' ? '#047857' : '#475569',
+                    background: decision === 'Aprobada' ? 'var(--ok-bg)' : 'var(--white)',
+                    color: decision === 'Aprobada' ? 'var(--success)' : 'var(--muted)',
                     fontWeight: '700',
                     fontSize: '13px',
                     cursor: 'pointer'
@@ -209,8 +209,8 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                     padding: '11px',
                     borderRadius: '10px',
                     border: decision === 'Denegada' ? '2px solid #dc2626' : '1px solid #cbd5e1',
-                    background: decision === 'Denegada' ? '#fef2f2' : '#ffffff',
-                    color: decision === 'Denegada' ? '#b91c1c' : '#475569',
+                    background: decision === 'Denegada' ? 'var(--danger-bg)' : 'var(--white)',
+                    color: decision === 'Denegada' ? 'var(--danger-fg)' : 'var(--muted)',
                     fontWeight: '700',
                     fontSize: '13px',
                     cursor: 'pointer'
@@ -223,7 +223,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
 
             {/* RF-09 Priority */}
             <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '7px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '7px' }}>
                 Asignar Prioridad (RF-09) *
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -238,11 +238,11 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                       borderRadius: '10px',
                       border: priority === p ? '2px solid #06244a' : '1px solid #cbd5e1',
                       background: priority === p 
-                        ? (p === 'Alta' ? '#ffebe8' : p === 'Media' ? '#fef4dc' : '#e2f4f8')
-                        : '#ffffff',
+                        ? (p === 'Alta' ? 'var(--danger-bg)' : p === 'Media' ? 'var(--warn-bg)' : 'var(--info-bg)')
+                        : 'var(--white)',
                       color: priority === p 
-                        ? (p === 'Alta' ? '#c0392b' : p === 'Media' ? '#d35400' : '#2980b9')
-                        : '#64748b',
+                        ? (p === 'Alta' ? 'var(--danger-fg)' : p === 'Media' ? 'var(--warn-fg)' : 'var(--info-fg)')
+                        : 'var(--muted)',
                       fontWeight: '800',
                       fontSize: '12px',
                       cursor: 'pointer'
@@ -257,7 +257,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
 
           {/* RF-10 Administrative Exception Box */}
           {isExceeded && decision === 'Aprobada' && (
-            <div style={{ background: '#fdfbf7', border: '1.5px dashed #f59e0b', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ background: 'var(--warn-bg)', border: '1.5px dashed var(--warning)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                 <input
                   type="checkbox"
@@ -266,7 +266,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                   onChange={e => setGrantException(e.target.checked)}
                   style={{ width: '18px', height: '18px', marginTop: '2px', cursor: 'pointer' }}
                 />
-                <label htmlFor="grantException" style={{ fontSize: '13px', fontWeight: '700', color: '#92400e', cursor: 'pointer' }}>
+                <label htmlFor="grantException" style={{ fontSize: '13px', fontWeight: '700', color: 'var(--warn-fg)', cursor: 'pointer' }}>
                   Registrar excepción administrativa y desbloquear aprobación
                 </label>
               </div>
@@ -274,7 +274,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
               {grantException && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px', paddingLeft: '28px' }}>
                   <div>
-                    <label style={{ fontSize: '12px', fontWeight: '700', color: '#78350f', display: 'block', marginBottom: '4px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--warn-fg)', display: 'block', marginBottom: '4px' }}>
                       Justificación formal de la excepción *
                     </label>
                     <textarea
@@ -289,13 +289,13 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                         borderRadius: '8px',
                         border: '1px solid #d97706',
                         fontSize: '12px',
-                        background: '#ffffff',
+                        background: 'var(--white)',
                         boxSizing: 'border-box'
                       }}
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '12px', fontWeight: '700', color: '#78350f', display: 'block', marginBottom: '4px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--warn-fg)', display: 'block', marginBottom: '4px' }}>
                       Administrador que autoriza la excepción *
                     </label>
                     <input
@@ -309,7 +309,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                         borderRadius: '8px',
                         border: '1px solid #d97706',
                         fontSize: '12px',
-                        background: '#ffffff',
+                        background: 'var(--white)',
                         boxSizing: 'border-box'
                       }}
                     />
@@ -322,7 +322,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
           {/* Decision Reason & Date (RF-08) */}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
             <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '6px' }}>
                 Motivo de la decisión (RF-08) *
               </label>
               <textarea
@@ -335,14 +335,14 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                   width: '100%',
                   padding: '10px',
                   borderRadius: '9px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--line)',
                   fontSize: '12.5px',
                   boxSizing: 'border-box'
                 }}
               />
             </div>
             <div>
-              <label style={{ fontSize: '12px', fontWeight: '700', color: '#334155', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', display: 'block', marginBottom: '6px' }}>
                 Fecha de la decisión *
               </label>
               <input
@@ -354,7 +354,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
                   width: '100%',
                   padding: '9px',
                   borderRadius: '9px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--line)',
                   fontSize: '12.5px',
                   boxSizing: 'border-box'
                 }}
@@ -364,19 +364,19 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
 
           {/* Error notice if blocked */}
           {isApprovalBlocked && (
-            <div style={{ background: '#fef2f2', border: '1px solid #f87171', color: '#b91c1c', padding: '10px 14px', borderRadius: '8px', fontSize: '12px' }}>
+            <div style={{ background: 'var(--danger-bg)', border: '1px solid var(--line)', color: 'var(--danger)', padding: '10px 14px', borderRadius: '8px', fontSize: '12px' }}>
               <Ban className="i i-l" size={14} /><strong>Aprobación bloqueada:</strong> Esta solicitud supera el límite permitido. Marcá "Registrar excepción administrativa" y detallá la justificación para proceder.
             </div>
           )}
 
           {errorMsg && (
-            <div style={{ background: '#fef2f2', border: '1px solid #f87171', color: '#b91c1c', padding: '10px 14px', borderRadius: '8px', fontSize: '12px' }}>
+            <div style={{ background: 'var(--danger-bg)', border: '1px solid var(--line)', color: 'var(--danger)', padding: '10px 14px', borderRadius: '8px', fontSize: '12px' }}>
               {errorMsg}
             </div>
           )}
 
           {/* Modal Footer Actions */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '10px', borderTop: '1px solid var(--line-light)' }}>
             <button
               type="button"
               className="btn secondary"
@@ -392,7 +392,7 @@ export function RequestEvaluationModal({ isOpen, onClose, request, allRequests =
               style={{
                 padding: '11px 26px',
                 fontSize: '13px',
-                background: isApprovalBlocked ? '#64748b' : '#06244a',
+                background: isApprovalBlocked ? 'var(--muted)' : 'var(--brand-solid)',
                 cursor: isApprovalBlocked ? 'not-allowed' : 'pointer',
                 opacity: isApprovalBlocked ? 0.7 : 1
               }}

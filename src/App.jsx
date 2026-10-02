@@ -48,7 +48,7 @@ function Shell() {
   // Título de pestaña según la pantalla
   useEffect(() => {
     const titles = {
-      '/': 'Inicio', '/necesidades': 'Necesidades', '/panel': 'Panel de gestión', '/acceso': 'Acceso',
+      '/': 'Inicio', '/necesidades': 'Necesidades', '/solicitudes': 'Solicitudes', '/panel': 'Panel de gestión', '/acceso': 'Acceso',
       '/perfil': 'Perfil', '/donar': 'Donar', '/solicitar': 'Solicitar ayuda', '/chat': 'Asistente'
     };
     const t = titles[location.pathname];
@@ -97,7 +97,11 @@ function Shell() {
         <nav>
           <NavLink to="/" end>Inicio</NavLink>
           <NavLink to="/necesidades">Necesidades</NavLink>
+ erian-feature
           <NavLink to="/donar">Donar</NavLink>
+
+          <NavLink to="/solicitudes">Solicitudes</NavLink>
+ main
           <NavLink to="/panel">Panel de gestión</NavLink>
           <NavLink to="/chat">Asistente</NavLink>
         </nav>

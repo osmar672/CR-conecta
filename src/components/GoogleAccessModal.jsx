@@ -16,12 +16,12 @@ export function GoogleIcon({ size = 20 }) {
 }
 
 const ROLE_BADGES = {
-  'Administrador': { bg: '#e8f0fe', color: '#1967d2', border: '#c2e7ff' },
-  'Beneficiario': { bg: '#e6f4ea', color: '#137333', border: '#ceead6' },
-  'Donante individual': { bg: '#fef7e0', color: '#b06000', border: '#feefc3' },
-  'Empresa donante': { bg: '#f3e8fd', color: '#8430ce', border: '#e8d0fb' },
-  'Voluntario': { bg: '#e0f2fe', color: '#0284c7', border: '#bae6fd' },
-  'Aliado comunitario': { bg: '#fce8e6', color: '#c5221f', border: '#fad2cf' }
+  'Administrador': { bg: 'var(--info-bg)', color: 'var(--info-fg)' },
+  'Beneficiario': { bg: 'var(--ok-bg)', color: 'var(--ok-fg)' },
+  'Donante individual': { bg: 'var(--warn-bg)', color: 'var(--warn-fg)' },
+  'Empresa donante': { bg: 'var(--info-bg)', color: 'var(--accent-violet)' },
+  'Voluntario': { bg: 'var(--info-bg)', color: 'var(--info-fg)' },
+  'Aliado comunitario': { bg: 'var(--danger-bg)', color: 'var(--danger-fg)' }
 };
 
 export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser }) {
@@ -72,31 +72,31 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
         className="google-modal-card" 
         onClick={e => e.stopPropagation()}
         style={{
-          background: '#ffffff',
+          background: 'var(--white)',
           width: 'min(500px, 94vw)',
           borderRadius: '20px',
           boxShadow: '0 24px 60px rgba(6,36,74,0.18)',
-          border: '1px solid #dce7eb',
+          border: '1px solid var(--line)',
           overflow: 'hidden'
         }}
       >
         {/* Google Header */}
-        <div style={{ padding: '28px 28px 18px', textAlign: 'center', borderBottom: '1px solid #edf2f5' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: '#f8fafc', border: '1px solid #e2e8f0', marginBottom: 12 }}>
+        <div style={{ padding: '28px 28px 18px', textAlign: 'center', borderBottom: '1px solid var(--line-light)' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: 'var(--surface-soft)', border: '1px solid var(--line-light)', marginBottom: 12 }}>
             <GoogleIcon size={24} />
           </div>
-          <h2 id="demo-login-title" style={{ margin: '0 0 6px', fontSize: '20px', color: '#1f2937', fontWeight: '700' }}>
+          <h2 id="demo-login-title" style={{ margin: '0 0 6px', fontSize: '20px', color: 'var(--navy)', fontWeight: '700' }}>
             Acceso simulado con Google / Gmail
           </h2>
-          <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
             Elegí una cuenta de demostración e ingresá su contraseña:
           </p>
         </div>
 
         {/* Disclaimer Warning according to RF-02 */}
-        <div style={{ background: '#f8fafc', padding: '12px 24px', borderBottom: '1px solid #edf2f5', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+        <div style={{ background: 'var(--surface-soft)', padding: '12px 24px', borderBottom: '1px solid var(--line-light)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
           <Info size={15} style={{ flexShrink: 0 }} />
-          <p style={{ margin: 0, fontSize: '12px', color: '#475569', lineHeight: '1.45' }}>
+          <p style={{ margin: 0, fontSize: '12px', color: 'var(--muted)', lineHeight: '1.45' }}>
             <strong>Aviso de demostración (RF-02):</strong> Este acceso asocia correos ficticios de <code>db.json</code>. Google/Gmail y flujos con n8n son simulados con fines académicos. En modo local, las cuentas comparten la contraseña de demostración indicada en el README.
           </p>
         </div>
@@ -104,7 +104,7 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
         {/* List of demo Google accounts */}
         <div style={{ padding: '16px 20px', maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {users.map((u) => {
-            const badge = ROLE_BADGES[u.role] || { bg: '#f1f5f9', color: '#334155', border: '#e2e8f0' };
+            const badge = ROLE_BADGES[u.role] || { bg: 'var(--tag-bg)', color: 'var(--tag-fg)' };
             const avatarSrc = u.role === 'Empresa donante' ? '/logo.jpg' : '/logo-mark.png';
             
             return (
@@ -124,8 +124,8 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
                   gap: '14px',
                   padding: '12px 14px',
                   borderRadius: '12px',
-                  border: '1px solid #e5e9ec',
-                  background: '#ffffff',
+                  border: '1px solid var(--line)',
+                  background: 'var(--white)',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.15s ease'
@@ -146,7 +146,7 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: '700', fontSize: '14px', color: '#0f172a' }}>{u.name}</span>
+                    <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--navy)' }}>{u.name}</span>
                     <span 
                       style={{
                         fontSize: '11px',
@@ -155,21 +155,21 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
                         borderRadius: '20px',
                         background: badge.bg,
                         color: badge.color,
-                        border: `1px solid ${badge.border}`
+                        border: '1px solid currentColor'
                       }}
                     >
                       {u.role}
                     </span>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>
                     {u.email}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '1px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '1px' }}>
                     Zona: {u.zone} {u.phone ? `· ${u.phone}` : ''}
                   </div>
                 </div>
 
-                <div style={{ color: '#0284c7', fontSize: '13px', fontWeight: '700' }}>
+                <div style={{ color: 'var(--info-fg)', fontSize: '13px', fontWeight: '700' }}>
                   Entrar<ArrowRight className="i i-r" size={14} />
                 </div>
               </button>
@@ -189,9 +189,9 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
               required
               value={password}
               onChange={event => setPassword(event.target.value)}
-              style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid #cbd5e1' }}
+              style={{ width: '100%', padding: '11px', borderRadius: '10px', border: '1px solid var(--line)' }}
             />
-            {error && <p role="alert" style={{ color: '#b91c1c', margin: 0, fontSize: '12px' }}>{error}</p>}
+            {error && <p role="alert" style={{ color: 'var(--danger)', margin: 0, fontSize: '12px' }}>{error}</p>}
             <button className="btn primary" type="submit" disabled={submitting}>
               {submitting ? 'Verificando…' : 'Iniciar sesión'}<ArrowRight className="i i-r" size={14} />
             </button>
@@ -199,7 +199,7 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
         )}
 
         {/* Modal footer */}
-        <div style={{ padding: '16px 24px', background: '#fcfdfd', borderTop: '1px solid #edf2f5', display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ padding: '16px 24px', background: 'var(--surface-soft)', borderTop: '1px solid var(--line-light)', display: 'flex', justifyContent: 'flex-end' }}>
           <button 
             type="button" 
             className="btn secondary" 
