@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
-import { evaluateRequest, createRequest, publicRequest, ValidationError } from './validation.js';
+import { evaluateRequest, createRequest, nextSectionId, nextUserId, publicRequest, validateNewSection, validateNewUser, ValidationError } from './validation.js';
 import { CATEGORY_LIMITS } from '../src/constants/limits.js';
 import { answerSiteQuestion } from './assistant.js';
 import { projectCampaign } from './projection.js';
@@ -83,7 +83,13 @@ async function verifyPassword(password, credential) {
   if (!credential?.salt || !credential?.hash) return false;
   const derived = await scrypt(password, credential.salt, 64);
   const expected = Buffer.from(credential.hash, 'hex');
-  return expected.length === derived.length && timingSafeEqual(expected, derived);
+  return derived.length === expected.length && timingSafeEqual(derived, expected);
+}
+
+async function hashPassword(password) {
+  const salt = randomBytes(16).toString('hex');
+  const derived = await scrypt(password, salt, 64);
+  return { salt, hash: derived.toString('hex') };
 }
 
 function canManageUsers(user, targetUserId) {
@@ -122,6 +128,8 @@ function allowedCollectionRows(collection, user, database) {
       return rows.map(({ id, name, type, description, zone, logo, website, category, badge, support }) => ({
         id, name, type, description, zone, logo, website, category, badge, support
       }));
+    case 'sections':
+      return rows;
     case 'facilities':
     case 'chatbot':
       return rows;
@@ -137,6 +145,7 @@ function requestCookie(token, secure) {
 export function createApiServer({
   database,
   persist = async () => {},
+  persistCredentials = async () => {},
   demoPassword = process.env.CR_DEMO_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'conecta-demo'),
   authUsers = {},
   assistantApiKey = process.env.GROQ_API_KEY,
@@ -151,6 +160,7 @@ export function createApiServer({
 }) {
   const sessions = new Map();
   const loginAttempts = new Map();
+  const registerAttempts = new Map();
   const assistantAttempts = new Map();
   const projectionAttempts = new Map();
 
@@ -175,7 +185,7 @@ export function createApiServer({
     const corsHeaders = origin ? {
       'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       Vary: 'Origin'
     } : {};
@@ -193,6 +203,50 @@ export function createApiServer({
 
       if (path[0] === 'auth' && path[1] === 'demo-users' && request.method === 'GET') {
         send(response, 200, database.users.map(safeDemoUser), corsHeaders);
+        return;
+      }
+
+      if (path[0] === 'auth' && path[1] === 'register' && request.method === 'POST') {
+        const attemptKey = request.socket.remoteAddress || 'unknown';
+        const attempt = registerAttempts.get(attemptKey);
+        if (attempt?.lockedUntil > Date.now()) {
+          send(response, 429, { message: 'Demasiados registros. Probá de nuevo en 15 minutos.' }, corsHeaders);
+          return;
+        }
+        const body = await readBody(request);
+        const fields = validateNewUser(body, database.users);
+        if (fields.role === ADMIN) {
+          send(response, 400, { message: 'El rol Administrador no está disponible para autorregistro.' }, corsHeaders);
+          return;
+        }
+        const id = nextUserId(database.users);
+        const { password, ...profile } = fields;
+        const account = { id, ...profile };
+
+        database.users.push(account);
+        authUsers[id] = await hashPassword(password);
+        try {
+          await persistCredentials(authUsers);
+          await persist(database);
+        } catch (error) {
+          database.users.pop();
+          delete authUsers[id];
+          throw error;
+        }
+        const nextFailures = attempt?.windowStartedAt > Date.now() - 15 * 60 * 1000 ? attempt.failures + 1 : 1;
+        registerAttempts.set(attemptKey, {
+          failures: nextFailures,
+          windowStartedAt: attempt?.windowStartedAt > Date.now() - 15 * 60 * 1000 ? attempt.windowStartedAt : Date.now(),
+          lockedUntil: nextFailures >= 10 ? Date.now() + 15 * 60 * 1000 : 0
+        });
+        recordActivity(database, safeUser(account), 'se registró', 'cuenta', id, account.role);
+
+        const token = randomBytes(32).toString('base64url');
+        sessions.set(token, { userId: id, expiresAt: Date.now() + SESSION_TTL_MS });
+        send(response, 201, safeUser(account), {
+          ...corsHeaders,
+          'Set-Cookie': requestCookie(token, secureCookies)
+        });
         return;
       }
 
@@ -316,7 +370,7 @@ export function createApiServer({
 
       const knownCollections = new Set([
         'users', 'requests', 'donations', 'inventory', 'transfers', 'allies',
-        'facilities', 'campaigns', 'jobs', 'chatbot'
+        'facilities', 'campaigns', 'jobs', 'chatbot', 'sections'
       ]);
       if (!knownCollections.has(collection)) {
         send(response, 404, { message: 'Recurso no encontrado.' }, corsHeaders);
@@ -325,8 +379,8 @@ export function createApiServer({
 
       if (collection === 'users') {
         if (request.method === 'GET') {
-          if (!user || (itemId && !canManageUsers(user, itemId)) || (!itemId && user.role !== ADMIN)) {
-            send(response, 403, { message: 'No tenés permiso para consultar este perfil.' }, corsHeaders);
+          if (!user || (itemId && !canManageUsers(user, itemId))) {
+            send(response, user ? 403 : 401, { message: 'No tenés permiso para consultar este perfil.' }, corsHeaders);
             return;
           }
           const selected = itemId ? database.users.find(item => item.id === itemId) : database.users;
@@ -337,6 +391,36 @@ export function createApiServer({
           send(response, 200, Array.isArray(selected) ? selected.map(safeUser) : safeUser(selected), corsHeaders);
           return;
         }
+        if (request.method === 'POST' && !itemId) {
+          if (!user) {
+            send(response, 401, { message: 'Iniciá sesión para registrar una cuenta.' }, corsHeaders);
+            return;
+          }
+          const input = await readBody(request);
+          const fields = validateNewUser(input, database.users);
+          if (fields.role === ADMIN && user.role !== ADMIN) {
+            send(response, 403, { message: 'Solo el administrador puede crear cuentas con rol Administrador.' }, corsHeaders);
+            return;
+          }
+          const id = nextUserId(database.users);
+          const { password, ...profile } = fields;
+          const item = { id, ...profile };
+
+          database.users.push(item);
+          authUsers[id] = await hashPassword(password);
+          try {
+            await persistCredentials(authUsers);
+          } catch (error) {
+            database.users.pop();
+            delete authUsers[id];
+            throw error;
+          }
+          recordActivity(database, user, 'registró', 'cuenta', id, item.role);
+          await persist(database);
+          send(response, 201, safeUser(item), corsHeaders);
+          return;
+        }
+
         if (request.method === 'PATCH' && itemId) {
           if (!user || !canManageUsers(user, itemId)) {
             send(response, 403, { message: 'No tenés permiso para actualizar este perfil.' }, corsHeaders);
@@ -388,6 +472,47 @@ export function createApiServer({
           send(response, 200, result, corsHeaders);
         }
         return;
+      }
+
+      if (collection === 'sections') {
+        if (request.method === 'POST') {
+          if (!user) {
+            send(response, 401, { message: 'Iniciá sesión para agregar una sección.' }, corsHeaders);
+            return;
+          }
+          const input = await readBody(request);
+          const fields = validateNewSection(input);
+          const item = {
+            id: nextSectionId(database.sections || []),
+            ...fields,
+            author: user.name,
+            authorId: user.id,
+            role: user.role
+          };
+          database.sections = database.sections || [];
+          database.sections.push(item);
+          recordActivity(database, user, 'agregó', 'sección', item.id, item.title);
+          await persist(database);
+          send(response, 201, item, corsHeaders);
+          return;
+        }
+
+        if (request.method === 'DELETE' && itemId) {
+          const index = (database.sections || []).findIndex(item => item.id === itemId);
+          if (index === -1) {
+            send(response, 404, { message: 'Sección no encontrada.' }, corsHeaders);
+            return;
+          }
+          if (!user || (user.role !== ADMIN && database.sections[index].authorId !== user.id)) {
+            send(response, user ? 403 : 401, { message: 'Solo podés quitar las secciones que agregaste.' }, corsHeaders);
+            return;
+          }
+          const [removed] = database.sections.splice(index, 1);
+          recordActivity(database, user, 'quitó', 'sección', removed.id, removed.title);
+          await persist(database);
+          send(response, 200, { message: 'Sección eliminada.', id: removed.id }, corsHeaders);
+          return;
+        }
       }
 
       if (collection === 'requests' && request.method === 'POST') {

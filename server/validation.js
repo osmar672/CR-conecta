@@ -3,6 +3,17 @@ import { CATEGORY_LIMITS, checkRequestLimits } from '../src/constants/limits.js'
 const VALID_PRIORITIES = new Set(['Alta', 'Media', 'Baja']);
 const VALID_DECISIONS = new Set(['Aprobada', 'Denegada']);
 
+export const USER_ROLES = [
+  'Administrador',
+  'Beneficiario',
+  'Donante individual',
+  'Empresa donante',
+  'Voluntario',
+  'Aliado comunitario'
+];
+
+export const USER_ZONES = ['Puntarenas', 'Barranca', 'El Roble', 'Chacarita', 'San José'];
+
 export class ValidationError extends Error {
   constructor(message) {
     super(message);
@@ -14,6 +25,75 @@ function isDateOnly(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00.000Z`);
   return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function readText(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+export const PUBLIC_ROLES = USER_ROLES.filter(role => role !== 'Administrador');
+
+export function nextSectionId(sections) {
+  const highest = sections.reduce((max, section) => {
+    const match = /^s(\d+)$/.exec(String(section.id));
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 0);
+  return `s${highest + 1}`;
+}
+
+export function validateNewSection(input) {
+  const title = readText(input?.title, 90);
+  const body = readText(input?.body, 1200);
+
+  if (title.length < 3) {
+    throw new ValidationError('El título debe tener al menos 3 caracteres.');
+  }
+  if (body.length < 10) {
+    throw new ValidationError('El contenido debe tener al menos 10 caracteres.');
+  }
+  return { title, body };
+}
+
+export function nextUserId(users) {
+  const highest = users.reduce((max, user) => {
+    const match = /^u(\d+)$/.exec(String(user.id));
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 0);
+  return `u${highest + 1}`;
+}
+
+export function validateNewUser(input, existingUsers) {
+  const name = readText(input?.name, 120);
+  const email = readText(input?.email, 160).toLowerCase();
+  const role = readText(input?.role, 60);
+  const zone = readText(input?.zone, 100);
+  const phone = readText(input?.phone, 40);
+  const notes = readText(input?.notes, 500);
+  const password = typeof input?.password === 'string' ? input.password : '';
+
+  if (!name || name.length > 120) {
+    throw new ValidationError('El nombre debe tener entre 1 y 120 caracteres.');
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 160) {
+    throw new ValidationError('Ingresá un correo electrónico válido.');
+  }
+  if (!USER_ROLES.includes(role)) throw new ValidationError('Seleccioná un rol válido.');
+  if (!zone || zone.length > 100) throw new ValidationError('Ingresá una zona válida.');
+  if (phone.length > 40) throw new ValidationError('El teléfono es demasiado largo.');
+  if (notes.length > 500) throw new ValidationError('Las notas son demasiado largas.');
+  if (password.length < 8 || password.length > 200) {
+    throw new ValidationError('La contraseña debe tener entre 8 y 200 caracteres.');
+  }
+
+  const duplicated = existingUsers.some(
+    user => String(user.email || '').toLowerCase() === email
+      || String(user.name || '').trim().toLowerCase() === name.toLowerCase()
+  );
+  if (duplicated) {
+    throw new ValidationError('Ya existe una cuenta con ese correo o ese nombre.');
+  }
+
+  return { name, email, role, zone, phone, notes, password };
 }
 
 export function publicRequest(request) {

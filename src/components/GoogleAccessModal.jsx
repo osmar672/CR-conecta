@@ -24,6 +24,19 @@ const ROLE_BADGES = {
   'Aliado comunitario': { bg: 'var(--danger-bg)', color: 'var(--danger-fg)' }
 };
 
+function roleBadgeStyle(role) {
+  const badge = ROLE_BADGES[role] || { bg: 'var(--tag-bg)', color: 'var(--tag-fg)' };
+  return {
+    fontSize: '11px',
+    fontWeight: 700,
+    padding: '2px 8px',
+    borderRadius: '20px',
+    background: badge.bg,
+    color: badge.color,
+    border: '1px solid currentColor'
+  };
+}
+
 export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser }) {
   const modalRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -104,14 +117,14 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
         {/* List of demo Google accounts */}
         <div style={{ padding: '16px 20px', maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {users.map((u) => {
-            const badge = ROLE_BADGES[u.role] || { bg: 'var(--tag-bg)', color: 'var(--tag-fg)' };
+            const isSelected = selectedUser?.id === u.id;
             const avatarSrc = u.role === 'Empresa donante' ? '/logo.jpg' : '/logo-mark.png';
-            
+
             return (
               <button
                 key={u.id}
                 type="button"
-                aria-pressed={selectedUser?.id === u.id}
+                aria-pressed={isSelected}
                 onClick={() => {
                   setSelectedUser(u);
                   setPassword('');
@@ -124,16 +137,24 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
                   gap: '14px',
                   padding: '12px 14px',
                   borderRadius: '12px',
-                  border: '1px solid var(--line)',
-                  background: 'var(--white)',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  transition: 'all 0.15s ease'
+                  transition: 'border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease',
+                  ...(isSelected
+                    ? {
+                        border: '2px solid var(--accent-primary)',
+                        background: 'var(--surface-soft)',
+                        boxShadow: '0 0 0 3px rgba(6, 36, 74, 0.08)'
+                      }
+                    : {
+                        border: '1px solid var(--line)',
+                        background: 'var(--white)'
+                      })
                 }}
               >
                 <img
                   src={avatarSrc}
-                  alt={u.name}
+                  alt=""
                   style={{
                     width: 40,
                     height: 40,
@@ -146,20 +167,8 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--navy)' }}>{u.name}</span>
-                    <span 
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        padding: '2px 8px',
-                        borderRadius: '20px',
-                        background: badge.bg,
-                        color: badge.color,
-                        border: '1px solid currentColor'
-                      }}
-                    >
-                      {u.role}
-                    </span>
+                    <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--navy)' }}>{u.name}</span>
+                    <span style={roleBadgeStyle(u.role)}>{u.role}</span>
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>
                     {u.email}
@@ -169,8 +178,19 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
                   </div>
                 </div>
 
-                <div style={{ color: 'var(--info-fg)', fontSize: '13px', fontWeight: '700' }}>
-                  Entrar<ArrowRight className="i i-r" size={14} />
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    flexShrink: 0,
+                    color: 'var(--info-fg)',
+                    fontSize: '13px',
+                    fontWeight: 700
+                  }}
+                >
+                  {isSelected ? 'Ingresar' : 'Entrar'}
+                  <ArrowRight className="i i-r" size={14} />
                 </div>
               </button>
             );

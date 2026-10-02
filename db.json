@@ -53,6 +53,15 @@
       "zone": "Chacarita",
       "phone": "+506 8888-0006",
       "notes": "Centro vecinal de acopio y enlace vecinal en Chacarita."
+    },
+    {
+      "id": "u7",
+      "name": "Steven Salas Ledezma",
+      "email": "ssalasl@fwdcostarica.com",
+      "role": "Beneficiario",
+      "zone": "Puntarenas",
+      "phone": "88888888",
+      "notes": ""
     }
   ],
   "requests": [
@@ -1184,5 +1193,6 @@
       "entityId": "u1",
       "detail": ""
     }
-  ]
+  ],
+  "sections": []
 }

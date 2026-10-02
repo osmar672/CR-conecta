@@ -1,4 +1,5 @@
-import { ArrowRight, Info } from 'lucide-react';
+import { ArrowRight, Info, UserPlus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useData } from '../lib/useData';
 import { GoogleIcon } from '../components/GoogleAccessModal';
 import { RoleAvatar, roleIcons } from '../components/ShellParts';
@@ -44,23 +45,33 @@ export function Access({ onOpenGoogleAuth }) {
           </p>
         </div>
 
-        <button 
-          type="button" 
-          className="btn secondary"
-          onClick={onOpenGoogleAuth}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '10px',
-            border: '1.5px solid #d5e1e7',
-            padding: '12px 24px',
-            fontSize: '13.5px',
-            fontWeight: '700'
-          }}
-        >
-          <GoogleIcon size={18} />
-          Continuar con Google<ArrowRight className="i i-r" size={14} />
-        </button>
+<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <button
+            type="button"
+            className="btn primary"
+            onClick={onOpenGoogleAuth}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '12px 24px',
+              fontSize: '13.5px',
+              fontWeight: '700'
+            }}
+          >
+            <GoogleIcon size={18} />
+            Continuar con Google<ArrowRight className="i i-r" size={14} />
+          </button>
+
+          <Link
+            to="/registro"
+            className="btn secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '11px 20px', fontSize: '13px' }}
+          >
+            <UserPlus className="i i-l" size={15} />
+            No tengo cuenta, registrarme
+          </Link>
+        </div>
       </div>
 
       {/* Disclaimer Notice */}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TriangleAlert, ArrowRightLeft } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Logo } from './components/Logo';
@@ -8,6 +8,8 @@ import { Confirm, RoleAvatar, roleIcons } from './components/ShellParts';
 import { api } from './lib/api';
 import { useData } from './lib/useData';
 import { AppRoutes } from './routes/AppRoutes';
+
+const PRIVATE_PATHS = ['/panel', '/perfil', '/donar', '/solicitar', '/solicitudes'];
 
 function Shell() {
   const [session, setSession] = useState(null);
@@ -55,6 +57,11 @@ function Shell() {
     document.title = t ? `${t} · CR Conecta` : 'CR Conecta — Conectando personas · Construyendo paz';
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  const pendingTarget = useMemo(() => {
+    const requested = new URLSearchParams(location.search).get('redirect');
+    return requested && PRIVATE_PATHS.includes(requested) ? requested : '/panel';
+  }, [location.search]);
 
   const logout = () => {
     setConfirm({
@@ -126,9 +133,18 @@ function Shell() {
               </button>
             </div>
           ) : (
-            <button className="btn primary" onClick={() => setGoogleModalOpen(true)}>
-              Quiero ayudar
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                className="btn secondary"
+                onClick={() => navigate('/registro')}
+                style={{ padding: '8px 12px', fontSize: '12px' }}
+              >
+                Registrarme
+              </button>
+              <button className="btn primary" onClick={() => setGoogleModalOpen(true)}>
+                Quiero ayudar
+              </button>
+            </div>
           )}
         </div>
       </header>
@@ -155,7 +171,7 @@ function Shell() {
         users={users || []}
         onSelectUser={(u) => {
           login(u);
-          navigate('/panel');
+          navigate(pendingTarget, { replace: true });
         }}
       />
 

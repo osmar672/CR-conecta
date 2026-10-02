@@ -5,10 +5,11 @@ import { useData } from '../lib/useData';
 import { SponsorsSection } from '../components/SponsorsSection';
 import { HowItWorksSection } from '../components/HowItWorksSection';
 import { CommunityCoverageSection } from '../components/CommunityCoverageSection';
+import { HomeSections } from '../components/HomeSections';
 import { AidServicesSection } from '../components/AidServicesSection';
 import { DEFAULT_MAP_ZOOM, getMapBounds, MAX_MAP_ZOOM, MIN_MAP_ZOOM } from '../lib/mapZoom';
 
-export function Home({ onOpenNeedModal }) {
+export function Home({ onOpenNeedModal, session }) {
   const { data: reqs = [] } = useData('/requests');
   const { data: transfers = [] } = useData('/transfers');
   const { data: allies = [] } = useData('/allies');
@@ -140,6 +141,9 @@ export function Home({ onOpenNeedModal }) {
 
       {/* 3. Informative Section: Territorial Coverage & Facilities */}
       <CommunityCoverageSection facilities={facilities || []} />
+
+      {/* 4. Secciones publicadas por la comunidad */}
+      <HomeSections session={session} />
 
       {/* Impact Indicators */}
       <section className="impact-strip">

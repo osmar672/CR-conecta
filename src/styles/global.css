@@ -1293,6 +1293,405 @@ nav a.active {
   color: #2b7a9e;
 }
 
+/* REGISTRO PÚBLICO */
+.register-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 22px;
+  align-items: start;
+}
+
+.register-card {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.register-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  background: var(--brand-solid);
+  color: #ffffff;
+}
+
+.register-card-head h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.register-card-head p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--brand-eyebrow);
+}
+
+.register-aside {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface-soft);
+}
+
+.register-aside h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: var(--navy);
+}
+
+.register-aside ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+@media (max-width: 860px) {
+  .register-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-theme='dark'] .register-card {
+  background: #1e1e1e;
+  border-color: #2c2c2c;
+}
+
+html[data-theme='dark'] .register-aside {
+  background: #232323;
+  border-color: #2c2c2c;
+}
+
+/* SECCIONES DE LA COMUNIDAD */
+.community-sections {
+  padding: 72px 5.5% 80px;
+  background: linear-gradient(180deg, #f7fafc 0%, #ffffff 100%);
+  border-top: 1px solid var(--line-light);
+}
+
+.community-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.community-section-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.community-section-card h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--navy);
+}
+
+.community-section-card p {
+  margin: 0;
+  flex: 1;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+
+.community-section-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-light);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.community-sections .section-intro h2 {
+  font-size: 32px;
+}
+
+@media (max-width: 768px) {
+  .community-sections {
+    padding: 48px 4%;
+  }
+}
+
+html[data-theme='dark'] .community-sections {
+  background: linear-gradient(180deg, #161616 0%, #121212 100%);
+  border-top-color: #2c2c2c;
+}
+
+html[data-theme='dark'] .community-section-card {
+  background: #1e1e1e;
+  border-color: #2c2c2c;
+}
+
+/* Modal de acceso: fila de cuenta seleccionable */
+.google-account-row:hover {
+  border-color: var(--accent-primary) !important;
+  background: var(--surface-soft) !important;
+}
+
+.google-account-row:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* CUENTAS · ALTA DE USUARIOS */
+.accounts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accounts-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--white);
+}
+
+.accounts-toolbar strong {
+  display: block;
+  font-size: 14px;
+  color: var(--navy);
+}
+
+.accounts-toolbar p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.accounts-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--ok-bg);
+  border-radius: 12px;
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.accounts-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.accounts-identity > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.accounts-identity b {
+  font-size: 13px;
+  color: var(--navy);
+}
+
+.accounts-identity small {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.accounts-role {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.accounts-role.role-admin {
+  color: var(--info-fg);
+}
+
+.accounts-role.role-beneficiario {
+  color: var(--ok-fg);
+}
+
+.accounts-role.role-donante {
+  color: var(--warn-fg);
+}
+
+.accounts-role.role-empresa {
+  color: var(--accent-violet);
+}
+
+.accounts-role.role-voluntario,
+.accounts-role.role-aliado {
+  color: var(--muted);
+}
+
+/* Modal de alta */
+.user-modal-card {
+  width: min(540px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--white);
+  box-shadow: var(--shadow-lg);
+}
+
+.user-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px;
+  background: var(--brand-solid);
+  color: #ffffff;
+}
+
+.user-modal-header h3 {
+  margin: 3px 0 0;
+  font-size: 19px;
+  color: #ffffff;
+}
+
+.user-modal-header .eyebrow {
+  color: var(--brand-eyebrow);
+}
+
+.user-modal-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--brand-chip);
+  color: var(--brand-chip-fg);
+}
+
+.user-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+}
+
+.user-modal-body label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.user-modal-body input,
+.user-modal-body select,
+.user-modal-body textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.user-modal-body textarea {
+  resize: vertical;
+}
+
+.user-modal-body input:focus-visible,
+.user-modal-body select:focus-visible,
+.user-modal-body textarea:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
+.user-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.user-modal-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 11px 13px;
+  border: 1px solid var(--line-light);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.user-modal-note .i {
+  margin-top: 2px;
+}
+
+.user-modal-error {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+  font-size: 12px;
+}
+
+.user-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+@media (max-width: 560px) {
+  .user-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-theme='dark'] .accounts-toolbar {
+  background: #1e1e1e;
+  border-color: #2c2c2c;
+}
+
+html[data-theme='dark'] .user-modal-card {
+  background: #1e1e1e;
+  border-color: #2c2c2c;
+}
+
+html[data-theme='dark'] .user-modal-body input,
+html[data-theme='dark'] .user-modal-body select,
+html[data-theme='dark'] .user-modal-body textarea {
+  background: #2c2c2c;
+  border-color: #3a3a3a;
+  color: #e1e1e1;
+}
+
 /* SOLICITUDES · ADMINISTRACIÓN (RF-08, RF-09, RF-10) */
 .solicitudes-gate {
   max-width: 560px;

@@ -25,17 +25,26 @@ function createDatabase() {
     facilities: [],
     campaigns: [],
     jobs: [],
-    chatbot: []
+    chatbot: [],
+    sections: []
   };
 }
 
 async function startServer() {
   const database = createDatabase();
-  const server = createApiServer({ database, persist: async () => {} });
+  const authUsers = {};
+  const server = createApiServer({
+    database,
+    authUsers,
+    persist: async () => {},
+    persistCredentials: async credentials => { Object.assign(authUsers, credentials); }
+  });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
   return {
     database,
+    authUsers,
+    get savedCredentials() { return authUsers; },
     url: `http://127.0.0.1:${address.port}`,
     close: () => new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
   };
@@ -192,7 +201,14 @@ test('public and beneficiary request reads do not disclose private records', asy
   const privateResponse = await fetch(`${app.url}/requests`, { headers: { Cookie: beneficiaryLogin.cookie } });
   const privateRequests = await privateResponse.json();
   assert.deepEqual(privateRequests.map(request => request.id), ['private-1', 'approved-1']);
-  assert.equal((await fetch(`${app.url}/users`)).status, 403);
+  // El listado de cuentas exige sesión y nunca expone credenciales.
+  assert.equal((await fetch(`${app.url}/users`)).status, 401);
+  const accounts = await fetch(`${app.url}/users`, { headers: { Cookie: beneficiaryLogin.cookie } });
+  const listed = await accounts.json();
+  assert.equal(accounts.status, 200);
+  assert.equal(listed.length, 4);
+  assert.equal('password' in listed[0], false);
+  assert.equal('hash' in listed[0], false);
 });
 
 test('only an administrator can evaluate requests and exceptions are enforced server-side', async t => {
@@ -273,6 +289,179 @@ test('beneficiary cannot create a request for another account or exceed validati
     body: JSON.stringify({ ...body, category: 'categoría desconocida' })
   });
   assert.equal(invalid.status, 400);
+});
+
+test('any signed-in account can register users but only an admin creates admins', async t => {
+  const app = await startServer();
+  t.after(app.close);
+
+  const beneficiary = await login(app.url, 'beneficiary');
+  const body = {
+    name: 'Nueva Voluntaria',
+    email: 'voluntaria@example.test',
+    role: 'Voluntario',
+    zone: 'El Roble',
+    phone: '+506 8888-0009',
+    password: 'conecta-demo'
+  };
+
+  const anonymous = await fetch(`${app.url}/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  assert.equal(anonymous.status, 401);
+
+  // Un beneficiario no puede crear cuentas con rol Administrador.
+  const escalation = await fetch(`${app.url}/users`, {
+    method: 'POST',
+    headers: { Cookie: beneficiary.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...body, role: 'Administrador' })
+  });
+  assert.equal(escalation.status, 403);
+
+  const invalid = await fetch(`${app.url}/users`, {
+    method: 'POST',
+    headers: { Cookie: beneficiary.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...body, password: 'corta' })
+  });
+  assert.equal(invalid.status, 400);
+
+  // Pero sí puede registrar una cuenta de otro rol.
+  const created = await fetch(`${app.url}/users`, {
+    method: 'POST',
+    headers: { Cookie: beneficiary.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  assert.equal(created.status, 201);
+  const user = await created.json();
+  assert.equal(user.role, 'Voluntario');
+  assert.equal(user.password, undefined);
+  assert.equal(app.savedCredentials[user.id].salt !== undefined, true);
+  assert.notEqual(app.savedCredentials[user.id].hash, body.password);
+  assert.equal(app.database.activity[0].entity, 'cuenta');
+
+  const duplicated = await fetch(`${app.url}/users`, {
+    method: 'POST',
+    headers: { Cookie: beneficiary.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  assert.equal(duplicated.status, 400);
+
+  // La cuenta nueva sirve para iniciar sesión con su propia contraseña.
+  const session = await fetch(`${app.url}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: user.id, password: body.password })
+  });
+  assert.equal(session.status, 200);
+
+  // El administrador sí puede crear cuentas de Administrador.
+  const admin = await login(app.url, 'admin');
+  const newAdmin = await fetch(`${app.url}/users`, {
+    method: 'POST',
+    headers: { Cookie: admin.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...body, name: 'Segundo Admin', email: 'admin2@example.test', role: 'Administrador' })
+  });
+  assert.equal(newAdmin.status, 201);
+});
+
+test('public registration creates a usable account but never an administrator', async t => {
+  const app = await startServer();
+  t.after(app.close);
+
+  const body = {
+    name: 'Nueva Persona',
+    email: 'nueva@persona.test',
+    role: 'Voluntario',
+    zone: 'Chacarita',
+    password: 'conecta-demo'
+  };
+
+  const escalation = await fetch(`${app.url}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...body, role: 'Administrador' })
+  });
+  assert.equal(escalation.status, 400);
+
+  const weakPassword = await fetch(`${app.url}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...body, password: '123' })
+  });
+  assert.equal(weakPassword.status, 400);
+
+  const response = await fetch(`${app.url}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  assert.equal(response.status, 201);
+  const account = await response.json();
+  assert.equal(account.role, 'Voluntario');
+  assert.equal('password' in account, false);
+  assert.notEqual(app.savedCredentials[account.id].hash, body.password);
+
+  // El registro inicia sesión con la contraseña elegida por la persona.
+  const cookie = cookieFrom(response);
+  assert.ok(cookie);
+  const session = await fetch(`${app.url}/auth/session`, { headers: { Cookie: cookie } });
+  assert.equal((await session.json()).id, account.id);
+
+  // El correo no se puede reutilizar.
+  const duplicated = await fetch(`${app.url}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  assert.equal(duplicated.status, 400);
+});
+
+test('any signed-in role can publish home sections and only authors or admins remove them', async t => {
+  const app = await startServer();
+  t.after(app.close);
+
+  const anonymous = await fetch(`${app.url}/sections`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'Sección anónima', body: 'No debería poder publicarse.' })
+  });
+  assert.equal(anonymous.status, 401);
+
+  const publicRead = await fetch(`${app.url}/sections`);
+  assert.equal(publicRead.status, 200);
+
+  const beneficiary = await login(app.url, 'beneficiary');
+  const created = await fetch(`${app.url}/sections`, {
+    method: 'POST',
+    headers: { Cookie: beneficiary.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'Noticias', body: 'Recuperación deentence completa del proyecto.' })
+  });
+  assert.equal(created.status, 201);
+  const section = await created.json();
+  assert.equal(section.authorId, 'beneficiary');
+
+  const invalid = await fetch(`${app.url}/sections`, {
+    method: 'POST',
+    headers: { Cookie: beneficiary.cookie, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'X', body: 'corto' })
+  });
+  assert.equal(invalid.status, 400);
+
+  const donor = await login(app.url, 'donor');
+  const foreignDelete = await fetch(`${app.url}/sections/${section.id}`, {
+    method: 'DELETE',
+    headers: { Cookie: donor.cookie }
+  });
+  assert.equal(foreignDelete.status, 403);
+
+  const ownDelete = await fetch(`${app.url}/sections/${section.id}`, {
+    method: 'DELETE',
+    headers: { Cookie: beneficiary.cookie }
+  });
+  assert.equal(ownDelete.status, 200);
+  assert.deepEqual(await (await fetch(`${app.url}/sections`)).json(), []);
 });
 
 test('donations require a donor role and an approved request destination', async t => {

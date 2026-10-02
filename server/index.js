@@ -27,7 +27,12 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
-const server = createApiServer({ database, persist: createJsonPersistence(databasePath), authUsers });
+const server = createApiServer({
+  database,
+  persist: createJsonPersistence(databasePath),
+  persistCredentials: createJsonPersistence(authPath),
+  authUsers
+});
 const port = Number(process.env.PORT || 3001);
 server.listen(port, () => {
   console.log(`CR Conecta API disponible en http://localhost:${port}`);

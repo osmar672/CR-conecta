@@ -6,6 +6,7 @@ import { GoogleIcon } from '../components/GoogleAccessModal';
 import { BeneficiarySection } from '../components/BeneficiarySection';
 import { ProfileEditModal } from '../components/ProfileEditModal';
 import { DashboardBarChart, DashboardMetric, dashboardCounts } from '../components/DashboardCharts';
+import { AccountsSection } from '../components/AccountsSection';
 import { DonationsView } from '../components/DonationsView';
 import { CampaignProjection } from '../components/CampaignProjection';
 
@@ -280,12 +281,12 @@ function PanelInner({ session, onUpdateSession }) {
 
   // Available tabs depending on role (RF-03)
   const availableTabs = useMemo(() => {
-    if (isAdmin) return ['resumen', 'inventario', 'traslados', 'empresa y aliados'];
-    if (isBeneficiary) return ['beneficiario', 'empleos'];
-    if (isDonor) return ['resumen', 'mis donaciones', 'necesidades'];
-    if (isCompany) return ['resumen', 'campañas y empleo', 'donaciones'];
-    if (isVolunteer) return ['resumen', 'traslados asignados', 'necesidades'];
-    return ['resumen', 'colaboraciones'];
+    if (isAdmin) return ['resumen', 'cuentas', 'inventario', 'traslados', 'empresa y aliados'];
+    if (isBeneficiary) return ['beneficiario', 'cuentas', 'empleos'];
+    if (isDonor) return ['resumen', 'cuentas', 'mis donaciones', 'necesidades'];
+    if (isCompany) return ['resumen', 'cuentas', 'campañas y empleo', 'donaciones'];
+    if (isVolunteer) return ['resumen', 'cuentas', 'traslados asignados', 'necesidades'];
+    return ['resumen', 'cuentas', 'colaboraciones'];
   }, [isAdmin, isBeneficiary, isDonor, isCompany, isVolunteer]);
 
   return (
@@ -362,6 +363,7 @@ function PanelInner({ session, onUpdateSession }) {
             />
       )}
 
+<<<<<<< HEAD
  erian-feature
       {((isAdmin && tab === 'resumen') || (isCompany && tab === 'campañas y empleo')) && (
         <CampaignProjection campaigns={campaigns} />
@@ -516,6 +518,11 @@ function PanelInner({ session, onUpdateSession }) {
 
 
  main
+=======
+      {/* CUENTAS */}
+      {tab === 'cuentas' && <AccountsSection sessionRole={role} />}
+
+>>>>>>> 0a80d23 (inicio secion)
       {/* DONATIONS TABLE */}
       {(tab === 'donaciones' || tab === 'mis donaciones') && (
         <DonationsView data={dons} />
