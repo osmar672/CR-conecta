@@ -37,7 +37,7 @@ export function Confirm({ title, text, error, onConfirm, onCancel }) {
         <div className="modal-mark">!</div>
         <h3 id="confirm-title">{title}</h3>
         <p>{text}</p>
-        {error && <p role="alert" style={{ color: '#b91c1c' }}>{error}</p>}
+        {error && <p role="alert" style={{ color: 'var(--danger-fg)' }}>{error}</p>}
         <div className="modal-actions">
           <button className="btn secondary" onClick={onCancel}>Cancelar</button>
           <button className="btn primary" onClick={onConfirm}>Continuar</button>

@@ -61,7 +61,11 @@ Las validaciones de cantidad, estado, prioridad y excepción se ejecutan en la A
 
 ## Panel administrativo
 
-El resumen del administrador reúne indicadores y gráficas de cuentas por rol, solicitudes por estado y comunidad, donaciones por categoría y estado, inventario, traslados y campañas. También muestra las últimas acciones auditadas. Se registran inicios de sesión correctos, cambios de perfil, creación y actualización de solicitudes, donaciones y entregas de traslados. El historial se guarda en `db.json`, conserva hasta 500 eventos y solo el administrador puede consultarlo; no incluye acciones anteriores a esta función ni visitas o navegación por páginas.
+El resumen del administrador reúne indicadores y gráficas de cuentas por rol, donaciones por categoría y estado, inventario, traslados y campañas. También muestra las últimas acciones auditadas. Se registran inicios de sesión correctos, cambios de perfil, creación y actualización de solicitudes, donaciones y entregas de traslados. El historial se guarda en `db.json`, conserva hasta 500 eventos y solo el administrador puede consultarlo; no incluye acciones anteriores a esta función ni visitas o navegación por páginas.
+
+## Solicitudes
+
+Las solicitudes tienen su propia sección en el menú principal, separada del panel de gestión. Entra todo el mundo, pero el servidor ya devuelve información distinta según quién consulta: la administración recibe todas las solicitudes con los campos internos para dictaminarlas, la persona beneficiaria solo las propias, y el resto de los roles únicamente las solicitudes aprobadas y en su forma pública, sin datos personales. La interfaz no agrega ni oculta información por su cuenta: se limita a mostrar la que el servidor le entrega.
 
 ## Preparar contraseñas para despliegue
 

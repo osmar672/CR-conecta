@@ -35,9 +35,9 @@ export function NeedDetailModal({ isOpen, onClose, need }) {
         }}
       >
         {/* Header Bar */}
-        <div style={{ background: '#06244a', padding: '20px 26px', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'var(--brand-solid)', padding: '20px 26px', color: 'var(--white)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#8ec5db', fontWeight: '800', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: 'var(--brand-eyebrow)', fontWeight: '800', textTransform: 'uppercase' }}>
               Ficha limitada de necesidad aprobada
             </span>
             <h3 id="need-detail-title" style={{ margin: '4px 0 0', fontSize: '20px', color: '#ffffff' }}>
@@ -51,8 +51,8 @@ export function NeedDetailModal({ isOpen, onClose, need }) {
               borderRadius: '20px',
               fontSize: '12px',
               fontWeight: '800',
-              background: need.priority === 'Alta' ? '#ffebe8' : need.priority === 'Baja' ? '#e2f4f8' : '#fef4dc',
-              color: need.priority === 'Alta' ? '#c0392b' : need.priority === 'Baja' ? '#2980b9' : '#d35400',
+              background: need.priority === 'Alta' ? 'var(--danger-bg)' : need.priority === 'Baja' ? 'var(--info-bg)' : 'var(--warn-bg)',
+              color: need.priority === 'Alta' ? 'var(--danger-fg)' : need.priority === 'Baja' ? 'var(--info-fg)' : 'var(--warn-fg)',
               border: '1px solid currentColor'
             }}
           >
@@ -62,7 +62,7 @@ export function NeedDetailModal({ isOpen, onClose, need }) {
 
         {/* Protection Notice Banner for RF-06 */}
         <div style={{ background: 'var(--surface-soft)', padding: '12px 24px', borderBottom: '1px solid var(--line-light)', display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#3281a6', color: '#ffffff', display: 'grid', placeItems: 'center', fontSize: '13px', flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--accent-primary)', color: 'var(--on-accent)', display: 'grid', placeItems: 'center', fontSize: '13px', flexShrink: 0 }}>
             <ShieldCheck size={16} />
           </div>
           <div style={{ fontSize: '12px', color: 'var(--muted)', lineHeight: '1.4' }}>
@@ -96,7 +96,7 @@ export function NeedDetailModal({ isOpen, onClose, need }) {
             </div>
             <div>
               <span style={{ fontSize: '12px', color: 'var(--muted)', display: 'block' }}>Aporte recibido</span>
-              <strong style={{ fontSize: '13.5px', color: '#257f9f' }}>{need.received || 0} {need.unit} ({progress}%)</strong>
+              <strong style={{ fontSize: '13.5px', color: 'var(--accent-primary)' }}>{need.received || 0} {need.unit} ({progress}%)</strong>
             </div>
           </div>
 
@@ -106,8 +106,8 @@ export function NeedDetailModal({ isOpen, onClose, need }) {
               <span>Progreso de recolección comunitaria</span>
               <span>{progress}% cubierto</span>
             </div>
-            <div style={{ height: '8px', background: '#e2ebf0', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${progress}%`, background: '#3381a6', borderRadius: '10px', transition: 'width 0.4s ease' }} />
+            <div style={{ height: '8px', background: 'var(--surface-soft)', borderRadius: '10px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${progress}%`, background: 'var(--accent-primary)', borderRadius: '10px', transition: 'width 0.4s ease' }} />
             </div>
           </div>
 
@@ -115,7 +115,7 @@ export function NeedDetailModal({ isOpen, onClose, need }) {
           <div style={{ background: 'var(--surface-soft)', border: '1px dashed var(--line-light)', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: 'var(--muted)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <span style={{ fontWeight: '700', color: 'var(--navy)' }}>Persona solicitante:</span>
-              <span style={{ background: 'var(--surface-soft)', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', color: '#276885', fontWeight: '600' }}>
+              <span style={{ background: 'var(--surface-soft)', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', color: 'var(--accent-primary)', fontWeight: '600' }}>
                 <Lock className="i i-l" size={13} />Identidad protegida (Núcleo en {need.zone})
               </span>
             </div>
@@ -140,7 +140,7 @@ export function NeedDetailModal({ isOpen, onClose, need }) {
               type="button" 
               className="btn primary" 
               onClick={handleDonate}
-              style={{ padding: '10px 22px', fontSize: '12.5px', background: '#06244a' }}
+              style={{ padding: '10px 22px', fontSize: '12.5px', background: 'var(--brand-solid)' }}
             >
               Quiero aportar a este caso<ArrowRight className="i i-r" size={14} />
             </button>

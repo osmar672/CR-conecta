@@ -16,12 +16,12 @@ export function GoogleIcon({ size = 20 }) {
 }
 
 const ROLE_BADGES = {
-  'Administrador': { bg: '#e8f0fe', color: '#1967d2', border: '#c2e7ff' },
-  'Beneficiario': { bg: '#e6f4ea', color: '#137333', border: '#ceead6' },
-  'Donante individual': { bg: '#fef7e0', color: '#b06000', border: '#feefc3' },
-  'Empresa donante': { bg: '#f3e8fd', color: '#8430ce', border: '#e8d0fb' },
-  'Voluntario': { bg: '#e0f2fe', color: '#0284c7', border: '#bae6fd' },
-  'Aliado comunitario': { bg: '#fce8e6', color: '#c5221f', border: '#fad2cf' }
+  'Administrador': { bg: 'var(--info-bg)', color: 'var(--info-fg)' },
+  'Beneficiario': { bg: 'var(--ok-bg)', color: 'var(--ok-fg)' },
+  'Donante individual': { bg: 'var(--warn-bg)', color: 'var(--warn-fg)' },
+  'Empresa donante': { bg: 'var(--info-bg)', color: 'var(--accent-violet)' },
+  'Voluntario': { bg: 'var(--info-bg)', color: 'var(--info-fg)' },
+  'Aliado comunitario': { bg: 'var(--danger-bg)', color: 'var(--danger-fg)' }
 };
 
 export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser }) {
@@ -104,7 +104,7 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
         {/* List of demo Google accounts */}
         <div style={{ padding: '16px 20px', maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {users.map((u) => {
-            const badge = ROLE_BADGES[u.role] || { bg: '#f1f5f9', color: 'var(--muted)', border: 'var(--line-light)' };
+            const badge = ROLE_BADGES[u.role] || { bg: 'var(--tag-bg)', color: 'var(--tag-fg)' };
             const avatarSrc = u.role === 'Empresa donante' ? '/logo.jpg' : '/logo-mark.png';
             
             return (
@@ -155,7 +155,7 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
                         borderRadius: '20px',
                         background: badge.bg,
                         color: badge.color,
-                        border: `1px solid ${badge.border}`
+                        border: '1px solid currentColor'
                       }}
                     >
                       {u.role}
@@ -169,7 +169,7 @@ export function GoogleAccessModal({ isOpen, onClose, users = [], onSelectUser })
                   </div>
                 </div>
 
-                <div style={{ color: '#0284c7', fontSize: '13px', fontWeight: '700' }}>
+                <div style={{ color: 'var(--info-fg)', fontSize: '13px', fontWeight: '700' }}>
                   Entrar<ArrowRight className="i i-r" size={14} />
                 </div>
               </button>

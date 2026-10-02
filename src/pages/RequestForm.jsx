@@ -189,7 +189,7 @@ export function RequestForm({ session }) {
 
             {/* RF-10 Real-time check */}
             {isLimitExceeded && (
-              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: '#92400e' }}>
+              <div style={{ background: 'var(--warn-bg)', border: '1px solid var(--warn-fg)', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: 'var(--warn-fg)' }}>
                 <AlertTriangle className="i i-l" size={14} /><strong>Aviso de límite (RF-10):</strong> {limitCheck.reason} Requerirá autorización con excepción administrativa para ser aprobada.
               </div>
             )}

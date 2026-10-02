@@ -154,7 +154,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <h2 style={{ margin: 0, fontSize: '22px', color: 'var(--navy)' }}>{session?.name}</h2>
-              <span style={{ background: '#e6f4ea', color: '#137333', border: '1px solid #ceead6', borderRadius: '14px', padding: '3px 10px', fontSize: '12px', fontWeight: '700' }}>
+              <span style={{ background: 'var(--ok-bg)', color: 'var(--ok-fg)', border: '1px solid var(--ok-fg)', borderRadius: '14px', padding: '3px 10px', fontSize: '12px', fontWeight: '700' }}>
                 Rol: Beneficiario (RF-05)
               </span>
             </div>
@@ -189,9 +189,9 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
           style={{
             padding: '14px 18px',
             borderRadius: '12px',
-            background: notification.type === 'success' ? '#eef7f2' : undefined,
+            background: notification.type === 'success' ? 'var(--ok-bg)' : undefined,
             border: notification.type === 'success' ? '1px solid #b7e1cd' : undefined,
-            color: notification.type === 'success' ? '#0f5132' : undefined,
+            color: notification.type === 'success' ? 'var(--ok-fg)' : undefined,
             fontSize: '13px',
             fontWeight: '600'
           }}
@@ -306,11 +306,11 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
 
             {/* RF-10 Limits Alert indicator */}
             {isLimitExceeded ? (
-              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: '#92400e', display: 'flex', gap: '10px' }}>
+              <div style={{ background: 'var(--warn-bg)', border: '1px solid var(--warn-fg)', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: 'var(--warn-fg)', display: 'flex', gap: '10px' }}>
                 <AlertTriangle size={16} style={{ flexShrink: 0 }} />
                 <div>
                   <strong>Aviso de límite (RF-10):</strong> {limitCheck.reason}
-                  <div style={{ marginTop: '4px', fontSize: '12px', color: '#78350f' }}>
+                  <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--warn-fg)' }}>
                     Podés enviar la solicitud, pero requerirá de una aprobación con excepción administrativa autorizada.
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
               type="submit"
               disabled={submitting}
               className="btn primary"
-              style={{ padding: '12px 24px', fontSize: '13.5px', background: '#06244a', marginTop: '6px' }}
+              style={{ padding: '12px 24px', fontSize: '13.5px', background: 'var(--brand-solid)', marginTop: '6px' }}
             >
               {submitting ? 'Registrando solicitud...' : <>Enviar solicitud<ArrowRight className="i i-r" size={14} /></>}
             </button>
@@ -341,7 +341,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
           }}
         >
           <div style={{ marginBottom: '16px' }}>
-            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#2b789e', fontWeight: '800' }}>SEGUIMIENTO</span>
+            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: 'var(--info-fg)', fontWeight: '800' }}>SEGUIMIENTO</span>
             <h3 style={{ margin: '4px 0 0', fontSize: '20px', color: 'var(--navy)' }}>
               Mis solicitudes
             </h3>
@@ -386,8 +386,8 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                             borderRadius: '12px',
                             fontSize: '11px',
                             fontWeight: '800',
-                            background: isApproved ? '#dcfce7' : isDenied ? '#fee2e2' : '#fef3c7',
-                            color: isApproved ? '#15803d' : isDenied ? '#b91c1c' : '#b45309'
+                            background: isApproved ? 'var(--ok-bg)' : isDenied ? 'var(--danger-bg)' : 'var(--warn-bg)',
+                            color: isApproved ? 'var(--ok-fg)' : isDenied ? 'var(--danger-fg)' : 'var(--warn-fg)'
                           }}
                         >
                           {r.status}
@@ -398,8 +398,8 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                             borderRadius: '12px',
                             fontSize: '11px',
                             fontWeight: '800',
-                            background: r.priority === 'Alta' ? '#ffebe8' : r.priority === 'Baja' ? '#e2f4f8' : '#fef4dc',
-                            color: r.priority === 'Alta' ? '#c0392b' : r.priority === 'Baja' ? '#2980b9' : '#d35400'
+                            background: r.priority === 'Alta' ? 'var(--danger-bg)' : r.priority === 'Baja' ? 'var(--info-bg)' : 'var(--warn-bg)',
+                            color: r.priority === 'Alta' ? 'var(--danger-fg)' : r.priority === 'Baja' ? 'var(--info-fg)' : 'var(--warn-fg)'
                           }}
                         >
                           {r.priority}
@@ -407,7 +407,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                       </div>
                     </div>
 
-                    <div className="beneficiary-request-description" style={{ fontSize: '13.5px', fontWeight: '600', color: '#1e293b' }}>
+                    <div className="beneficiary-request-description" style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--navy)' }}>
                       {r.description}
                     </div>
 
@@ -424,8 +424,8 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                           <span>Progreso de donaciones</span>
                           <span>{r.received || 0} / {r.goal || r.amount} {r.unit} ({progress}%)</span>
                         </div>
-                        <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${progress}%`, background: '#257f9f', borderRadius: '6px' }} />
+                        <div style={{ height: '6px', background: 'var(--surface-soft)', borderRadius: '6px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${progress}%`, background: 'var(--accent-primary)', borderRadius: '6px' }} />
                         </div>
                       </div>
 
@@ -433,7 +433,7 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                         <div style={{ background: 'var(--surface-soft)', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: 'var(--muted)', marginTop: '10px' }}>
                           <strong>Dictamen administrativo:</strong> {r.decisionReason} ({r.decisionDate})
                           {r.exceptionGranted && (
-                            <div style={{ color: '#b45309', fontWeight: '600', marginTop: '2px' }}>
+                            <div style={{ color: 'var(--warn-fg)', fontWeight: '600', marginTop: '2px' }}>
                               <Star className="i i-l" size={14} />Aprobada con excepción administrativa: {r.exceptionReason}
                             </div>
                           )}
@@ -444,14 +444,14 @@ export function BeneficiarySection({ session, onOpenEditProfile, requests = [], 
                     {isApproved && (r.received > 0 || r.deliveryConfirmed) && (
                       <div className="beneficiary-request-delivery">
                         {r.deliveryConfirmed ? (
-                          <span style={{ fontSize: '12px', color: '#166534', fontWeight: '700', background: '#dcfce7', padding: '4px 10px', borderRadius: '8px' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--ok-fg)', fontWeight: '700', background: 'var(--ok-bg)', padding: '4px 10px', borderRadius: '8px' }}>
                             <Check className="i i-l" size={14} />Entrega confirmada ({r.deliveryConfirmationDate || 'Registrada'})
                           </span>
                         ) : (
                           <button
                             type="button"
                             onClick={() => handleConfirmDelivery(r)}
-                            style={{ background: '#059669', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                            style={{ background: 'var(--success)', color: 'var(--on-accent)', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                           >
                             Confirmar recepción de ayuda<Check className="i i-r" size={14} />
                           </button>

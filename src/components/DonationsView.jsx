@@ -40,7 +40,7 @@ export function DonationsView({ data = [] }) {
                 <td>{d.quantity}</td>
                 <td>{d.destination}</td>
                 <td>
-                  <span style={{ padding: '3px 8px', borderRadius: '12px', background: '#e0f2fe', color: '#0369a1', fontSize: '12px', fontWeight: '700' }}>
+                  <span style={{ padding: '3px 8px', borderRadius: '12px', background: 'var(--info-bg)', color: 'var(--info-fg)', fontSize: '12px', fontWeight: '700' }}>
                     {d.status}
                   </span>
                 </td>
@@ -48,14 +48,14 @@ export function DonationsView({ data = [] }) {
                   <button
                     type="button"
                     onClick={() => generateQR(d)}
-                    style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer', marginRight: '4px' }}
+                    style={{ background: 'var(--white)', border: '1px solid var(--line)', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer', marginRight: '4px' }}
                   >
                     QR<QrCode className="i i-r" size={14} />
                   </button>
                   <button
                     type="button"
                     onClick={() => alert('Simulando generación de certificado PDF y subida a n8n... (RF-30)\n\nCertificado generado para la donación #' + d.id)}
-                    style={{ background: '#0f5132', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer' }}
+                    style={{ background: 'var(--success)', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', cursor: 'pointer' }}
                   >
                     PDF (RF-30)<FileText className="i i-r" size={14} />
                   </button>
@@ -71,10 +71,10 @@ export function DonationsView({ data = [] }) {
           <div className="modal" ref={qrModalRef} role="dialog" aria-modal="true" aria-labelledby="qr-title" tabIndex={-1} onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
             <span className="eyebrow">CONSULTA LOCAL SIMULADA</span>
             <h3 id="qr-title" style={{ margin: '8px 0 4px' }}>Comprobante #{qrModal.donation.id}</h3>
-            <p style={{ margin: '0 0 16px', fontSize: '12px', color: '#64748b' }}>
+            <p style={{ margin: '0 0 16px', fontSize: '12px', color: 'var(--muted)' }}>
               Código QR de demostración para verificar el aporte en centros comunitarios.
             </p>
-            <img src={qrModal.qrUrl} alt="QR de donación" style={{ width: '160px', height: '160px', border: '1px solid #dce8ec', borderRadius: '12px', padding: '8px' }} />
+            <img src={qrModal.qrUrl} alt="QR de donación" style={{ width: '160px', height: '160px', border: '1px solid var(--line)', borderRadius: '12px', padding: '8px' }} />
             <div style={{ marginTop: '20px' }}>
               <button className="btn secondary" onClick={() => setQrModal(null)}>Cerrar</button>
             </div>

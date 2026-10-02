@@ -61,16 +61,16 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
           overflow: 'hidden'
         }}
       >
-        <div style={{ background: '#06244a', padding: '20px 24px', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'var(--brand-solid)', padding: '20px 24px', color: 'var(--white)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: '#8ec5db', fontWeight: '800' }}>
+            <span style={{ fontSize: '11px', letterSpacing: '1.5px', color: 'var(--brand-eyebrow)', fontWeight: '800' }}>
               ACTUALIZACIÓN DE PERFIL (RF-04)
             </span>
             <h3 id="profile-edit-title" style={{ margin: '3px 0 0', fontSize: '19px', color: '#ffffff' }}>
               Editar datos de {user.name}
             </h3>
           </div>
-          <span style={{ background: '#133e6f', color: '#d8ebf5', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' }}>
+          <span style={{ background: 'var(--brand-chip)', color: 'var(--brand-chip-fg)', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '700' }}>
             {user.role}
           </span>
         </div>
@@ -139,7 +139,7 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
           </div>
 
           {error && (
-            <div style={{ background: '#fef2f2', color: 'var(--danger)', padding: '10px', borderRadius: '8px', fontSize: '12px' }}>
+            <div style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '10px', borderRadius: '8px', fontSize: '12px' }}>
               {error}
             </div>
           )}
@@ -148,7 +148,7 @@ export function ProfileEditModal({ isOpen, onClose, user, onSaved }) {
             <button type="button" className="btn secondary" onClick={onClose} style={{ padding: '9px 18px', fontSize: '12.5px' }}>
               Cancelar
             </button>
-            <button type="submit" className="btn primary" disabled={loading} style={{ padding: '9px 22px', fontSize: '12.5px', background: '#06244a' }}>
+            <button type="submit" className="btn primary" disabled={loading} style={{ padding: '9px 22px', fontSize: '12.5px', background: 'var(--brand-solid)' }}>
               {loading ? 'Guardando...' : <>Guardar cambios<ArrowRight className="i i-r" size={14} /></>}
             </button>
           </div>

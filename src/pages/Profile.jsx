@@ -43,7 +43,7 @@ export function Profile({ session, onUpdateSession, onLogout, onOpenGoogleAuth }
           <div>
             <h2 style={{ margin: 0, fontSize: '22px', color: 'var(--navy)' }}>{session.name}</h2>
             <div style={{ display: 'flex', gap: '10px', marginTop: '6px', alignItems: 'center' }}>
-              <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '3px 10px', borderRadius: '14px', fontSize: '12px', fontWeight: '700' }}>
+              <span style={{ background: 'var(--info-bg)', color: 'var(--info-fg)', padding: '3px 10px', borderRadius: '14px', fontSize: '12px', fontWeight: '700' }}>
                 Rol: {session.role}
               </span>
               <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Zona: {session.zone}</span>

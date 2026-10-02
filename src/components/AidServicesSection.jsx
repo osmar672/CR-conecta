@@ -28,7 +28,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
       tag: 'ABRIGO FAMILIAR',
       icon: <Shirt size={22} />,
       headerBg: '#def1f6',
-      accentColor: '#1e6888',
+      accentColor: 'var(--info-fg)',
       summary: 'Prendas limpias y clasificadas por tallas para niñas, niños y adultos.',
       includes: [
         'Ropa escolar e infantil por edades',
@@ -124,7 +124,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
       tag: 'ACCESO DIGITAL',
       icon: <Zap size={22} />,
       headerBg: '#ecf7ff',
-      accentColor: '#0d6fa5',
+      accentColor: 'var(--info-fg)',
       summary: 'Acompañamiento y equipos básicos para mantener acceso a educación, trámites y comunicación.',
       includes: [
         'Kits con acceso a internet o datos',
@@ -187,7 +187,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
       name: 'Emergencia y contingencia',
       tag: 'RESPUESTA RÁPIDA',
       icon: <Package size={22} />,
-      headerBg: '#fdecec',
+      headerBg: 'var(--danger-bg)',
       accentColor: '#b33535',
       summary: 'Soporte inmediato para crisis temporales, desastres o interrupciones severas del hogar.',
       includes: [
@@ -276,7 +276,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
               onClick={() => setActiveTab('categories')}
               style={{
                 border: 'none',
-                background: activeTab === 'categories' ? '#06244a' : 'transparent',
+                background: activeTab === 'categories' ? 'var(--brand-solid)' : 'transparent',
                 color: activeTab === 'categories' ? '#ffffff' : '#4b657c',
                 padding: '9px 18px',
                 borderRadius: '24px',
@@ -293,7 +293,7 @@ export function AidServicesSection({ displayNeeds = [], onOpenNeedModal }) {
               onClick={() => setActiveTab('active-cases')}
               style={{
                 border: 'none',
-                background: activeTab === 'active-cases' ? '#06244a' : 'transparent',
+                background: activeTab === 'active-cases' ? 'var(--brand-solid)' : 'transparent',
                 color: activeTab === 'active-cases' ? '#ffffff' : '#4b657c',
                 padding: '9px 18px',
                 borderRadius: '24px',
